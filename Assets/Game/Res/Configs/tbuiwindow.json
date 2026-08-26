@@ -1,0 +1,13 @@
+[
+  {
+    "id": 11,
+    "desc": "通用领奖界面",
+    "windowName": "UIAwardDisplayWindow",
+    "isNeedBlackMask": true,
+    "isClickBlankQuit": true,
+    "enterAnimType": 3,
+    "exitAnimType": 3,
+    "isIgnoreSafeArea": false,
+    "uiLayer": 200
+  }
+]

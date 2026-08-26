@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 185f6993d5150494d98da50e26cb1c25, type: 3}
+  m_Name: AssetBundleCollectorSetting
+  m_EditorClassIdentifier: 
+  ShowPackageView: 1
+  ShowEditorAlias: 0
+  UniqueBundleName: 0
+  Packages:
+  - PackageName: DefaultPackage
+    PackageDesc: 
+    EnableAddressable: 1
+    LocationToLower: 0
+    IncludeAssetGUID: 0
+    AutoCollectShaders: 1
+    IgnoreRuleName: NormalIgnoreRule
+    Groups:
+    - GroupName: Default Group
+      GroupDesc: 
+      AssetTags: 
+      ActiveRuleName: EnableGroup
+      Collectors:
+      - CollectPath: Assets/Game/Res/Configs
+        CollectorGUID: ec372860801154ac0aa7e298c30c8eac
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+      - CollectPath: Assets/Game/Scenes
+        CollectorGUID: 462d87c7a742a4dc1a6a8043fb68cd43
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+      - CollectPath: Assets/Game/Res/Prefabs
+        CollectorGUID: 1eff8348797124fa99c4992969d016d8
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData:
+    - GroupName: HotUpdate
+      GroupDesc: HybridCLR hot-update assemblies
+      AssetTags: HotUpdate
+      ActiveRuleName: EnableGroup
+      Collectors:
+      - CollectPath: Assets/Game/Res/HotUpdateDlls
+        CollectorGUID: 3d19a86013924726a8a98e252a307d44
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags: HotUpdate
+        UserData:
+    - GroupName: AOTMetadata
+      GroupDesc: HybridCLR supplemental AOT metadata
+      AssetTags: AOTMetadata
+      ActiveRuleName: EnableGroup
+      Collectors:
+      - CollectPath: Assets/Game/Res/AOTMetaDlls
+        CollectorGUID: 4fc13cb6e47f4dc0b9b9142c39e9252b
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags: AOTMetadata
+        UserData: 

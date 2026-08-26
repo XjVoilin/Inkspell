@@ -1,0 +1,31 @@
+{
+  "name": "Aot.Runtime",
+  "rootNamespace": "GameTemplate.Aot",
+  "references": [
+    "July.Arch",
+    "July.Launch",
+    "July.Logging",
+    "July.Resource",
+    "July.Resource.YooAsset",
+    "July.UI",
+    "July.Audio",
+    "July.Analytics",
+    "July.Analytics.ThinkingData",
+    "July.Platform",
+    "July.Platform.WeChat",
+    "July.Platform.TikTok",
+    "YooAsset.MiniGame",
+    "HybridCLR.Runtime",
+    "UniTask",
+    "YooAsset"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
