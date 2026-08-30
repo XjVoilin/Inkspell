@@ -43,12 +43,42 @@ namespace Game
             context.RegisterSystem(new ConfigSystem());
             context.RegisterSystem(new JsonSerializeSystem());
             context.RegisterSystem(new NoEncryptionSystem());
-            context.RegisterSystem(new LocalFileSaveSystem());
+            var localFileSaveSystem = new LocalFileSaveSystem();
+            context.RegisterSystem(localFileSaveSystem);
             context.RegisterSystem(new SceneSystem());
             context.RegisterSystem(new UnityInputSystem());
             context.RegisterSystem(new FsmSystem());
             context.RegisterSystem(new TimeSystem());
             context.RegisterSystem(new LocalizationSystem());
+
+            var spellAssetStore = new SpellAssetStore();
+            var autoBattleStore = new AutoBattleStore();
+            var stageProgressionStore = new StageProgressionStore();
+            var spellGenerationStore = new SpellGenerationStore();
+            context.RegisterStore(spellAssetStore);
+            context.RegisterStore(autoBattleStore);
+            context.RegisterStore(stageProgressionStore);
+            context.RegisterStore(spellGenerationStore);
+
+            localFileSaveSystem.Persist(
+                spellAssetStore,
+                "inkspell.spell-assets",
+                SaveImportance.Important);
+            localFileSaveSystem.Persist(
+                stageProgressionStore,
+                "inkspell.stage-progression",
+                SaveImportance.Important);
+            localFileSaveSystem.Persist(
+                spellGenerationStore,
+                "inkspell.spell-generation",
+                SaveImportance.Important);
+
+            context.RegisterSystem(new SpellAssetSystem());
+            context.RegisterSystem(new SpellSynthesisSystem());
+            context.RegisterSystem(new SpellProgressionSystem());
+            context.RegisterSystem(new AutoBattleSystem());
+            context.RegisterSystem(new StageProgressionSystem());
+            context.RegisterSystem(new SpellGenerationSystem());
         }
 
         public async UniTask PreInitializeAsync(CancellationToken ct = default)
@@ -104,8 +134,25 @@ namespace Game
 
         public async UniTask OnGameLaunch()
         {
-            this.GetSystem<IUISystem>().SetMainProvider(new LubanUIWindowProvider());
+            var uiSystem = this.GetSystem<IUISystem>();
+            uiSystem.SetMainProvider(new LubanUIWindowProvider());
             await this.GetSystem<ISceneSystem>().SwitchSceneAsync("Main");
+
+            var offlineOutcome = await this
+                .GetSystem<SpellGenerationSystem>()
+                .SettleOfflineAsync();
+            await uiSystem.OpenAsync(
+                UIWindowID.UIInkspellMainWindow,
+                new UIInkspellMainWindowData());
+
+            if (offlineOutcome.GeneratedCount > 0)
+            {
+                await uiSystem.OpenAsync(
+                    UIWindowID.UIOfflineRewardWindow,
+                    new UIOfflineRewardWindowData(offlineOutcome));
+            }
+
+            this.GetSystem<StageProgressionSystem>().StartContinuousChallenges();
         }
     }
 }

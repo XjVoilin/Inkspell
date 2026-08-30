@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "equipmentSlotCount": 4,
+    "craftingRows": 6,
+    "craftingColumns": 4,
+    "initialSpellType": 1,
+    "initialTier": 1,
+    "initialLevel": 1,
+    "initialEquipmentSlot": 0
+  }
+]

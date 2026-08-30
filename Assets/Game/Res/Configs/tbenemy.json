@@ -1,0 +1,30 @@
+[
+  {
+    "enemyType": 1,
+    "maxHealth": 100,
+    "moveSpeedPerSecond": 0.08,
+    "attackDamage": 10,
+    "attackIntervalSeconds": 1.5
+  },
+  {
+    "enemyType": 2,
+    "maxHealth": 70,
+    "moveSpeedPerSecond": 0.13,
+    "attackDamage": 8,
+    "attackIntervalSeconds": 1.2
+  },
+  {
+    "enemyType": 3,
+    "maxHealth": 250,
+    "moveSpeedPerSecond": 0.05,
+    "attackDamage": 20,
+    "attackIntervalSeconds": 2
+  },
+  {
+    "enemyType": 4,
+    "maxHealth": 800,
+    "moveSpeedPerSecond": 0.04,
+    "attackDamage": 35,
+    "attackIntervalSeconds": 1.5
+  }
+]

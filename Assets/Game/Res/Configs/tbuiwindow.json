@@ -9,5 +9,38 @@
     "exitAnimType": 3,
     "isIgnoreSafeArea": false,
     "uiLayer": 200
+  },
+  {
+    "id": 12,
+    "desc": "Inkspell 主界面",
+    "windowName": "UIInkspellMainWindow",
+    "isNeedBlackMask": false,
+    "isClickBlankQuit": false,
+    "enterAnimType": 0,
+    "exitAnimType": 0,
+    "isIgnoreSafeArea": false,
+    "uiLayer": 100
+  },
+  {
+    "id": 13,
+    "desc": "法术详情窗口",
+    "windowName": "UISpellDetailWindow",
+    "isNeedBlackMask": true,
+    "isClickBlankQuit": true,
+    "enterAnimType": 3,
+    "exitAnimType": 3,
+    "isIgnoreSafeArea": false,
+    "uiLayer": 200
+  },
+  {
+    "id": 14,
+    "desc": "离线收益窗口",
+    "windowName": "UIOfflineRewardWindow",
+    "isNeedBlackMask": true,
+    "isClickBlankQuit": true,
+    "enterAnimType": 3,
+    "exitAnimType": 3,
+    "isIgnoreSafeArea": false,
+    "uiLayer": 200
   }
 ]

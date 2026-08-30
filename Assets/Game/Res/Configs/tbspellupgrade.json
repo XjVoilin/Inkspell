@@ -1,0 +1,602 @@
+[
+  {
+    "spellType": 1,
+    "tier": 1,
+    "currentLevel": 1,
+    "nextLevel": 2,
+    "inkCost": 10,
+    "currentPowerMultiplier": 1,
+    "nextPowerMultiplier": 1.15,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 1,
+    "tier": 1,
+    "currentLevel": 2,
+    "nextLevel": 3,
+    "inkCost": 20,
+    "currentPowerMultiplier": 1.15,
+    "nextPowerMultiplier": 1.3,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 1,
+    "tier": 1,
+    "currentLevel": 3,
+    "nextLevel": 4,
+    "inkCost": 30,
+    "currentPowerMultiplier": 1.3,
+    "nextPowerMultiplier": 1.5,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 1,
+    "tier": 1,
+    "currentLevel": 4,
+    "nextLevel": 5,
+    "inkCost": 40,
+    "currentPowerMultiplier": 1.5,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 1,
+    "tier": 1,
+    "currentLevel": 5,
+    "nextLevel": 5,
+    "inkCost": 0,
+    "currentPowerMultiplier": 1.75,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": true
+  },
+  {
+    "spellType": 1,
+    "tier": 2,
+    "currentLevel": 1,
+    "nextLevel": 2,
+    "inkCost": 30,
+    "currentPowerMultiplier": 1,
+    "nextPowerMultiplier": 1.15,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 1,
+    "tier": 2,
+    "currentLevel": 2,
+    "nextLevel": 3,
+    "inkCost": 60,
+    "currentPowerMultiplier": 1.15,
+    "nextPowerMultiplier": 1.3,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 1,
+    "tier": 2,
+    "currentLevel": 3,
+    "nextLevel": 4,
+    "inkCost": 90,
+    "currentPowerMultiplier": 1.3,
+    "nextPowerMultiplier": 1.5,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 1,
+    "tier": 2,
+    "currentLevel": 4,
+    "nextLevel": 5,
+    "inkCost": 120,
+    "currentPowerMultiplier": 1.5,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 1,
+    "tier": 2,
+    "currentLevel": 5,
+    "nextLevel": 5,
+    "inkCost": 0,
+    "currentPowerMultiplier": 1.75,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": true
+  },
+  {
+    "spellType": 1,
+    "tier": 3,
+    "currentLevel": 1,
+    "nextLevel": 2,
+    "inkCost": 90,
+    "currentPowerMultiplier": 1,
+    "nextPowerMultiplier": 1.15,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 1,
+    "tier": 3,
+    "currentLevel": 2,
+    "nextLevel": 3,
+    "inkCost": 180,
+    "currentPowerMultiplier": 1.15,
+    "nextPowerMultiplier": 1.3,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 1,
+    "tier": 3,
+    "currentLevel": 3,
+    "nextLevel": 4,
+    "inkCost": 270,
+    "currentPowerMultiplier": 1.3,
+    "nextPowerMultiplier": 1.5,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 1,
+    "tier": 3,
+    "currentLevel": 4,
+    "nextLevel": 5,
+    "inkCost": 360,
+    "currentPowerMultiplier": 1.5,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 1,
+    "tier": 3,
+    "currentLevel": 5,
+    "nextLevel": 5,
+    "inkCost": 0,
+    "currentPowerMultiplier": 1.75,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": true
+  },
+  {
+    "spellType": 2,
+    "tier": 1,
+    "currentLevel": 1,
+    "nextLevel": 2,
+    "inkCost": 10,
+    "currentPowerMultiplier": 1,
+    "nextPowerMultiplier": 1.15,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 2,
+    "tier": 1,
+    "currentLevel": 2,
+    "nextLevel": 3,
+    "inkCost": 20,
+    "currentPowerMultiplier": 1.15,
+    "nextPowerMultiplier": 1.3,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 2,
+    "tier": 1,
+    "currentLevel": 3,
+    "nextLevel": 4,
+    "inkCost": 30,
+    "currentPowerMultiplier": 1.3,
+    "nextPowerMultiplier": 1.5,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 2,
+    "tier": 1,
+    "currentLevel": 4,
+    "nextLevel": 5,
+    "inkCost": 40,
+    "currentPowerMultiplier": 1.5,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 2,
+    "tier": 1,
+    "currentLevel": 5,
+    "nextLevel": 5,
+    "inkCost": 0,
+    "currentPowerMultiplier": 1.75,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": true
+  },
+  {
+    "spellType": 2,
+    "tier": 2,
+    "currentLevel": 1,
+    "nextLevel": 2,
+    "inkCost": 30,
+    "currentPowerMultiplier": 1,
+    "nextPowerMultiplier": 1.15,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 2,
+    "tier": 2,
+    "currentLevel": 2,
+    "nextLevel": 3,
+    "inkCost": 60,
+    "currentPowerMultiplier": 1.15,
+    "nextPowerMultiplier": 1.3,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 2,
+    "tier": 2,
+    "currentLevel": 3,
+    "nextLevel": 4,
+    "inkCost": 90,
+    "currentPowerMultiplier": 1.3,
+    "nextPowerMultiplier": 1.5,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 2,
+    "tier": 2,
+    "currentLevel": 4,
+    "nextLevel": 5,
+    "inkCost": 120,
+    "currentPowerMultiplier": 1.5,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 2,
+    "tier": 2,
+    "currentLevel": 5,
+    "nextLevel": 5,
+    "inkCost": 0,
+    "currentPowerMultiplier": 1.75,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": true
+  },
+  {
+    "spellType": 2,
+    "tier": 3,
+    "currentLevel": 1,
+    "nextLevel": 2,
+    "inkCost": 90,
+    "currentPowerMultiplier": 1,
+    "nextPowerMultiplier": 1.15,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 2,
+    "tier": 3,
+    "currentLevel": 2,
+    "nextLevel": 3,
+    "inkCost": 180,
+    "currentPowerMultiplier": 1.15,
+    "nextPowerMultiplier": 1.3,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 2,
+    "tier": 3,
+    "currentLevel": 3,
+    "nextLevel": 4,
+    "inkCost": 270,
+    "currentPowerMultiplier": 1.3,
+    "nextPowerMultiplier": 1.5,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 2,
+    "tier": 3,
+    "currentLevel": 4,
+    "nextLevel": 5,
+    "inkCost": 360,
+    "currentPowerMultiplier": 1.5,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 2,
+    "tier": 3,
+    "currentLevel": 5,
+    "nextLevel": 5,
+    "inkCost": 0,
+    "currentPowerMultiplier": 1.75,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": true
+  },
+  {
+    "spellType": 3,
+    "tier": 1,
+    "currentLevel": 1,
+    "nextLevel": 2,
+    "inkCost": 10,
+    "currentPowerMultiplier": 1,
+    "nextPowerMultiplier": 1.15,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 3,
+    "tier": 1,
+    "currentLevel": 2,
+    "nextLevel": 3,
+    "inkCost": 20,
+    "currentPowerMultiplier": 1.15,
+    "nextPowerMultiplier": 1.3,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 3,
+    "tier": 1,
+    "currentLevel": 3,
+    "nextLevel": 4,
+    "inkCost": 30,
+    "currentPowerMultiplier": 1.3,
+    "nextPowerMultiplier": 1.5,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 3,
+    "tier": 1,
+    "currentLevel": 4,
+    "nextLevel": 5,
+    "inkCost": 40,
+    "currentPowerMultiplier": 1.5,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 3,
+    "tier": 1,
+    "currentLevel": 5,
+    "nextLevel": 5,
+    "inkCost": 0,
+    "currentPowerMultiplier": 1.75,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": true
+  },
+  {
+    "spellType": 3,
+    "tier": 2,
+    "currentLevel": 1,
+    "nextLevel": 2,
+    "inkCost": 30,
+    "currentPowerMultiplier": 1,
+    "nextPowerMultiplier": 1.15,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 3,
+    "tier": 2,
+    "currentLevel": 2,
+    "nextLevel": 3,
+    "inkCost": 60,
+    "currentPowerMultiplier": 1.15,
+    "nextPowerMultiplier": 1.3,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 3,
+    "tier": 2,
+    "currentLevel": 3,
+    "nextLevel": 4,
+    "inkCost": 90,
+    "currentPowerMultiplier": 1.3,
+    "nextPowerMultiplier": 1.5,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 3,
+    "tier": 2,
+    "currentLevel": 4,
+    "nextLevel": 5,
+    "inkCost": 120,
+    "currentPowerMultiplier": 1.5,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 3,
+    "tier": 2,
+    "currentLevel": 5,
+    "nextLevel": 5,
+    "inkCost": 0,
+    "currentPowerMultiplier": 1.75,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": true
+  },
+  {
+    "spellType": 3,
+    "tier": 3,
+    "currentLevel": 1,
+    "nextLevel": 2,
+    "inkCost": 90,
+    "currentPowerMultiplier": 1,
+    "nextPowerMultiplier": 1.15,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 3,
+    "tier": 3,
+    "currentLevel": 2,
+    "nextLevel": 3,
+    "inkCost": 180,
+    "currentPowerMultiplier": 1.15,
+    "nextPowerMultiplier": 1.3,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 3,
+    "tier": 3,
+    "currentLevel": 3,
+    "nextLevel": 4,
+    "inkCost": 270,
+    "currentPowerMultiplier": 1.3,
+    "nextPowerMultiplier": 1.5,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 3,
+    "tier": 3,
+    "currentLevel": 4,
+    "nextLevel": 5,
+    "inkCost": 360,
+    "currentPowerMultiplier": 1.5,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 3,
+    "tier": 3,
+    "currentLevel": 5,
+    "nextLevel": 5,
+    "inkCost": 0,
+    "currentPowerMultiplier": 1.75,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": true
+  },
+  {
+    "spellType": 4,
+    "tier": 1,
+    "currentLevel": 1,
+    "nextLevel": 2,
+    "inkCost": 10,
+    "currentPowerMultiplier": 1,
+    "nextPowerMultiplier": 1.15,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 4,
+    "tier": 1,
+    "currentLevel": 2,
+    "nextLevel": 3,
+    "inkCost": 20,
+    "currentPowerMultiplier": 1.15,
+    "nextPowerMultiplier": 1.3,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 4,
+    "tier": 1,
+    "currentLevel": 3,
+    "nextLevel": 4,
+    "inkCost": 30,
+    "currentPowerMultiplier": 1.3,
+    "nextPowerMultiplier": 1.5,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 4,
+    "tier": 1,
+    "currentLevel": 4,
+    "nextLevel": 5,
+    "inkCost": 40,
+    "currentPowerMultiplier": 1.5,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 4,
+    "tier": 1,
+    "currentLevel": 5,
+    "nextLevel": 5,
+    "inkCost": 0,
+    "currentPowerMultiplier": 1.75,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": true
+  },
+  {
+    "spellType": 4,
+    "tier": 2,
+    "currentLevel": 1,
+    "nextLevel": 2,
+    "inkCost": 30,
+    "currentPowerMultiplier": 1,
+    "nextPowerMultiplier": 1.15,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 4,
+    "tier": 2,
+    "currentLevel": 2,
+    "nextLevel": 3,
+    "inkCost": 60,
+    "currentPowerMultiplier": 1.15,
+    "nextPowerMultiplier": 1.3,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 4,
+    "tier": 2,
+    "currentLevel": 3,
+    "nextLevel": 4,
+    "inkCost": 90,
+    "currentPowerMultiplier": 1.3,
+    "nextPowerMultiplier": 1.5,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 4,
+    "tier": 2,
+    "currentLevel": 4,
+    "nextLevel": 5,
+    "inkCost": 120,
+    "currentPowerMultiplier": 1.5,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 4,
+    "tier": 2,
+    "currentLevel": 5,
+    "nextLevel": 5,
+    "inkCost": 0,
+    "currentPowerMultiplier": 1.75,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": true
+  },
+  {
+    "spellType": 4,
+    "tier": 3,
+    "currentLevel": 1,
+    "nextLevel": 2,
+    "inkCost": 90,
+    "currentPowerMultiplier": 1,
+    "nextPowerMultiplier": 1.15,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 4,
+    "tier": 3,
+    "currentLevel": 2,
+    "nextLevel": 3,
+    "inkCost": 180,
+    "currentPowerMultiplier": 1.15,
+    "nextPowerMultiplier": 1.3,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 4,
+    "tier": 3,
+    "currentLevel": 3,
+    "nextLevel": 4,
+    "inkCost": 270,
+    "currentPowerMultiplier": 1.3,
+    "nextPowerMultiplier": 1.5,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 4,
+    "tier": 3,
+    "currentLevel": 4,
+    "nextLevel": 5,
+    "inkCost": 360,
+    "currentPowerMultiplier": 1.5,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": false
+  },
+  {
+    "spellType": 4,
+    "tier": 3,
+    "currentLevel": 5,
+    "nextLevel": 5,
+    "inkCost": 0,
+    "currentPowerMultiplier": 1.75,
+    "nextPowerMultiplier": 1.75,
+    "isMaxLevel": true
+  }
+]

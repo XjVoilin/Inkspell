@@ -1,0 +1,23 @@
+[
+  {
+    "tier": 1,
+    "isHighest": false,
+    "displayNameKey": "SPELL_TIER_1_NAME",
+    "frameResourceKey": "Spell/Frame/Tier1",
+    "combatFeedbackScale": 1
+  },
+  {
+    "tier": 2,
+    "isHighest": false,
+    "displayNameKey": "SPELL_TIER_2_NAME",
+    "frameResourceKey": "Spell/Frame/Tier2",
+    "combatFeedbackScale": 1.25
+  },
+  {
+    "tier": 3,
+    "isHighest": true,
+    "displayNameKey": "SPELL_TIER_3_NAME",
+    "frameResourceKey": "Spell/Frame/Tier3",
+    "combatFeedbackScale": 1.5
+  }
+]

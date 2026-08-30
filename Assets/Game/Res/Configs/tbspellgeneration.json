@@ -1,0 +1,18 @@
+[
+  {
+    "offlineLimitSeconds": 28800,
+    "minimumIntervalSeconds": 45,
+    "spellTypes": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "weights": [
+      1,
+      1,
+      1,
+      1
+    ]
+  }
+]

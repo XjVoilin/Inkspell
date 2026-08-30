@@ -1,0 +1,284 @@
+[
+  {
+    "stageId": 1,
+    "spawns": [
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 0
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 2
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 4
+      }
+    ]
+  },
+  {
+    "stageId": 2,
+    "spawns": [
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 0
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 1.5
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 3
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 4.5
+      }
+    ]
+  },
+  {
+    "stageId": 3,
+    "spawns": [
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 0
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 1.2
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 2.4
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 3.6
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 4.4
+      }
+    ]
+  },
+  {
+    "stageId": 4,
+    "spawns": [
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 0
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 1
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 2
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 3
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 4
+      }
+    ]
+  },
+  {
+    "stageId": 5,
+    "spawns": [
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 0
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 1
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 2
+      },
+      {
+        "enemyType": 3,
+        "spawnTimeSeconds": 3.5
+      }
+    ]
+  },
+  {
+    "stageId": 6,
+    "spawns": [
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 0
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 0.8
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 1.6
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 2.4
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 3.2
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 4
+      },
+      {
+        "enemyType": 3,
+        "spawnTimeSeconds": 5
+      }
+    ]
+  },
+  {
+    "stageId": 7,
+    "spawns": [
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 0
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 0.8
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 1.6
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 2.4
+      },
+      {
+        "enemyType": 3,
+        "spawnTimeSeconds": 3.5
+      },
+      {
+        "enemyType": 3,
+        "spawnTimeSeconds": 5
+      }
+    ]
+  },
+  {
+    "stageId": 8,
+    "spawns": [
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 0
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 0.7
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 1.4
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 2.1
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 2.8
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 3.5
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 4.2
+      },
+      {
+        "enemyType": 3,
+        "spawnTimeSeconds": 5.2
+      }
+    ]
+  },
+  {
+    "stageId": 9,
+    "spawns": [
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 0
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 0.6
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 1.2
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 1.8
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 2.4
+      },
+      {
+        "enemyType": 3,
+        "spawnTimeSeconds": 3.5
+      },
+      {
+        "enemyType": 3,
+        "spawnTimeSeconds": 4.7
+      },
+      {
+        "enemyType": 3,
+        "spawnTimeSeconds": 5.9
+      }
+    ]
+  },
+  {
+    "stageId": 10,
+    "spawns": [
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 0
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 1
+      },
+      {
+        "enemyType": 1,
+        "spawnTimeSeconds": 2
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 3
+      },
+      {
+        "enemyType": 2,
+        "spawnTimeSeconds": 4
+      },
+      {
+        "enemyType": 3,
+        "spawnTimeSeconds": 5
+      },
+      {
+        "enemyType": 3,
+        "spawnTimeSeconds": 7
+      },
+      {
+        "enemyType": 4,
+        "spawnTimeSeconds": 9
+      }
+    ]
+  }
+]

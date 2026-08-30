@@ -1,0 +1,42 @@
+[
+  {
+    "stageId": 1,
+    "intervalSeconds": 180
+  },
+  {
+    "stageId": 2,
+    "intervalSeconds": 165
+  },
+  {
+    "stageId": 3,
+    "intervalSeconds": 150
+  },
+  {
+    "stageId": 4,
+    "intervalSeconds": 135
+  },
+  {
+    "stageId": 5,
+    "intervalSeconds": 120
+  },
+  {
+    "stageId": 6,
+    "intervalSeconds": 105
+  },
+  {
+    "stageId": 7,
+    "intervalSeconds": 90
+  },
+  {
+    "stageId": 8,
+    "intervalSeconds": 75
+  },
+  {
+    "stageId": 9,
+    "intervalSeconds": 60
+  },
+  {
+    "stageId": 10,
+    "intervalSeconds": 45
+  }
+]

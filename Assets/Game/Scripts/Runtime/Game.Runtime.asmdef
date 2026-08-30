@@ -18,7 +18,8 @@
     "July.Resource",
     "July.Scene",
     "July.Time",
-    "July.UI"
+    "July.UI",
+    "Unity.TextMeshPro"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

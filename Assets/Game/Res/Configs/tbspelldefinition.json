@@ -1,0 +1,30 @@
+[
+  {
+    "spellType": 1,
+    "isOpen": true,
+    "displayPriority": 10,
+    "displayNameKey": "SPELL_FIREBALL_NAME",
+    "iconResourceKey": "Spell/Icon/Fireball"
+  },
+  {
+    "spellType": 2,
+    "isOpen": true,
+    "displayPriority": 20,
+    "displayNameKey": "SPELL_CHAIN_LIGHTNING_NAME",
+    "iconResourceKey": "Spell/Icon/ChainLightning"
+  },
+  {
+    "spellType": 3,
+    "isOpen": true,
+    "displayPriority": 30,
+    "displayNameKey": "SPELL_FROST_RING_NAME",
+    "iconResourceKey": "Spell/Icon/FrostRing"
+  },
+  {
+    "spellType": 4,
+    "isOpen": true,
+    "displayPriority": 40,
+    "displayNameKey": "SPELL_SHIELD_NAME",
+    "iconResourceKey": "Spell/Icon/Shield"
+  }
+]

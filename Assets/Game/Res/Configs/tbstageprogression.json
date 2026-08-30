@@ -1,0 +1,62 @@
+[
+  {
+    "stageId": 1,
+    "isMaxStage": false,
+    "victoryPauseSeconds": 1,
+    "failurePauseSeconds": 2
+  },
+  {
+    "stageId": 2,
+    "isMaxStage": false,
+    "victoryPauseSeconds": 1,
+    "failurePauseSeconds": 2
+  },
+  {
+    "stageId": 3,
+    "isMaxStage": false,
+    "victoryPauseSeconds": 1,
+    "failurePauseSeconds": 2
+  },
+  {
+    "stageId": 4,
+    "isMaxStage": false,
+    "victoryPauseSeconds": 1,
+    "failurePauseSeconds": 2
+  },
+  {
+    "stageId": 5,
+    "isMaxStage": false,
+    "victoryPauseSeconds": 1,
+    "failurePauseSeconds": 2
+  },
+  {
+    "stageId": 6,
+    "isMaxStage": false,
+    "victoryPauseSeconds": 1,
+    "failurePauseSeconds": 2
+  },
+  {
+    "stageId": 7,
+    "isMaxStage": false,
+    "victoryPauseSeconds": 1,
+    "failurePauseSeconds": 2
+  },
+  {
+    "stageId": 8,
+    "isMaxStage": false,
+    "victoryPauseSeconds": 1,
+    "failurePauseSeconds": 2
+  },
+  {
+    "stageId": 9,
+    "isMaxStage": false,
+    "victoryPauseSeconds": 1,
+    "failurePauseSeconds": 2
+  },
+  {
+    "stageId": 10,
+    "isMaxStage": true,
+    "victoryPauseSeconds": 1,
+    "failurePauseSeconds": 2
+  }
+]

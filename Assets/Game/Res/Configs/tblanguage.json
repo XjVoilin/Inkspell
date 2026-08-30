@@ -18,5 +18,197 @@
   {
     "Key": "COMMON_KILL",
     "CN": "击杀数:{0}"
+  },
+  {
+    "Key": "SPELL_FIREBALL_NAME",
+    "CN": "火球"
+  },
+  {
+    "Key": "SPELL_CHAIN_LIGHTNING_NAME",
+    "CN": "雷链"
+  },
+  {
+    "Key": "SPELL_FROST_RING_NAME",
+    "CN": "冰环"
+  },
+  {
+    "Key": "SPELL_SHIELD_NAME",
+    "CN": "护盾"
+  },
+  {
+    "Key": "SPELL_TIER_1_NAME",
+    "CN": "一阶"
+  },
+  {
+    "Key": "SPELL_TIER_2_NAME",
+    "CN": "二阶"
+  },
+  {
+    "Key": "SPELL_TIER_3_NAME",
+    "CN": "三阶"
+  },
+  {
+    "Key": "MAIN_STAGE",
+    "CN": "第 {0} 关"
+  },
+  {
+    "Key": "MAIN_MAGIC_INK",
+    "CN": "魔法墨水：{0}"
+  },
+  {
+    "Key": "MAIN_PENDING",
+    "CN": "待领取：{0}"
+  },
+  {
+    "Key": "MAIN_GENERATION",
+    "CN": "生成：{0:0}/{1:0} 秒"
+  },
+  {
+    "Key": "MAIN_BOOK_HEALTH",
+    "CN": "魔法书生命：{0:0}/{1:0}"
+  },
+  {
+    "Key": "MAIN_BOOK_SHIELD",
+    "CN": "护盾：{0:0}"
+  },
+  {
+    "Key": "SYNTHESIS_REJECT_NOT_FOUND",
+    "CN": "法术已不存在"
+  },
+  {
+    "Key": "SYNTHESIS_REJECT_SAME_INSTANCE",
+    "CN": "请选择另一张法术"
+  },
+  {
+    "Key": "SYNTHESIS_REJECT_DIFFERENT_TIER",
+    "CN": "不同阶法术不能合成"
+  },
+  {
+    "Key": "SYNTHESIS_REJECT_LOCKED",
+    "CN": "锁定法术不能合成"
+  },
+  {
+    "Key": "SYNTHESIS_REJECT_EQUIPPED",
+    "CN": "已装备法术不能合成"
+  },
+  {
+    "Key": "SYNTHESIS_REJECT_HIGHEST_TIER",
+    "CN": "最高阶法术不能合成"
+  },
+  {
+    "Key": "SYNTHESIS_REJECT_CULTIVATED",
+    "CN": "已培养法术不能合成"
+  },
+  {
+    "Key": "SYNTHESIS_RESULT_HIGHER_TIER",
+    "CN": "合成成功！获得高一阶法术"
+  },
+  {
+    "Key": "SYNTHESIS_RESULT_MAGIC_INK",
+    "CN": "合成失败，获得 {0} 魔法墨水"
+  },
+  {
+    "Key": "BATTLE_DEFEAT",
+    "CN": "战斗失败"
+  },
+  {
+    "Key": "BATTLE_RETRY",
+    "CN": "重新挑战"
+  },
+  {
+    "Key": "BATTLE_SHIELD_ACTIVE",
+    "CN": "护盾生效：{0:0}"
+  },
+  {
+    "Key": "SPELL_DETAIL_DAMAGE_VALUE_NAME",
+    "CN": "伤害"
+  },
+  {
+    "Key": "SPELL_DETAIL_SHIELD_VALUE_NAME",
+    "CN": "护盾值"
+  },
+  {
+    "Key": "SPELL_DETAIL_TIER_LEVEL",
+    "CN": "{0} · {1}级"
+  },
+  {
+    "Key": "SPELL_DETAIL_LOCATION_CRAFTING",
+    "CN": "合成区"
+  },
+  {
+    "Key": "SPELL_DETAIL_LOCATION_EQUIPPED",
+    "CN": "装备槽 {0}"
+  },
+  {
+    "Key": "SPELL_DETAIL_MAIN_VALUE_CURRENT",
+    "CN": "{0}：{1:0.##}"
+  },
+  {
+    "Key": "SPELL_DETAIL_MAIN_VALUE_CHANGE",
+    "CN": "{0}：{1:0.##} → {2:0.##}"
+  },
+  {
+    "Key": "SPELL_DETAIL_MULTIPLIER_CURRENT",
+    "CN": "主要倍率：{0:0.##}×"
+  },
+  {
+    "Key": "SPELL_DETAIL_MULTIPLIER_CHANGE",
+    "CN": "主要倍率：{0:0.##}× → {1:0.##}×"
+  },
+  {
+    "Key": "SPELL_DETAIL_MAGIC_INK",
+    "CN": "魔法墨水：{0}"
+  },
+  {
+    "Key": "SPELL_DETAIL_UPGRADE_COST",
+    "CN": "升级消耗：{0}"
+  },
+  {
+    "Key": "SPELL_DETAIL_LOCK",
+    "CN": "锁定"
+  },
+  {
+    "Key": "SPELL_DETAIL_UNLOCK",
+    "CN": "解锁"
+  },
+  {
+    "Key": "SPELL_DETAIL_UPGRADE",
+    "CN": "升级"
+  },
+  {
+    "Key": "SPELL_DETAIL_LOCKED",
+    "CN": "法术已锁定"
+  },
+  {
+    "Key": "SPELL_DETAIL_UNLOCKED",
+    "CN": "法术已解锁"
+  },
+  {
+    "Key": "SPELL_DETAIL_INSUFFICIENT_INK",
+    "CN": "魔法墨水不足：需要 {0}，还差 {1}"
+  },
+  {
+    "Key": "SPELL_DETAIL_MAX_LEVEL",
+    "CN": "已满级"
+  },
+  {
+    "Key": "SPELL_DETAIL_UPGRADED",
+    "CN": "升级成功：Lv.{0} → Lv.{1}，倍率 {2:0.##}× → {3:0.##}×，消耗 {4} 墨水"
+  },
+  {
+    "Key": "OFFLINE_REWARD_ELAPSED",
+    "CN": "离线时长：{0} 秒"
+  },
+  {
+    "Key": "OFFLINE_REWARD_GENERATED",
+    "CN": "获得法术：{0}"
+  },
+  {
+    "Key": "OFFLINE_REWARD_TRANSFERRED",
+    "CN": "已自动补入：{0}"
+  },
+  {
+    "Key": "OFFLINE_REWARD_CONTINUE",
+    "CN": "继续"
   }
 ]

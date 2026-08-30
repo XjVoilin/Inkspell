@@ -1,0 +1,134 @@
+[
+  {
+    "spellType": 1,
+    "tier": 1,
+    "baseDamage": 12,
+    "baseShield": 0,
+    "cooldownSeconds": 1.5,
+    "effectRange": 0,
+    "effectDurationSeconds": 0,
+    "chainTargetCount": 0,
+    "slowMultiplier": 1
+  },
+  {
+    "spellType": 1,
+    "tier": 2,
+    "baseDamage": 24,
+    "baseShield": 0,
+    "cooldownSeconds": 1.5,
+    "effectRange": 0,
+    "effectDurationSeconds": 0,
+    "chainTargetCount": 0,
+    "slowMultiplier": 1
+  },
+  {
+    "spellType": 1,
+    "tier": 3,
+    "baseDamage": 48,
+    "baseShield": 0,
+    "cooldownSeconds": 1.5,
+    "effectRange": 0,
+    "effectDurationSeconds": 0,
+    "chainTargetCount": 0,
+    "slowMultiplier": 1
+  },
+  {
+    "spellType": 2,
+    "tier": 1,
+    "baseDamage": 9,
+    "baseShield": 0,
+    "cooldownSeconds": 2,
+    "effectRange": 0.25,
+    "effectDurationSeconds": 0,
+    "chainTargetCount": 2,
+    "slowMultiplier": 1
+  },
+  {
+    "spellType": 2,
+    "tier": 2,
+    "baseDamage": 18,
+    "baseShield": 0,
+    "cooldownSeconds": 2,
+    "effectRange": 0.25,
+    "effectDurationSeconds": 0,
+    "chainTargetCount": 3,
+    "slowMultiplier": 1
+  },
+  {
+    "spellType": 2,
+    "tier": 3,
+    "baseDamage": 36,
+    "baseShield": 0,
+    "cooldownSeconds": 2,
+    "effectRange": 0.25,
+    "effectDurationSeconds": 0,
+    "chainTargetCount": 4,
+    "slowMultiplier": 1
+  },
+  {
+    "spellType": 3,
+    "tier": 1,
+    "baseDamage": 7,
+    "baseShield": 0,
+    "cooldownSeconds": 2.5,
+    "effectRange": 0.18,
+    "effectDurationSeconds": 2,
+    "chainTargetCount": 0,
+    "slowMultiplier": 0.6
+  },
+  {
+    "spellType": 3,
+    "tier": 2,
+    "baseDamage": 14,
+    "baseShield": 0,
+    "cooldownSeconds": 2.5,
+    "effectRange": 0.22,
+    "effectDurationSeconds": 2.5,
+    "chainTargetCount": 0,
+    "slowMultiplier": 0.55
+  },
+  {
+    "spellType": 3,
+    "tier": 3,
+    "baseDamage": 28,
+    "baseShield": 0,
+    "cooldownSeconds": 2.5,
+    "effectRange": 0.26,
+    "effectDurationSeconds": 3,
+    "chainTargetCount": 0,
+    "slowMultiplier": 0.5
+  },
+  {
+    "spellType": 4,
+    "tier": 1,
+    "baseDamage": 0,
+    "baseShield": 20,
+    "cooldownSeconds": 4,
+    "effectRange": 0,
+    "effectDurationSeconds": 3,
+    "chainTargetCount": 0,
+    "slowMultiplier": 1
+  },
+  {
+    "spellType": 4,
+    "tier": 2,
+    "baseDamage": 0,
+    "baseShield": 40,
+    "cooldownSeconds": 4,
+    "effectRange": 0,
+    "effectDurationSeconds": 3,
+    "chainTargetCount": 0,
+    "slowMultiplier": 1
+  },
+  {
+    "spellType": 4,
+    "tier": 3,
+    "baseDamage": 0,
+    "baseShield": 80,
+    "cooldownSeconds": 4,
+    "effectRange": 0,
+    "effectDurationSeconds": 3,
+    "chainTargetCount": 0,
+    "slowMultiplier": 1
+  }
+]

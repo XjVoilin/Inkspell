@@ -1,0 +1,50 @@
+[
+  {
+    "outputTier": 2,
+    "spellType": 1,
+    "isOpen": true,
+    "weight": 1
+  },
+  {
+    "outputTier": 2,
+    "spellType": 2,
+    "isOpen": true,
+    "weight": 1
+  },
+  {
+    "outputTier": 2,
+    "spellType": 3,
+    "isOpen": true,
+    "weight": 1
+  },
+  {
+    "outputTier": 2,
+    "spellType": 4,
+    "isOpen": true,
+    "weight": 1
+  },
+  {
+    "outputTier": 3,
+    "spellType": 1,
+    "isOpen": true,
+    "weight": 1
+  },
+  {
+    "outputTier": 3,
+    "spellType": 2,
+    "isOpen": true,
+    "weight": 1
+  },
+  {
+    "outputTier": 3,
+    "spellType": 3,
+    "isOpen": true,
+    "weight": 1
+  },
+  {
+    "outputTier": 3,
+    "spellType": 4,
+    "isOpen": true,
+    "weight": 1
+  }
+]

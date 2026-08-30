@@ -1,0 +1,9 @@
+[
+  {
+    "id": 1,
+    "bookMaxHealth": 100,
+    "enemySpawnPosition": 1,
+    "bookContactPosition": 0,
+    "attackTravelSeconds": 0.2
+  }
+]

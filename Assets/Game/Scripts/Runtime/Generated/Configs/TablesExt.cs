@@ -6,12 +6,25 @@ namespace cfg
 {
     public partial class Tables
     {
-        public static readonly string[] TableNames = { "tbuiwindow", "tblanguage" };
+        public static readonly string[] TableNames = { "tbuiwindow", "tblanguage", "tbspelldefinition", "tbspelltier", "tbspellassetrule", "tbsynthesisrule", "tbsynthesisreward", "tbspellupgrade", "tbbattlerule", "tbspellcombat", "tbenemy", "tbstagebattle", "tbstageprogression", "tbspellgeneration", "tbstagegeneration" };
 
         public void RegisterTo(Dictionary<Type, object> registry)
         {
             registry[typeof(TbUIWindow)] = TbUIWindow;
             registry[typeof(TbLanguage)] = TbLanguage;
+            registry[typeof(TbSpellDefinition)] = TbSpellDefinition;
+            registry[typeof(TbSpellTier)] = TbSpellTier;
+            registry[typeof(TbSpellAssetRule)] = TbSpellAssetRule;
+            registry[typeof(TbSynthesisRule)] = TbSynthesisRule;
+            registry[typeof(TbSynthesisReward)] = TbSynthesisReward;
+            registry[typeof(TbSpellUpgrade)] = TbSpellUpgrade;
+            registry[typeof(TbBattleRule)] = TbBattleRule;
+            registry[typeof(TbSpellCombat)] = TbSpellCombat;
+            registry[typeof(TbEnemy)] = TbEnemy;
+            registry[typeof(TbStageBattle)] = TbStageBattle;
+            registry[typeof(TbStageProgression)] = TbStageProgression;
+            registry[typeof(TbSpellGeneration)] = TbSpellGeneration;
+            registry[typeof(TbStageGeneration)] = TbStageGeneration;
         }
     }
 }

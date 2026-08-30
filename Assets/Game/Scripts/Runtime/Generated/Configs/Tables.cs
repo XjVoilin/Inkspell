@@ -16,11 +16,76 @@ public partial class Tables
 {
     public TbUIWindow TbUIWindow {get; }
     public TbLanguage TbLanguage {get; }
+    /// <summary>
+    /// 法术定义
+    /// </summary>
+    public TbSpellDefinition TbSpellDefinition {get; }
+    /// <summary>
+    /// 法术阶级
+    /// </summary>
+    public TbSpellTier TbSpellTier {get; }
+    /// <summary>
+    /// 法术资产规则
+    /// </summary>
+    public TbSpellAssetRule TbSpellAssetRule {get; }
+    /// <summary>
+    /// 合成规则
+    /// </summary>
+    public TbSynthesisRule TbSynthesisRule {get; }
+    /// <summary>
+    /// 合成产物
+    /// </summary>
+    public TbSynthesisReward TbSynthesisReward {get; }
+    /// <summary>
+    /// 法术升级
+    /// </summary>
+    public TbSpellUpgrade TbSpellUpgrade {get; }
+    /// <summary>
+    /// 战斗规则
+    /// </summary>
+    public TbBattleRule TbBattleRule {get; }
+    /// <summary>
+    /// 法术战斗
+    /// </summary>
+    public TbSpellCombat TbSpellCombat {get; }
+    /// <summary>
+    /// 敌人
+    /// </summary>
+    public TbEnemy TbEnemy {get; }
+    /// <summary>
+    /// 关卡战斗
+    /// </summary>
+    public TbStageBattle TbStageBattle {get; }
+    /// <summary>
+    /// 关卡推进
+    /// </summary>
+    public TbStageProgression TbStageProgression {get; }
+    /// <summary>
+    /// 法术生成
+    /// </summary>
+    public TbSpellGeneration TbSpellGeneration {get; }
+    /// <summary>
+    /// 关卡生成间隔
+    /// </summary>
+    public TbStageGeneration TbStageGeneration {get; }
 
     public Tables(System.Func<string, JSONNode> loader)
     {
         TbUIWindow = new TbUIWindow(loader("tbuiwindow"));
         TbLanguage = new TbLanguage(loader("tblanguage"));
+        TbSpellDefinition = new TbSpellDefinition(loader("tbspelldefinition"));
+        TbSpellTier = new TbSpellTier(loader("tbspelltier"));
+        TbSpellAssetRule = new TbSpellAssetRule(loader("tbspellassetrule"));
+        TbSynthesisRule = new TbSynthesisRule(loader("tbsynthesisrule"));
+        TbSynthesisReward = new TbSynthesisReward(loader("tbsynthesisreward"));
+        TbSpellUpgrade = new TbSpellUpgrade(loader("tbspellupgrade"));
+        TbBattleRule = new TbBattleRule(loader("tbbattlerule"));
+        TbSpellCombat = new TbSpellCombat(loader("tbspellcombat"));
+        TbEnemy = new TbEnemy(loader("tbenemy"));
+        TbStageBattle = new TbStageBattle(loader("tbstagebattle"));
+        TbStageProgression = new TbStageProgression(loader("tbstageprogression"));
+        TbSpellGeneration = new TbSpellGeneration(loader("tbspellgeneration"));
+        TbStageGeneration = new TbStageGeneration(loader("tbstagegeneration"));
         ResolveRef();
     }
     
@@ -28,6 +93,19 @@ public partial class Tables
     {
         TbUIWindow.ResolveRef(this);
         TbLanguage.ResolveRef(this);
+        TbSpellDefinition.ResolveRef(this);
+        TbSpellTier.ResolveRef(this);
+        TbSpellAssetRule.ResolveRef(this);
+        TbSynthesisRule.ResolveRef(this);
+        TbSynthesisReward.ResolveRef(this);
+        TbSpellUpgrade.ResolveRef(this);
+        TbBattleRule.ResolveRef(this);
+        TbSpellCombat.ResolveRef(this);
+        TbEnemy.ResolveRef(this);
+        TbStageBattle.ResolveRef(this);
+        TbStageProgression.ResolveRef(this);
+        TbSpellGeneration.ResolveRef(this);
+        TbStageGeneration.ResolveRef(this);
     }
 }
 
