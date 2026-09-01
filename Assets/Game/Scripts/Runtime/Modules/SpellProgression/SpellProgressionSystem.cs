@@ -7,15 +7,17 @@ using July.Logging;
 
 namespace Game
 {
+    /// <summary>解释升级配置，并编排墨水扣除与法术等级提升的一次原子提交。</summary>
     public sealed class SpellProgressionSystem : SystemBase
     {
-        private SpellAssetSystem _spellAssets;
+        private SpellAssetStore _spellAssets;
         private TbSpellUpgrade _spellUpgrades;
 
         public SpellUpgradeInfo GetUpgradeInfo(long instanceId)
         {
-            var spell = _spellAssets.GetSpell(instanceId);
-            if (!spell.HasValue)
+            if (!_spellAssets.TryGetSpell(
+                    instanceId,
+                    out SpellInstanceState currentSpell))
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(instanceId),
@@ -23,7 +25,6 @@ namespace Game
                     "法术实例不存在。");
             }
 
-            var currentSpell = spell.Value;
             var rule = _spellUpgrades.Get(
                 currentSpell.Type,
                 currentSpell.Tier,
@@ -53,11 +54,7 @@ namespace Game
                 return Reject(upgrade, SpellUpgradeRejectReason.InsufficientInk);
             }
 
-            if (!_spellAssets.TryCommitUpgrade(instanceId, upgrade.InkCost))
-            {
-                throw new InvalidOperationException(
-                    $"法术升级预检通过后资产提交失败: instanceId={instanceId}, inkCost={upgrade.InkCost}, currentInk={upgrade.CurrentInk}");
-            }
+            _spellAssets.CommitUpgrade(instanceId, upgrade.InkCost);
 
             Publish(new SpellUpgradedEvent(upgrade));
             return true;
@@ -65,7 +62,7 @@ namespace Game
 
         protected override UniTask OnInitializeAsync()
         {
-            _spellAssets = GetSystem<SpellAssetSystem>();
+            _spellAssets = GetStore<SpellAssetStore>();
             _spellUpgrades = GetSystem<IConfigSystem>().GetTable<TbSpellUpgrade>();
             return UniTask.CompletedTask;
         }

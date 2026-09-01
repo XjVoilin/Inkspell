@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using cfg;
 using Cysharp.Threading.Tasks;
@@ -7,74 +6,23 @@ using July.Config;
 
 namespace Game
 {
+    /// <summary>
+    /// 负责法术资产恢复后的新档初始化、容量解释与配置派生的稳定排列。
+    /// </summary>
     public sealed class SpellAssetSystem : SystemBase
     {
         private SpellAssetStore _store;
         private TbSpellAssetRule _assetRule;
         private TbSpellDefinition _spellDefinitions;
 
-        public int MagicInk => _store.MagicInk;
         public int CraftingCapacity => _store.CraftingCapacity;
-        public int RemainingCraftingCapacity => _store.RemainingCraftingCapacity;
 
-        public IReadOnlyList<SpellInfo> GetCraftingAreaSpells()
+        internal IReadOnlyList<SpellInstanceState> GetSortedCraftingAreaSpells()
         {
-            var spells = _store.GetCraftingAreaSpells();
+            var spells = new List<SpellInstanceState>(
+                _store.GetCraftingAreaSpellStates());
             spells.Sort(CompareCraftingAreaSpells);
             return spells.AsReadOnly();
-        }
-
-        public SpellInfo? GetSpell(long instanceId)
-        {
-            return _store.GetSpell(instanceId);
-        }
-
-        public SpellInfo? GetEquippedSpell(int equipmentSlot)
-        {
-            if (equipmentSlot < 0 || equipmentSlot >= _assetRule.EquipmentSlotCount)
-            {
-                throw new ArgumentOutOfRangeException(nameof(equipmentSlot), equipmentSlot, null);
-            }
-
-            return _store.GetEquippedSpell(equipmentSlot);
-        }
-
-        public bool TrySetLocked(long instanceId, bool locked)
-        {
-            return _store.TrySetLocked(instanceId, locked);
-        }
-
-        public bool TryEquip(long instanceId, int equipmentSlot)
-        {
-            return _store.TryEquip(instanceId, equipmentSlot);
-        }
-
-        public bool TryReceiveGeneratedSpell(SpellType type)
-        {
-            return _store.TryReceiveGeneratedSpell(type);
-        }
-
-        public bool TryCommitSynthesisSuccess(
-            long firstId,
-            long secondId,
-            SpellType resultType,
-            int resultTier)
-        {
-            return _store.TryCommitSynthesisSuccess(
-                firstId,
-                secondId,
-                resultType,
-                resultTier);
-        }
-
-        public bool TryCommitSynthesisFailure(long firstId, long secondId, int inkReward)
-        {
-            return _store.TryCommitSynthesisFailure(firstId, secondId, inkReward);
-        }
-
-        public bool TryCommitUpgrade(long instanceId, int inkCost)
-        {
-            return _store.TryCommitUpgrade(instanceId, inkCost);
         }
 
         protected override UniTask OnInitializeAsync()
@@ -89,7 +37,9 @@ namespace Game
             return UniTask.CompletedTask;
         }
 
-        private int CompareCraftingAreaSpells(SpellInfo left, SpellInfo right)
+        private int CompareCraftingAreaSpells(
+            SpellInstanceState left,
+            SpellInstanceState right)
         {
             var priorityComparison = _spellDefinitions
                 .Get(left.Type)

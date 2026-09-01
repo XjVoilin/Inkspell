@@ -1,5 +1,4 @@
 using July.Arch;
-using Cysharp.Threading.Tasks;
 using July.Localization;
 using July.UI;
 using UnityEngine;
@@ -29,7 +28,7 @@ namespace Game
         [SerializeField] private UIBattlefieldGameView _battlefield;
 
         private UIInkspellMainWindowData _data;
-        private SpellAssetSystem _spellAssets;
+        private SpellAssetStore _spellAssets;
         private SpellSynthesisSystem _spellSynthesis;
         private ILocalizationSystem _localization;
         private IUISystem _ui;
@@ -37,7 +36,7 @@ namespace Game
         protected override void OnBeforeOpen()
         {
             _data = GetData<UIInkspellMainWindowData>() ?? new UIInkspellMainWindowData();
-            _spellAssets = this.GetSystem<SpellAssetSystem>();
+            _spellAssets = this.GetStore<SpellAssetStore>();
             _spellSynthesis = this.GetSystem<SpellSynthesisSystem>();
             _localization = this.GetSystem<ILocalizationSystem>();
             _ui = this.GetSystem<IUISystem>();
@@ -113,9 +112,7 @@ namespace Game
 
         private void OnSynthesisRequested(long firstSpellId, long secondSpellId)
         {
-            _spellSynthesis
-                .TrySynthesizeAsync(firstSpellId, secondSpellId)
-                .Forget();
+            _spellSynthesis.TrySynthesize(firstSpellId, secondSpellId);
         }
 
         private void OnSpellClicked(long spellInstanceId)

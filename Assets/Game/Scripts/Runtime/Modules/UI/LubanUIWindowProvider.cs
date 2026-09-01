@@ -4,6 +4,7 @@ using July.UI;
 using cfg;
 namespace Game
 {
+    /// <summary>把 Luban 窗口配置转换为 UI 框架的打开参数，不包含具体界面的业务逻辑。</summary>
     public class LubanUIWindowProvider : IUIWindowProvider
     {
         public bool TryResolve(int windowId, out UIOpenOptions options)

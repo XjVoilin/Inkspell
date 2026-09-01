@@ -9,7 +9,8 @@ namespace Game
     /// </summary>
     public sealed class UIInkspellMainWindowData
     {
-        private readonly SpellAssetSystem _spellAssets;
+        private readonly SpellAssetStore _spellAssetStore;
+        private readonly SpellAssetSystem _spellAssetSystem;
         private readonly AutoBattleSystem _autoBattle;
         private readonly StageProgressionSystem _stageProgression;
         private readonly SpellGenerationSystem _spellGeneration;
@@ -22,7 +23,8 @@ namespace Game
 
         public UIInkspellMainWindowData()
         {
-            _spellAssets = ArchContext.Current.GetSystem<SpellAssetSystem>();
+            _spellAssetStore = ArchContext.Current.GetStore<SpellAssetStore>();
+            _spellAssetSystem = ArchContext.Current.GetSystem<SpellAssetSystem>();
             _autoBattle = ArchContext.Current.GetSystem<AutoBattleSystem>();
             _stageProgression = ArchContext.Current.GetSystem<StageProgressionSystem>();
             _spellGeneration = ArchContext.Current.GetSystem<SpellGenerationSystem>();
@@ -47,9 +49,9 @@ namespace Game
 
         public void RefreshStatus()
         {
-            var battle = _autoBattle.GetBattleViewState();
+            var battle = _autoBattle.CurrentState;
             Status.CurrentStageId = _stageProgression.CurrentStageId;
-            Status.MagicInk = _spellAssets.MagicInk;
+            Status.MagicInk = _spellAssetStore.MagicInk;
             Status.PendingSpellCount = _spellGeneration.PendingCount;
             Status.GenerationProgressSeconds = _spellGeneration.CurrentCycleProgressSeconds;
             Status.GenerationIntervalSeconds = _spellGeneration.CurrentIntervalSeconds;
@@ -68,8 +70,8 @@ namespace Game
 
         public void RefreshSpellBoard()
         {
-            var spells = _spellAssets.GetCraftingAreaSpells();
-            var slots = new SpellCardViewData[_spellAssets.CraftingCapacity];
+            var spells = _spellAssetSystem.GetSortedCraftingAreaSpells();
+            var slots = new SpellCardViewData[_spellAssetSystem.CraftingCapacity];
             for (var index = 0; index < spells.Count; index++)
             {
                 slots[index] = CreateSpellCard(spells[index], true);
@@ -83,10 +85,11 @@ namespace Game
             var slots = new SpellCardViewData[_spellAssetRule.EquipmentSlotCount];
             for (var index = 0; index < slots.Length; index++)
             {
-                var spell = _spellAssets.GetEquippedSpell(index);
-                if (spell.HasValue)
+                if (_spellAssetStore.TryGetEquippedSpell(
+                        index,
+                        out SpellInstanceState spell))
                 {
-                    slots[index] = CreateSpellCard(spell.Value, false);
+                    slots[index] = CreateSpellCard(spell, false);
                 }
             }
 
@@ -95,7 +98,7 @@ namespace Game
 
         public void RefreshBattlefield()
         {
-            var battle = _autoBattle.GetBattleViewState();
+            var battle = _autoBattle.CurrentState;
             Battlefield.ChallengeId = battle.ChallengeId;
             Battlefield.StageId = battle.StageId;
             Battlefield.IsRunning = battle.IsRunning;
@@ -127,10 +130,11 @@ namespace Game
             {
                 var cooldown = battle.Cooldowns[index];
                 var totalSeconds = cooldown.RemainingSeconds;
-                var spell = _spellAssets.GetEquippedSpell(cooldown.EquipmentSlot);
-                if (spell.HasValue)
+                if (_spellAssetStore.TryGetEquippedSpell(
+                        cooldown.EquipmentSlot,
+                        out SpellInstanceState spell))
                 {
-                    var combat = _spellCombat.Get(spell.Value.Type, spell.Value.Tier);
+                    var combat = _spellCombat.Get(spell.Type, spell.Tier);
                     totalSeconds = Mathf.Max(totalSeconds, combat.CooldownSeconds);
                 }
 
@@ -176,7 +180,9 @@ namespace Game
             Battlefield.Effects = effects;
         }
 
-        private SpellCardViewData CreateSpellCard(SpellInfo spell, bool canDrag)
+        private SpellCardViewData CreateSpellCard(
+            SpellInstanceState spell,
+            bool canDrag)
         {
             return new SpellCardViewData
             {
@@ -196,17 +202,19 @@ namespace Game
             var maximum = currentShield;
             for (var slot = 0; slot < _spellAssetRule.EquipmentSlotCount; slot++)
             {
-                var spell = _spellAssets.GetEquippedSpell(slot);
-                if (!spell.HasValue || spell.Value.Type != cfg.SpellType.Shield)
+                if (!_spellAssetStore.TryGetEquippedSpell(
+                        slot,
+                        out SpellInstanceState spell) ||
+                    spell.Type != cfg.SpellType.Shield)
                 {
                     continue;
                 }
 
-                var combat = _spellCombat.Get(spell.Value.Type, spell.Value.Tier);
+                var combat = _spellCombat.Get(spell.Type, spell.Tier);
                 var upgrade = _spellUpgrades.Get(
-                    spell.Value.Type,
-                    spell.Value.Tier,
-                    spell.Value.Level);
+                    spell.Type,
+                    spell.Tier,
+                    spell.Level);
                 maximum = Mathf.Max(
                     maximum,
                     combat.BaseShield * upgrade.CurrentPowerMultiplier);

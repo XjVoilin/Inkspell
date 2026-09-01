@@ -20,4 +20,14 @@ namespace Game
     public readonly struct SpellGenerationChangedEvent
     {
     }
+
+    public readonly struct OfflineGenerationSettledEvent
+    {
+        public OfflineGenerationSettledEvent(OfflineGenerationOutcome outcome)
+        {
+            Outcome = outcome;
+        }
+
+        public OfflineGenerationOutcome Outcome { get; }
+    }
 }

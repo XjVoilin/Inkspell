@@ -5,9 +5,11 @@ using July.Arch;
 
 namespace Game
 {
-    public sealed class BattleChallengeProcedure : ProcedureBase
+    internal sealed class BattleChallengeProcedure : ProcedureBase
     {
         private readonly int _stageId;
+
+        // Procedure 等待帧更新驱动的 AutoBattleSystem 回填最终结果。
         private readonly UniTaskCompletionSource<BattleOutcome> _completion = new();
         private BattleOutcome _outcome;
         private bool _hasOutcome;

@@ -8,10 +8,11 @@ using July.Config;
 
 namespace Game
 {
+    /// <summary>驱动一次有界自动挑战，并按固定顺序结算生成、命中、移动、施法与胜负。</summary>
     public sealed class AutoBattleSystem : SystemBase, IUpdatableSystem
     {
-        private AutoBattleStore _store;
-        private SpellAssetSystem _spellAssets;
+        private AutoBattleState _state = new();
+        private SpellAssetStore _spellAssets;
         private TbBattleRule _battleRule;
         private TbSpellAssetRule _assetRule;
         private TbSpellCombat _spellCombat;
@@ -19,6 +20,8 @@ namespace Game
         private TbEnemy _enemies;
         private TbStageBattle _stages;
         private BattleChallengeProcedure _currentProcedure;
+
+        internal AutoBattleState CurrentState => _state;
 
         public async UniTask<BattleOutcome> RunChallengeAsync(
             int stageId,
@@ -43,14 +46,9 @@ namespace Game
             }
         }
 
-        public BattleViewState GetBattleViewState()
-        {
-            return _store.CreateViewState();
-        }
-
         public void OnUpdate(float deltaTime)
         {
-            if (_currentProcedure == null || !_store.Current.IsRunning)
+            if (_currentProcedure == null || !CurrentState.IsRunning)
             {
                 return;
             }
@@ -61,9 +59,9 @@ namespace Game
             }
             catch (Exception exception)
             {
-                if (_store.Current.IsRunning)
+                if (CurrentState.IsRunning)
                 {
-                    _store.StopChallenge();
+                    StopChallenge();
                     Publish(new BattleStateChangedEvent());
                 }
 
@@ -74,8 +72,7 @@ namespace Game
 
         protected override UniTask OnInitializeAsync()
         {
-            _store = GetStore<AutoBattleStore>();
-            _spellAssets = GetSystem<SpellAssetSystem>();
+            _spellAssets = GetStore<SpellAssetStore>();
 
             var config = GetSystem<IConfigSystem>();
             _battleRule = config.GetTable<TbBattleRule>();
@@ -95,8 +92,8 @@ namespace Game
             }
 
             var stage = _stages.Get(stageId);
-            var challengeId = _store.Current.ChallengeId + 1;
-            _store.StartChallenge(
+            var challengeId = CurrentState.ChallengeId + 1;
+            StartChallengeState(
                 challengeId,
                 stageId,
                 _battleRule.BookMaxHealth,
@@ -113,9 +110,9 @@ namespace Game
                 return;
             }
 
-            if (_store.Current.IsRunning)
+            if (CurrentState.IsRunning)
             {
-                _store.StopChallenge();
+                StopChallenge();
                 Publish(new BattleStateChangedEvent());
             }
 
@@ -124,24 +121,25 @@ namespace Game
 
         private void AdvanceBattle(float deltaTime)
         {
-            var stage = _stages.Get(_store.Current.StageId);
-            var previousSpawnElapsed = _store.Current.SpawnElapsedSeconds;
+            var stage = _stages.Get(CurrentState.StageId);
+            var previousSpawnElapsed = CurrentState.SpawnElapsedSeconds;
 
-            _store.AdvanceTimers(deltaTime);
-            _store.AdvanceSpawnProgress(deltaTime);
-            SpawnEnemies(stage, previousSpawnElapsed, _store.Current.SpawnElapsedSeconds);
+            // 结算顺序属于战斗规则：新敌人/已到达攻击先结算，再判胜、移动攻击、判负、最后施法。
+            AdvanceTimers(deltaTime);
+            AdvanceSpawnProgress(deltaTime);
+            SpawnEnemies(stage, previousSpawnElapsed, CurrentState.SpawnElapsedSeconds);
             ResolveArrivedSpellAttacks();
-            _store.RemoveDefeatedEnemies();
+            RemoveDefeatedEnemies();
             RemoveExpiredEffects();
 
-            if (_store.Current.Enemies.Count == 0 && !HasPendingSpawns(stage))
+            if (CurrentState.Enemies.Count == 0 && !HasPendingSpawns(stage))
             {
                 FinalizeChallenge(true);
                 return;
             }
 
             AdvanceEnemies(deltaTime);
-            if (_store.Current.BookHealth <= 0f && _store.Current.Enemies.Count > 0)
+            if (CurrentState.BookHealth <= 0f && CurrentState.Enemies.Count > 0)
             {
                 FinalizeChallenge(false);
                 return;
@@ -181,7 +179,7 @@ namespace Game
         private void SpawnEnemy(EnemyType enemyType)
         {
             var enemy = _enemies.Get(enemyType);
-            _store.SpawnEnemy(
+            SpawnEnemyState(
                 enemyType,
                 enemy.MaxHealth,
                 _battleRule.EnemySpawnPosition,
@@ -192,7 +190,7 @@ namespace Game
         {
             foreach (var spawn in stage.Spawns)
             {
-                if (spawn.SpawnTimeSeconds > _store.Current.SpawnElapsedSeconds)
+                if (spawn.SpawnTimeSeconds > CurrentState.SpawnElapsedSeconds)
                 {
                     return true;
                 }
@@ -204,7 +202,7 @@ namespace Game
         private void ResolveArrivedSpellAttacks()
         {
             var arrivedAttackIds = new List<long>();
-            foreach (var attack in _store.Current.Attacks)
+            foreach (var attack in CurrentState.Attacks)
             {
                 if (attack.RemainingTravelSeconds <= 0f)
                 {
@@ -217,8 +215,8 @@ namespace Game
                 var attack = FindAttack(attackId);
                 if (attack.SpellType == SpellType.Shield)
                 {
-                    _store.ApplyBookShield(attack.Shield, attack.EffectDurationSeconds);
-                    _store.AddEffect(
+                    ApplyBookShield(attack.Shield, attack.EffectDurationSeconds);
+                    AddEffect(
                         attack.SpellType,
                         0,
                         _battleRule.BookContactPosition,
@@ -229,7 +227,7 @@ namespace Game
                     ResolveDamageAttack(attack);
                 }
 
-                _store.RemoveAttack(attackId);
+                RemoveAttack(attackId);
             }
         }
 
@@ -243,10 +241,10 @@ namespace Game
                     continue;
                 }
 
-                _store.ApplyEnemyDamage(targetId, attack.Damage);
+                ApplyEnemyDamage(targetId, attack.Damage);
                 if (attack.SpellType == SpellType.FrostRing)
                 {
-                    _store.SetEnemySlow(
+                    SetEnemySlow(
                         targetId,
                         attack.EffectDurationSeconds,
                         attack.SlowMultiplier);
@@ -255,7 +253,7 @@ namespace Game
 
             if (attack.EffectDurationSeconds > 0f)
             {
-                _store.AddEffect(
+                AddEffect(
                     attack.SpellType,
                     attack.TargetEnemyIds.Count > 0 ? attack.TargetEnemyIds[0] : 0,
                     attack.TargetPathPosition,
@@ -266,7 +264,7 @@ namespace Game
         private void RemoveExpiredEffects()
         {
             var expiredEffectIds = new List<long>();
-            foreach (var effect in _store.Current.Effects)
+            foreach (var effect in CurrentState.Effects)
             {
                 if (effect.RemainingSeconds <= 0f)
                 {
@@ -276,14 +274,15 @@ namespace Game
 
             foreach (var effectId in expiredEffectIds)
             {
-                _store.RemoveEffect(effectId);
+                RemoveEffect(effectId);
             }
         }
 
         private void AdvanceEnemies(float deltaTime)
         {
-            var enemyIds = new List<long>(_store.Current.Enemies.Count);
-            foreach (var enemy in _store.Current.Enemies)
+            // 固定本帧要处理的敌人集合，后续均通过 ID 回查移动后的最新状态。
+            var enemyIds = new List<long>(CurrentState.Enemies.Count);
+            foreach (var enemy in CurrentState.Enemies)
             {
                 enemyIds.Add(enemy.RuntimeId);
             }
@@ -299,40 +298,46 @@ namespace Game
                         _battleRule.BookContactPosition,
                         state.PathPosition -
                         config.MoveSpeedPerSecond * state.SlowMultiplier * deltaTime);
-                    _store.SetEnemyPathPosition(enemyId, nextPosition);
+                    SetEnemyPathPosition(enemyId, nextPosition);
                     state = FindLivingEnemy(enemyId);
                 }
 
                 if (state.PathPosition <= _battleRule.BookContactPosition &&
                     state.AttackRemainingSeconds <= 0f)
                 {
-                    _store.ApplyBookDamage(config.AttackDamage);
-                    _store.ResetEnemyAttack(enemyId, config.AttackIntervalSeconds);
+                    ApplyBookDamage(config.AttackDamage);
+                    ResetEnemyAttack(enemyId, config.AttackIntervalSeconds);
                 }
             }
         }
 
         private void CastReadySpells()
         {
-            foreach (var cooldown in _store.Current.Cooldowns)
+            foreach (var cooldown in CurrentState.Cooldowns)
             {
                 if (cooldown.RemainingSeconds > 0f)
                 {
                     continue;
                 }
 
-                var spell = _spellAssets.GetEquippedSpell(cooldown.EquipmentSlot);
                 var target = FindNearestEnemyToBook();
-                if (!spell.HasValue || target == null)
+                SpellInstanceState spell;
+                if (!_spellAssets.TryGetEquippedSpell(
+                        cooldown.EquipmentSlot,
+                        out spell) ||
+                    target == null)
                 {
                     continue;
                 }
 
-                CastSpell(cooldown.EquipmentSlot, spell.Value, target);
+                CastSpell(cooldown.EquipmentSlot, spell, target);
             }
         }
 
-        private void CastSpell(int equipmentSlot, SpellInfo spell, EnemyBattleState primaryTarget)
+        private void CastSpell(
+            int equipmentSlot,
+            SpellInstanceState spell,
+            EnemyBattleState primaryTarget)
         {
             var combat = _spellCombat.Get(spell.Type, spell.Tier);
             var upgrade = _spellUpgrades.Get(spell.Type, spell.Tier, spell.Level);
@@ -343,7 +348,7 @@ namespace Game
                 ? _battleRule.BookContactPosition
                 : primaryTarget.PathPosition;
 
-            _store.LaunchAttack(
+            LaunchAttack(
                 equipmentSlot,
                 spell.Type,
                 targetIds,
@@ -354,7 +359,7 @@ namespace Game
                 combat.EffectRange,
                 combat.EffectDurationSeconds,
                 combat.SlowMultiplier);
-            _store.SetSpellCooldown(equipmentSlot, combat.CooldownSeconds);
+            SetSpellCooldown(equipmentSlot, combat.CooldownSeconds);
         }
 
         private IReadOnlyList<long> SelectTargets(
@@ -411,7 +416,7 @@ namespace Game
         private IReadOnlyList<long> SelectAreaTargets(float center, float range)
         {
             var targets = new List<EnemyBattleState>();
-            foreach (var enemy in _store.Current.Enemies)
+            foreach (var enemy in CurrentState.Enemies)
             {
                 if (enemy.Health > 0f && Math.Abs(enemy.PathPosition - center) <= range)
                 {
@@ -432,7 +437,7 @@ namespace Game
         private EnemyBattleState FindNearestEnemyToBook()
         {
             EnemyBattleState nearest = null;
-            foreach (var enemy in _store.Current.Enemies)
+            foreach (var enemy in CurrentState.Enemies)
             {
                 if (enemy.Health <= 0f ||
                     nearest != null && CompareEnemiesByPathThenId(enemy, nearest) >= 0)
@@ -454,7 +459,7 @@ namespace Game
             EnemyBattleState nearest = null;
             var nearestDistance = float.MaxValue;
 
-            foreach (var enemy in _store.Current.Enemies)
+            foreach (var enemy in CurrentState.Enemies)
             {
                 if (enemy.Health <= 0f || Contains(selected, enemy.RuntimeId))
                 {
@@ -481,13 +486,13 @@ namespace Game
 
         private EnemyBattleState FindLivingEnemy(long runtimeId)
         {
-            return _store.Current.Enemies.Find(
+            return CurrentState.Enemies.Find(
                 enemy => enemy.RuntimeId == runtimeId && enemy.Health > 0f);
         }
 
         private BattleAttackState FindAttack(long attackId)
         {
-            return _store.Current.Attacks.Find(attack => attack.AttackId == attackId)
+            return CurrentState.Attacks.Find(attack => attack.AttackId == attackId)
                    ?? throw new InvalidOperationException($"攻击不存在: {attackId}");
         }
 
@@ -495,6 +500,7 @@ namespace Game
             EnemyBattleState left,
             EnemyBattleState right)
         {
+            // 路径相同时以运行时 ID 打破平局，保证目标选择可复现。
             var pathComparison = left.PathPosition.CompareTo(right.PathPosition);
             return pathComparison != 0
                 ? pathComparison
@@ -514,9 +520,256 @@ namespace Game
             return false;
         }
 
+        private void StartChallengeState(
+            long challengeId,
+            int stageId,
+            float bookMaxHealth,
+            int equipmentSlotCount)
+        {
+            // 每次挑战整体替换瞬时状态，敌人、弹道、冷却和临时效果不会泄漏到下一局。
+            _state = new AutoBattleState
+            {
+                ChallengeId = challengeId,
+                StageId = stageId,
+                IsRunning = true,
+                BookHealth = bookMaxHealth,
+                BookMaxHealth = bookMaxHealth,
+            };
+
+            for (var slot = 0; slot < equipmentSlotCount; slot++)
+            {
+                CurrentState.Cooldowns.Add(new SpellSlotCooldownState
+                {
+                    EquipmentSlot = slot,
+                });
+            }
+        }
+
+        private void StopChallenge()
+        {
+            CurrentState.IsRunning = false;
+        }
+
+        private void AdvanceSpawnProgress(float deltaTime)
+        {
+            CurrentState.SpawnElapsedSeconds += deltaTime;
+        }
+
+        private void SpawnEnemyState(
+            EnemyType type,
+            float maxHealth,
+            float pathPosition,
+            float attackIntervalSeconds)
+        {
+            var runtimeId = CurrentState.NextEnemyRuntimeId++;
+            CurrentState.Enemies.Add(new EnemyBattleState
+            {
+                RuntimeId = runtimeId,
+                Type = type,
+                Health = maxHealth,
+                MaxHealth = maxHealth,
+                PathPosition = pathPosition,
+                AttackRemainingSeconds = attackIntervalSeconds,
+            });
+        }
+
+        private void SetEnemyPathPosition(long runtimeId, float pathPosition)
+        {
+            FindEnemy(runtimeId).PathPosition = pathPosition;
+        }
+
+        private void ResetEnemyAttack(long runtimeId, float attackIntervalSeconds)
+        {
+            FindEnemy(runtimeId).AttackRemainingSeconds = attackIntervalSeconds;
+        }
+
+        private void SetEnemySlow(
+            long runtimeId,
+            float remainingSeconds,
+            float multiplier)
+        {
+            var enemy = FindEnemy(runtimeId);
+            enemy.SlowRemainingSeconds = remainingSeconds;
+            enemy.SlowMultiplier = multiplier;
+        }
+
+        private void ApplyEnemyDamage(long runtimeId, float damage)
+        {
+            var enemy = FindEnemy(runtimeId);
+            enemy.Health = Math.Max(0f, enemy.Health - damage);
+        }
+
+        private void RemoveDefeatedEnemies()
+        {
+            CurrentState.Enemies.RemoveAll(enemy => enemy.Health <= 0f);
+        }
+
+        private void ApplyBookDamage(float damage)
+        {
+            // 护盾优先吸收伤害，只有溢出部分扣减魔法书生命。
+            var shieldDamage = Math.Min(CurrentState.BookShield, damage);
+            CurrentState.BookShield -= shieldDamage;
+            CurrentState.BookHealth = Math.Max(
+                0f,
+                CurrentState.BookHealth - (damage - shieldDamage));
+        }
+
+        private void ApplyBookShield(float shield, float durationSeconds)
+        {
+            CurrentState.BookShield = Math.Max(CurrentState.BookShield, shield);
+            CurrentState.BookShieldRemainingSeconds = durationSeconds;
+        }
+
+        private void SetSpellCooldown(int equipmentSlot, float remainingSeconds)
+        {
+            FindCooldown(equipmentSlot).RemainingSeconds = remainingSeconds;
+        }
+
+        private void LaunchAttack(
+            int equipmentSlot,
+            SpellType spellType,
+            IReadOnlyList<long> targetEnemyIds,
+            float targetPathPosition,
+            float travelSeconds,
+            float damage,
+            float shield,
+            float effectRange,
+            float effectDurationSeconds,
+            float slowMultiplier)
+        {
+            var attackId = CurrentState.NextAttackId++;
+            CurrentState.Attacks.Add(new BattleAttackState
+            {
+                AttackId = attackId,
+                EquipmentSlot = equipmentSlot,
+                SpellType = spellType,
+                TargetEnemyIds = new List<long>(targetEnemyIds),
+                TargetPathPosition = targetPathPosition,
+                RemainingTravelSeconds = travelSeconds,
+                Damage = damage,
+                Shield = shield,
+                EffectRange = effectRange,
+                EffectDurationSeconds = effectDurationSeconds,
+                SlowMultiplier = slowMultiplier,
+            });
+        }
+
+        private void RemoveAttack(long attackId)
+        {
+            CurrentState.Attacks.Remove(FindAttack(attackId));
+        }
+
+        private void AddEffect(
+            SpellType spellType,
+            long targetEnemyId,
+            float pathPosition,
+            float remainingSeconds)
+        {
+            var effectId = CurrentState.NextEffectId++;
+            CurrentState.Effects.Add(new BattleEffectState
+            {
+                EffectId = effectId,
+                SpellType = spellType,
+                TargetEnemyId = targetEnemyId,
+                PathPosition = pathPosition,
+                RemainingSeconds = remainingSeconds,
+            });
+        }
+
+        private void RemoveEffect(long effectId)
+        {
+            CurrentState.Effects.Remove(FindEffect(effectId));
+        }
+
+        private void AdvanceTimers(float deltaTime)
+        {
+            foreach (var enemy in CurrentState.Enemies)
+            {
+                enemy.AttackRemainingSeconds -= deltaTime;
+                if (enemy.SlowRemainingSeconds > 0f)
+                {
+                    enemy.SlowRemainingSeconds = Math.Max(
+                        0f,
+                        enemy.SlowRemainingSeconds - deltaTime);
+                    if (enemy.SlowRemainingSeconds == 0f)
+                    {
+                        enemy.SlowMultiplier = 1f;
+                    }
+                }
+            }
+
+            foreach (var cooldown in CurrentState.Cooldowns)
+            {
+                cooldown.RemainingSeconds = Math.Max(
+                    0f,
+                    cooldown.RemainingSeconds - deltaTime);
+            }
+
+            foreach (var attack in CurrentState.Attacks)
+            {
+                attack.RemainingTravelSeconds = Math.Max(
+                    0f,
+                    attack.RemainingTravelSeconds - deltaTime);
+            }
+
+            foreach (var effect in CurrentState.Effects)
+            {
+                effect.RemainingSeconds = Math.Max(
+                    0f,
+                    effect.RemainingSeconds - deltaTime);
+            }
+
+            if (CurrentState.BookShieldRemainingSeconds > 0f)
+            {
+                CurrentState.BookShieldRemainingSeconds = Math.Max(
+                    0f,
+                    CurrentState.BookShieldRemainingSeconds - deltaTime);
+                if (CurrentState.BookShieldRemainingSeconds == 0f)
+                {
+                    CurrentState.BookShield = 0f;
+                }
+            }
+        }
+
+        private BattleOutcome FinalizeOutcome(bool victory)
+        {
+            // Outcome 是一次性终态；重复结算说明战斗时序被破坏，应立即暴露。
+            if (CurrentState.Outcome.HasValue)
+            {
+                throw new InvalidOperationException("当前挑战已经产生最终结果。");
+            }
+
+            var outcome = new BattleOutcome(
+                CurrentState.ChallengeId,
+                CurrentState.StageId,
+                victory);
+            CurrentState.Outcome = outcome;
+            CurrentState.IsRunning = false;
+            return outcome;
+        }
+
+        private EnemyBattleState FindEnemy(long runtimeId)
+        {
+            return CurrentState.Enemies.Find(enemy => enemy.RuntimeId == runtimeId)
+                   ?? throw new KeyNotFoundException($"敌人不存在: {runtimeId}");
+        }
+
+        private SpellSlotCooldownState FindCooldown(int equipmentSlot)
+        {
+            return CurrentState.Cooldowns.Find(
+                       cooldown => cooldown.EquipmentSlot == equipmentSlot)
+                   ?? throw new KeyNotFoundException($"装备槽冷却不存在: {equipmentSlot}");
+        }
+
+        private BattleEffectState FindEffect(long effectId)
+        {
+            return CurrentState.Effects.Find(effect => effect.EffectId == effectId)
+                   ?? throw new KeyNotFoundException($"效果不存在: {effectId}");
+        }
+
         private void FinalizeChallenge(bool victory)
         {
-            var outcome = _store.FinalizeOutcome(victory);
+            var outcome = FinalizeOutcome(victory);
             Publish(new BattleStateChangedEvent());
             Publish(new BattleChallengeEndedEvent(outcome));
             _currentProcedure.Complete(outcome);

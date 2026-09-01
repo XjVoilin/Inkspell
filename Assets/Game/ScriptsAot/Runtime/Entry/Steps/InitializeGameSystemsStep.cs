@@ -27,6 +27,7 @@ namespace Game.Aot
 
         private static IHotUpdateRegistrar CreateRegistrar()
         {
+            // AOT 层只依赖接口和约定名称，避免编译期引用热更程序集。
             var type = Assembly.Load(AssemblyName).GetType(RegistrarTypeName, true);
             if (!typeof(IHotUpdateRegistrar).IsAssignableFrom(type))
                 throw new InvalidOperationException(

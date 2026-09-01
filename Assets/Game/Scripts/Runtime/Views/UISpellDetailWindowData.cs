@@ -8,7 +8,7 @@ namespace Game
     /// </summary>
     public sealed class UISpellDetailWindowData
     {
-        private SpellAssetSystem _spellAssets;
+        private SpellAssetStore _spellAssets;
         private SpellProgressionSystem _spellProgression;
         private cfg.TbSpellDefinition _spellDefinitions;
         private cfg.TbSpellTier _spellTiers;
@@ -56,7 +56,14 @@ namespace Game
                 BindSources();
             }
 
-            var spell = _spellAssets.GetSpell(SpellInstanceId).Value;
+            if (!_spellAssets.TryGetSpell(
+                    SpellInstanceId,
+                    out SpellInstanceState spell))
+            {
+                throw new System.InvalidOperationException(
+                    $"详情窗口绑定的法术实例不存在: {SpellInstanceId}");
+            }
+
             var upgrade = _spellProgression.GetUpgradeInfo(SpellInstanceId);
             var definition = _spellDefinitions.Get(spell.Type);
             var tier = _spellTiers.Get(spell.Tier);
@@ -73,11 +80,11 @@ namespace Game
             Location = spell.Location;
             EquipmentSlot = spell.EquipmentSlot;
             IsLocked = spell.IsLocked;
-            CurrentInk = upgrade.CurrentInk;
+            CurrentInk = _spellAssets.MagicInk;
             InkCost = upgrade.InkCost;
             MissingInk = upgrade.IsMaxLevel
                 ? 0
-                : System.Math.Max(0, upgrade.InkCost - upgrade.CurrentInk);
+                : System.Math.Max(0, upgrade.InkCost - CurrentInk);
             IsMaxLevel = upgrade.IsMaxLevel;
             MainValueNameKey = spell.Type == cfg.SpellType.Shield
                 ? "SPELL_DETAIL_SHIELD_VALUE_NAME"
@@ -90,7 +97,7 @@ namespace Game
 
         private void BindSources()
         {
-            _spellAssets = ArchContext.Current.GetSystem<SpellAssetSystem>();
+            _spellAssets = ArchContext.Current.GetStore<SpellAssetStore>();
             _spellProgression = ArchContext.Current.GetSystem<SpellProgressionSystem>();
             var config = ArchContext.Current.GetSystem<IConfigSystem>();
             _spellDefinitions = config.GetTable<cfg.TbSpellDefinition>();

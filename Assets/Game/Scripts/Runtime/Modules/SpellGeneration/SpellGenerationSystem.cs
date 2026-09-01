@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using cfg;
 using Cysharp.Threading.Tasks;
 using July.Arch;
@@ -10,10 +9,11 @@ using UnityEngine;
 
 namespace Game
 {
+    /// <summary>统一推进在线生成、触发离线结算，并把待领取法术按队列移交给资产模块。</summary>
     public sealed class SpellGenerationSystem : SystemBase, IUpdatableSystem
     {
         private SpellGenerationStore _store;
-        private SpellAssetSystem _spellAssets;
+        private SpellAssetStore _spellAssets;
         private StageProgressionSystem _stageProgression;
         private ITimeSystem _time;
         private SpellGeneration _generationRule;
@@ -24,13 +24,46 @@ namespace Game
         public float CurrentCycleProgressSeconds => _store.CycleProgressSeconds;
         public float CurrentIntervalSeconds => _store.ActiveIntervalSeconds;
 
-        public async UniTask<OfflineGenerationOutcome> SettleOfflineAsync(
-            CancellationToken ct = default)
+        public OfflineGenerationOutcome SettleOffline()
         {
-            var procedure = new OfflineGenerationProcedure();
-            await RunProcedure(procedure, ct);
+            if (!_store.HasInactiveAnchor)
+            {
+                _store.UpdateInterval(ResolveInterval(_stageProgression.CurrentStageId));
+                var emptyOutcome = new OfflineGenerationOutcome(0L, 0, 0);
+                Publish(new OfflineGenerationSettledEvent(emptyOutcome));
+                return emptyOutcome;
+            }
+
+            var elapsedSeconds = ResolveElapsedSeconds(
+                _time.ServerTimeSeconds,
+                _store.InactiveSinceUtcSeconds,
+                _generationRule.OfflineLimitSeconds);
+            var intervalSeconds = Math.Max(
+                _store.ActiveIntervalSeconds,
+                _generationRule.MinimumIntervalSeconds);
+            // 离线时间与离开前未完成的周期连续累计，而不是重新从零开始。
+            var totalProgressSeconds = _store.CycleProgressSeconds + (double)elapsedSeconds;
+            var generatedCount = checked(
+                (int)Math.Floor(totalProgressSeconds / intervalSeconds));
+            var remainingProgressSeconds = (float)(
+                totalProgressSeconds - generatedCount * intervalSeconds);
+
+            var generatedSpells = new List<SpellType>(generatedCount);
+            for (var index = 0; index < generatedCount; index++)
+            {
+                generatedSpells.Add(SelectGeneratedSpell());
+            }
+
+            // 先把全部收益写入待领取，再尝试移交；容量不足时剩余产物仍可在之后领取。
+            _store.CommitOfflineSettlement(remainingProgressSeconds, generatedSpells);
+            var transferredCount = TransferPendingSpells();
             _store.UpdateInterval(ResolveInterval(_stageProgression.CurrentStageId));
-            return procedure.Outcome;
+            var outcome = new OfflineGenerationOutcome(
+                elapsedSeconds,
+                generatedCount,
+                transferredCount);
+            Publish(new OfflineGenerationSettledEvent(outcome));
+            return outcome;
         }
 
         public void OnUpdate(float deltaTime)
@@ -40,6 +73,7 @@ namespace Game
                 return;
             }
 
+            // 单帧可能跨越多个周期，因此批量结算完整周期并保留不足一周期的余量。
             var interval = _store.ActiveIntervalSeconds;
             var elapsed = _store.CycleProgressSeconds + (double)deltaTime;
             var generatedCount = checked((int)Math.Floor(elapsed / interval));
@@ -64,7 +98,7 @@ namespace Game
         protected override UniTask OnInitializeAsync()
         {
             _store = GetStore<SpellGenerationStore>();
-            _spellAssets = GetSystem<SpellAssetSystem>();
+            _spellAssets = GetStore<SpellAssetStore>();
             _stageProgression = GetSystem<StageProgressionSystem>();
             _time = GetSystem<ITimeSystem>();
 
@@ -109,12 +143,12 @@ namespace Game
             throw new InvalidOperationException("法术生成权重无法选出产物。");
         }
 
-        internal int TransferPendingSpells(CancellationToken ct = default)
+        internal int TransferPendingSpells()
         {
             var transferredCount = 0;
+            // 严格按队首移交；合成区满时停止，但不丢弃任何已生成产物。
             while (_store.TryPeekPendingSpell(out var type))
             {
-                ct.ThrowIfCancellationRequested();
                 if (!_spellAssets.TryReceiveGeneratedSpell(type))
                 {
                     break;
@@ -144,6 +178,7 @@ namespace Game
 
         private void OnStageProgressChanged(StageProgressChangedEvent eventData)
         {
+            // 后台期间冻结间隔，待本次离线收益用旧间隔结算完后再采用新关卡间隔。
             if (_store.HasInactiveAnchor)
             {
                 return;
@@ -161,7 +196,7 @@ namespace Game
             }
             else
             {
-                SettleOfflineAsync().Forget();
+                SettleOffline();
             }
         }
 
@@ -173,6 +208,22 @@ namespace Game
         private void RecordInactive()
         {
             _store.RecordInactive(_time.ServerTimeSeconds);
+        }
+
+        private static long ResolveElapsedSeconds(
+            long nowUtcSeconds,
+            long inactiveSinceUtcSeconds,
+            long offlineLimitSeconds)
+        {
+            // 设备时间回拨视为零收益，正常离线时间则受配置上限约束。
+            if (nowUtcSeconds <= inactiveSinceUtcSeconds)
+            {
+                return 0L;
+            }
+
+            return inactiveSinceUtcSeconds < nowUtcSeconds - offlineLimitSeconds
+                ? offlineLimitSeconds
+                : nowUtcSeconds - inactiveSinceUtcSeconds;
         }
     }
 }

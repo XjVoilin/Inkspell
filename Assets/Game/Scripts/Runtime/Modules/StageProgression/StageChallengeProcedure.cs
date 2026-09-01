@@ -6,7 +6,7 @@ using July.Arch;
 
 namespace Game
 {
-    public sealed class StageChallengeProcedure : ProcedureBase
+    internal sealed class StageChallengeProcedure : ProcedureBase
     {
         private readonly StageProgression _stage;
 
@@ -25,6 +25,7 @@ namespace Game
                 GetStore<StageProgressionStore>().AdvanceOneStage();
             }
 
+            // 进度先提交再等待表现停顿；停顿结束后外层循环才会发起下一场挑战。
             var pauseSeconds = outcome.Victory
                 ? _stage.VictoryPauseSeconds
                 : _stage.FailurePauseSeconds;

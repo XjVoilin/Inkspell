@@ -3,7 +3,7 @@ using July.Arch;
 
 namespace Game
 {
-    public sealed class StageProgressionStore : StoreBase<StageProgressionStoreData>
+    internal sealed class StageProgressionStore : StoreBase<StageProgressionStoreData>
     {
         private TbStageProgression _stages;
 

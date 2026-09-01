@@ -5,7 +5,7 @@ using July.Arch;
 
 namespace Game
 {
-    public sealed class SpellGenerationStore : StoreBase<SpellGenerationStoreData>
+    internal sealed class SpellGenerationStore : StoreBase<SpellGenerationStoreData>
     {
         internal int PendingCount => Data.PendingSpells.Count;
         internal float CycleProgressSeconds => Data.CycleProgressSeconds;

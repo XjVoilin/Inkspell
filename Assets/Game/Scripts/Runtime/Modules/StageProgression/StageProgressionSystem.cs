@@ -7,6 +7,7 @@ using July.Config;
 
 namespace Game
 {
+    /// <summary>串行编排当前关卡的挑战、结果提交、停顿与下一次挑战。</summary>
     public sealed class StageProgressionSystem : SystemBase
     {
         private StageProgressionStore _store;
@@ -52,6 +53,7 @@ namespace Game
             {
                 while (true)
                 {
+                    // 每轮重新读取 CurrentStageId，确保胜利提交的进度在下一轮立即生效。
                     cancellation.Token.ThrowIfCancellationRequested();
                     var stage = _stages.Get(CurrentStageId);
                     await RunProcedure(

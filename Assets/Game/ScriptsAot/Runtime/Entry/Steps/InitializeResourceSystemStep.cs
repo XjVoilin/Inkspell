@@ -48,6 +48,7 @@ namespace Game.Aot
 
         private static EPlayMode ResolvePlayMode(ResourcePlayMode playMode)
         {
+            // 编辑器允许完整调试模式；小游戏平台固定走 Web 文件系统；其他真机默认离线包。
 #if UNITY_EDITOR
             return playMode switch
             {

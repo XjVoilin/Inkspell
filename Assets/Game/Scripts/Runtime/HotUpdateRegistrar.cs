@@ -23,7 +23,13 @@ using UnityEngine;
 
 namespace Game
 {
-    public sealed class HotUpdateRegistrar : IHotUpdateRegistrar, ICanGetSystem
+    /// <summary>
+    /// 热更层的组合根：集中注册业务系统、状态仓库及其持久化边界。
+    /// </summary>
+    public sealed class HotUpdateRegistrar :
+        IHotUpdateRegistrar,
+        ICanGetSystem,
+        ICanRunProcedure
     {
         public void Register()
         {
@@ -51,12 +57,11 @@ namespace Game
             context.RegisterSystem(new TimeSystem());
             context.RegisterSystem(new LocalizationSystem());
 
+            // Store 只负责权威状态；是否持久化在此处统一声明，避免业务模块自行决定存档边界。
             var spellAssetStore = new SpellAssetStore();
-            var autoBattleStore = new AutoBattleStore();
             var stageProgressionStore = new StageProgressionStore();
             var spellGenerationStore = new SpellGenerationStore();
             context.RegisterStore(spellAssetStore);
-            context.RegisterStore(autoBattleStore);
             context.RegisterStore(stageProgressionStore);
             context.RegisterStore(spellGenerationStore);
 
@@ -79,6 +84,7 @@ namespace Game
             context.RegisterSystem(new AutoBattleSystem());
             context.RegisterSystem(new StageProgressionSystem());
             context.RegisterSystem(new SpellGenerationSystem());
+            context.RegisterSystem(new OfflineRewardPresentationSystem());
         }
 
         public async UniTask PreInitializeAsync(CancellationToken ct = default)
@@ -106,6 +112,7 @@ namespace Game
                 tasks[i] = LoadSingleJsonAsync(resource, name);
             }
 
+            // 表文件并行读取，全部到齐后再一次性构造 Tables，防止系统看到不完整配置。
             var results = await UniTask.WhenAll(tasks);
             foreach (var (name, json) in results)
                 jsonCache[name] = json;
@@ -134,25 +141,8 @@ namespace Game
 
         public async UniTask OnGameLaunch()
         {
-            var uiSystem = this.GetSystem<IUISystem>();
-            uiSystem.SetMainProvider(new LubanUIWindowProvider());
-            await this.GetSystem<ISceneSystem>().SwitchSceneAsync("Main");
-
-            var offlineOutcome = await this
-                .GetSystem<SpellGenerationSystem>()
-                .SettleOfflineAsync();
-            await uiSystem.OpenAsync(
-                UIWindowID.UIInkspellMainWindow,
-                new UIInkspellMainWindowData());
-
-            if (offlineOutcome.GeneratedCount > 0)
-            {
-                await uiSystem.OpenAsync(
-                    UIWindowID.UIOfflineRewardWindow,
-                    new UIOfflineRewardWindowData(offlineOutcome));
-            }
-
-            this.GetSystem<StageProgressionSystem>().StartContinuousChallenges();
+            this.GetSystem<IUISystem>().SetMainProvider(new LubanUIWindowProvider());
+            await this.RunProcedure(new EnterMainGameProcedure());
         }
     }
 }

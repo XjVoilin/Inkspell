@@ -4,7 +4,7 @@ using July.Logging;
 
 namespace Game.Aot
 {
-    /// <summary>Startup-only value registry for the seed project's composition root.</summary>
+    /// <summary>仅供启动链路传递配置与注册器实例的临时服务表。</summary>
     public static class SeedServices
     {
         private static readonly Dictionary<Type, object> Services = new();
@@ -37,6 +37,7 @@ namespace Game.Aot
 
         public static void Clear()
         {
+            // 按注册逆序释放，尽量保持与依赖建立顺序相反。
             var values = new List<object>(Services.Values);
             Services.Clear();
 

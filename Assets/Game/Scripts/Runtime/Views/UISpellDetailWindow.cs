@@ -27,7 +27,7 @@ namespace Game
         [SerializeField] private UILocalizedText _upgradeActionText;
 
         private UISpellDetailWindowData _data;
-        private SpellAssetSystem _spellAssets;
+        private SpellAssetStore _spellAssets;
         private SpellProgressionSystem _spellProgression;
         private ILocalizationSystem _localization;
         private IUISystem _ui;
@@ -35,7 +35,7 @@ namespace Game
         protected override void OnBeforeOpen()
         {
             _data = GetData<UISpellDetailWindowData>() ?? new UISpellDetailWindowData();
-            _spellAssets = this.GetSystem<SpellAssetSystem>();
+            _spellAssets = this.GetStore<SpellAssetStore>();
             _spellProgression = this.GetSystem<SpellProgressionSystem>();
             _localization = this.GetSystem<ILocalizationSystem>();
             _ui = this.GetSystem<IUISystem>();

@@ -6,8 +6,9 @@ using July.Logging;
 
 namespace Game
 {
-    public sealed class SpellAssetStore : StoreBase<SpellAssetStoreData>
+    internal sealed class SpellAssetStore : StoreBase<SpellAssetStoreData>
     {
+        // 下列索引均由 Data 派生，不写入存档；换档后由 OnDataReplaced 统一重建。
         private readonly Dictionary<long, SpellInstanceState> _spellsById = new();
         private readonly Dictionary<int, SpellInstanceState> _equippedBySlot = new();
 
@@ -47,32 +48,32 @@ namespace Game
             CommitChange(false);
         }
 
-        internal List<SpellInfo> GetCraftingAreaSpells()
+        internal IReadOnlyList<SpellInstanceState> GetCraftingAreaSpellStates()
         {
-            var spells = new List<SpellInfo>(_craftingCount);
+            var spells = new List<SpellInstanceState>(_craftingCount);
             foreach (var state in Data.Spells)
             {
                 if (state.Location == SpellLocation.CraftingArea)
                 {
-                    spells.Add(ToSpellInfo(state));
+                    spells.Add(state);
                 }
             }
 
-            return spells;
+            return spells.AsReadOnly();
         }
 
-        internal SpellInfo? GetSpell(long instanceId)
+        internal bool TryGetSpell(
+            long instanceId,
+            out SpellInstanceState spell)
         {
-            return _spellsById.TryGetValue(instanceId, out var state)
-                ? ToSpellInfo(state)
-                : null;
+            return _spellsById.TryGetValue(instanceId, out spell);
         }
 
-        internal SpellInfo? GetEquippedSpell(int equipmentSlot)
+        internal bool TryGetEquippedSpell(
+            int equipmentSlot,
+            out SpellInstanceState spell)
         {
-            return _equippedBySlot.TryGetValue(equipmentSlot, out var state)
-                ? ToSpellInfo(state)
-                : null;
+            return _equippedBySlot.TryGetValue(equipmentSlot, out spell);
         }
 
         internal bool TrySetLocked(long instanceId, bool locked)
@@ -116,6 +117,7 @@ namespace Game
                 return false;
             }
 
+            // 替换装备时先把旧法术放回合成区，再把新法术移入槽位；整个交换只发布一次变更。
             var capacityIncreased = !_equippedBySlot.TryGetValue(equipmentSlot, out var replaced);
             if (replaced != null)
             {
@@ -147,16 +149,14 @@ namespace Game
             return true;
         }
 
-        internal bool TryCommitSynthesisSuccess(
+        internal void CommitSynthesisSuccess(
             long firstId,
             long secondId,
             SpellType resultType,
             int resultTier)
         {
-            if (!TryGetSynthesisInputs(firstId, secondId, out var first, out var second))
-            {
-                return false;
-            }
+            var first = _spellsById[firstId];
+            var second = _spellsById[secondId];
 
             var resultId = Data.NextInstanceId;
             var nextInstanceId = checked(resultId + 1);
@@ -168,94 +168,53 @@ namespace Game
                 SpellLocation.CraftingArea,
                 -1);
 
+            // 输入消耗与产物创建共享一次提交，外部不会观察到合成中间态。
             RemoveSpell(first);
             RemoveSpell(second);
             Data.NextInstanceId = nextInstanceId;
             AddSpell(result);
 
             CommitChange(true);
-            return true;
         }
 
-        internal bool TryCommitSynthesisFailure(long firstId, long secondId, int inkReward)
+        internal void CommitSynthesisFailure(
+            long firstId,
+            long secondId,
+            int inkReward)
         {
             if (inkReward < 0)
             {
-                JLogger.LogWarning(
-                    $"[SpellAssetStore] 无法提交合成失败，墨水奖励为负数: firstId={firstId}, secondId={secondId}, inkReward={inkReward}");
-                return false;
+                throw new ArgumentOutOfRangeException(
+                    nameof(inkReward),
+                    inkReward,
+                    "合成失败的墨水奖励不能为负数。");
             }
 
-            if (!TryGetSynthesisInputs(firstId, secondId, out var first, out var second))
-            {
-                return false;
-            }
-
+            var first = _spellsById[firstId];
+            var second = _spellsById[secondId];
             var magicInk = checked(Data.MagicInk + inkReward);
             RemoveSpell(first);
             RemoveSpell(second);
             Data.MagicInk = magicInk;
 
             CommitChange(true);
-            return true;
         }
 
-        internal bool TryCommitUpgrade(long instanceId, int inkCost)
+        internal void CommitUpgrade(long instanceId, int inkCost)
         {
-            if (inkCost < 0)
-            {
-                JLogger.LogWarning(
-                    $"[SpellAssetStore] 无法提交升级，墨水消耗为负数: instanceId={instanceId}, inkCost={inkCost}");
-                return false;
-            }
-
-            if (!_spellsById.TryGetValue(instanceId, out var spell))
-            {
-                JLogger.LogWarning(
-                    $"[SpellAssetStore] 无法提交升级，实例不存在: instanceId={instanceId}, inkCost={inkCost}");
-                return false;
-            }
-
-            if (Data.MagicInk < inkCost)
-            {
-                JLogger.LogWarning(
-                    $"[SpellAssetStore] 无法提交升级，墨水不足: instanceId={instanceId}, inkCost={inkCost}, currentInk={Data.MagicInk}");
-                return false;
-            }
-
+            var spell = _spellsById[instanceId];
+            var remainingInk = checked(Data.MagicInk - inkCost);
             var nextLevel = checked(spell.Level + 1);
-            Data.MagicInk -= inkCost;
-            spell.Level = nextLevel;
 
+            Data.MagicInk = remainingInk;
+            spell.Level = nextLevel;
             CommitChange(false);
-            return true;
         }
 
         protected override void OnDataReplaced()
         {
+            // 反序列化只恢复 Data，运行时查询索引必须随之重建。
             RebuildIndexes();
-        }
-
-        private bool TryGetSynthesisInputs(
-            long firstId,
-            long secondId,
-            out SpellInstanceState first,
-            out SpellInstanceState second)
-        {
-            if (firstId == secondId ||
-                !_spellsById.TryGetValue(firstId, out first) ||
-                !_spellsById.TryGetValue(secondId, out second) ||
-                first.Location != SpellLocation.CraftingArea ||
-                second.Location != SpellLocation.CraftingArea)
-            {
-                JLogger.LogWarning(
-                    $"[SpellAssetStore] 无法提交合成，输入实例不可用: firstId={firstId}, secondId={secondId}");
-                first = null;
-                second = null;
-                return false;
-            }
-
-            return true;
         }
 
         private SpellInstanceState AddNewSpell(
@@ -355,16 +314,5 @@ namespace Game
             };
         }
 
-        private static SpellInfo ToSpellInfo(SpellInstanceState state)
-        {
-            return new SpellInfo(
-                state.InstanceId,
-                state.Type,
-                state.Tier,
-                state.Level,
-                state.Location,
-                state.EquipmentSlot,
-                state.IsLocked);
-        }
     }
 }

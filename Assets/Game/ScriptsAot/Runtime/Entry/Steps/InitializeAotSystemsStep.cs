@@ -9,6 +9,7 @@ using July.Platform;
 
 namespace Game.Aot
 {
+    /// <summary>创建不参与热更新的平台与数据分析系统，并建立全局架构上下文。</summary>
     public sealed class InitializeAotSystemsStep : ILaunchStep
     {
         private const int WeChatPlatformType = 3;
