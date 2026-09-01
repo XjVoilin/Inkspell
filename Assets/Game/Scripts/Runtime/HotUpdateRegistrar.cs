@@ -49,35 +49,27 @@ namespace Game
             context.RegisterSystem(new ConfigSystem());
             context.RegisterSystem(new JsonSerializeSystem());
             context.RegisterSystem(new NoEncryptionSystem());
-            var localFileSaveSystem = new LocalFileSaveSystem();
-            context.RegisterSystem(localFileSaveSystem);
+            var saveSystem = new LocalFileSaveSystem();
+            context.RegisterSystem(saveSystem);
             context.RegisterSystem(new SceneSystem());
             context.RegisterSystem(new UnityInputSystem());
             context.RegisterSystem(new FsmSystem());
             context.RegisterSystem(new TimeSystem());
             context.RegisterSystem(new LocalizationSystem());
 
-            // Store 只负责权威状态；是否持久化在此处统一声明，避免业务模块自行决定存档边界。
-            var spellAssetStore = new SpellAssetStore();
-            var stageProgressionStore = new StageProgressionStore();
-            var spellGenerationStore = new SpellGenerationStore();
-            context.RegisterStore(spellAssetStore);
-            context.RegisterStore(stageProgressionStore);
-            context.RegisterStore(spellGenerationStore);
-
-            localFileSaveSystem.Persist(
-                spellAssetStore,
+            context.RegisterStore(saveSystem.Persist(
+                new SpellAssetStore(),
                 "inkspell.spell-assets",
-                SaveImportance.Important);
-            localFileSaveSystem.Persist(
-                stageProgressionStore,
+                SaveImportance.Important));
+            context.RegisterStore(saveSystem.Persist(
+                new StageProgressionStore(),
                 "inkspell.stage-progression",
-                SaveImportance.Important);
-            localFileSaveSystem.Persist(
-                spellGenerationStore,
+                SaveImportance.Important));
+            context.RegisterStore(saveSystem.Persist(
+                new SpellGenerationStore(),
                 "inkspell.spell-generation",
-                SaveImportance.Important);
-
+                SaveImportance.Important));
+            
             context.RegisterSystem(new SpellAssetSystem());
             context.RegisterSystem(new SpellSynthesisSystem());
             context.RegisterSystem(new SpellProgressionSystem());

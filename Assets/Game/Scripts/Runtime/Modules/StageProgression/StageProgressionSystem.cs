@@ -14,8 +14,6 @@ namespace Game
         private TbStageProgression _stages;
         private CancellationTokenSource _continuousCancellation;
 
-        public int CurrentStageId => _store.CurrentStageId;
-
         public void StartContinuousChallenges()
         {
             if (_continuousCancellation != null)
@@ -55,7 +53,7 @@ namespace Game
                 {
                     // 每轮重新读取 CurrentStageId，确保胜利提交的进度在下一轮立即生效。
                     cancellation.Token.ThrowIfCancellationRequested();
-                    var stage = _stages.Get(CurrentStageId);
+                    var stage = _stages.Get(_store.CurrentStageId);
                     await RunProcedure(
                         new StageChallengeProcedure(stage),
                         cancellation.Token);

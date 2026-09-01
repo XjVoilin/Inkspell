@@ -14,21 +14,17 @@ namespace Game
     {
         private SpellGenerationStore _store;
         private SpellAssetStore _spellAssets;
-        private StageProgressionSystem _stageProgression;
+        private StageProgressionStore _stageProgressionStore;
         private ITimeSystem _time;
         private SpellGeneration _generationRule;
         private TbStageGeneration _stageGeneration;
         private bool _hasFocus;
 
-        public int PendingCount => _store.PendingCount;
-        public float CurrentCycleProgressSeconds => _store.CycleProgressSeconds;
-        public float CurrentIntervalSeconds => _store.ActiveIntervalSeconds;
-
         public OfflineGenerationOutcome SettleOffline()
         {
             if (!_store.HasInactiveAnchor)
             {
-                _store.UpdateInterval(ResolveInterval(_stageProgression.CurrentStageId));
+                _store.UpdateInterval(ResolveInterval(_stageProgressionStore.CurrentStageId));
                 var emptyOutcome = new OfflineGenerationOutcome(0L, 0, 0);
                 Publish(new OfflineGenerationSettledEvent(emptyOutcome));
                 return emptyOutcome;
@@ -57,7 +53,7 @@ namespace Game
             // 先把全部收益写入待领取，再尝试移交；容量不足时剩余产物仍可在之后领取。
             _store.CommitOfflineSettlement(remainingProgressSeconds, generatedSpells);
             var transferredCount = TransferPendingSpells();
-            _store.UpdateInterval(ResolveInterval(_stageProgression.CurrentStageId));
+            _store.UpdateInterval(ResolveInterval(_stageProgressionStore.CurrentStageId));
             var outcome = new OfflineGenerationOutcome(
                 elapsedSeconds,
                 generatedCount,
@@ -99,14 +95,14 @@ namespace Game
         {
             _store = GetStore<SpellGenerationStore>();
             _spellAssets = GetStore<SpellAssetStore>();
-            _stageProgression = GetSystem<StageProgressionSystem>();
+            _stageProgressionStore = GetStore<StageProgressionStore>();
             _time = GetSystem<ITimeSystem>();
 
             var config = GetSystem<IConfigSystem>();
             _generationRule = config.GetTable<TbSpellGeneration>().Data;
             _stageGeneration = config.GetTable<TbStageGeneration>();
 
-            _store.Initialize(ResolveInterval(_stageProgression.CurrentStageId));
+            _store.Initialize(ResolveInterval(_stageProgressionStore.CurrentStageId));
             _hasFocus = Application.isFocused;
 
             Subscribe<SpellAssetsChangedEvent>(OnSpellAssetsChanged);
@@ -170,7 +166,7 @@ namespace Game
 
         private void OnSpellAssetsChanged(SpellAssetsChangedEvent eventData)
         {
-            if (eventData.CapacityIncreased)
+            if (eventData.CraftingSpaceFreed)
             {
                 TransferPendingSpells();
             }

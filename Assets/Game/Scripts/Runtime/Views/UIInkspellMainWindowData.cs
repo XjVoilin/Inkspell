@@ -10,10 +10,10 @@ namespace Game
     public sealed class UIInkspellMainWindowData
     {
         private readonly SpellAssetStore _spellAssetStore;
+        private readonly SpellGenerationStore _spellGenerationStore;
+        private readonly StageProgressionStore _stageProgressionStore;
         private readonly SpellAssetSystem _spellAssetSystem;
         private readonly AutoBattleSystem _autoBattle;
-        private readonly StageProgressionSystem _stageProgression;
-        private readonly SpellGenerationSystem _spellGeneration;
         private readonly cfg.TbSpellDefinition _spellDefinitions;
         private readonly cfg.TbSpellTier _spellTiers;
         private readonly cfg.TbSpellAssetRule _spellAssetRule;
@@ -24,10 +24,10 @@ namespace Game
         public UIInkspellMainWindowData()
         {
             _spellAssetStore = ArchContext.Current.GetStore<SpellAssetStore>();
+            _spellGenerationStore = ArchContext.Current.GetStore<SpellGenerationStore>();
+            _stageProgressionStore = ArchContext.Current.GetStore<StageProgressionStore>();
             _spellAssetSystem = ArchContext.Current.GetSystem<SpellAssetSystem>();
             _autoBattle = ArchContext.Current.GetSystem<AutoBattleSystem>();
-            _stageProgression = ArchContext.Current.GetSystem<StageProgressionSystem>();
-            _spellGeneration = ArchContext.Current.GetSystem<SpellGenerationSystem>();
             var config = ArchContext.Current.GetSystem<IConfigSystem>();
             _spellDefinitions = config.GetTable<cfg.TbSpellDefinition>();
             _spellTiers = config.GetTable<cfg.TbSpellTier>();
@@ -50,11 +50,11 @@ namespace Game
         public void RefreshStatus()
         {
             var battle = _autoBattle.CurrentState;
-            Status.CurrentStageId = _stageProgression.CurrentStageId;
+            Status.CurrentStageId = _stageProgressionStore.CurrentStageId;
             Status.MagicInk = _spellAssetStore.MagicInk;
-            Status.PendingSpellCount = _spellGeneration.PendingCount;
-            Status.GenerationProgressSeconds = _spellGeneration.CurrentCycleProgressSeconds;
-            Status.GenerationIntervalSeconds = _spellGeneration.CurrentIntervalSeconds;
+            Status.PendingSpellCount = _spellGenerationStore.PendingCount;
+            Status.GenerationProgressSeconds = _spellGenerationStore.CycleProgressSeconds;
+            Status.GenerationIntervalSeconds = _spellGenerationStore.ActiveIntervalSeconds;
             Status.BookHealth = battle.BookHealth;
             Status.BookMaxHealth = battle.BookMaxHealth;
             Status.BookShield = battle.BookShield;
@@ -71,7 +71,7 @@ namespace Game
         public void RefreshSpellBoard()
         {
             var spells = _spellAssetSystem.GetSortedCraftingAreaSpells();
-            var slots = new SpellCardViewData[_spellAssetSystem.CraftingCapacity];
+            var slots = new SpellCardViewData[_spellAssetStore.CraftingCapacity];
             for (var index = 0; index < spells.Count; index++)
             {
                 slots[index] = CreateSpellCard(spells[index], true);

@@ -7,22 +7,19 @@ using July.Config;
 namespace Game
 {
     /// <summary>
-    /// 负责法术资产恢复后的新档初始化、容量解释与配置派生的稳定排列。
+    /// 负责法术资产恢复后的新档初始化与配置派生的稳定排列。
     /// </summary>
     public sealed class SpellAssetSystem : SystemBase
     {
         private SpellAssetStore _store;
-        private TbSpellAssetRule _assetRule;
         private TbSpellDefinition _spellDefinitions;
-
-        public int CraftingCapacity => _store.CraftingCapacity;
 
         internal IReadOnlyList<SpellInstanceState> GetSortedCraftingAreaSpells()
         {
             var spells = new List<SpellInstanceState>(
                 _store.GetCraftingAreaSpellStates());
             spells.Sort(CompareCraftingAreaSpells);
-            return spells.AsReadOnly();
+            return spells;
         }
 
         protected override UniTask OnInitializeAsync()
@@ -30,10 +27,9 @@ namespace Game
             _store = GetStore<SpellAssetStore>();
 
             var config = GetSystem<IConfigSystem>();
-            _assetRule = config.GetTable<TbSpellAssetRule>();
             _spellDefinitions = config.GetTable<TbSpellDefinition>();
 
-            _store.Initialize(_assetRule);
+            _store.Initialize(config.GetTable<TbSpellAssetRule>().Data);
             return UniTask.CompletedTask;
         }
 

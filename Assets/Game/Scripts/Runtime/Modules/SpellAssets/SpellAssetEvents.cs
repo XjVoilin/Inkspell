@@ -2,11 +2,11 @@ namespace Game
 {
     public readonly struct SpellAssetsChangedEvent
     {
-        public SpellAssetsChangedEvent(bool capacityIncreased)
+        public SpellAssetsChangedEvent(bool craftingSpaceFreed)
         {
-            CapacityIncreased = capacityIncreased;
+            CraftingSpaceFreed = craftingSpaceFreed;
         }
 
-        public bool CapacityIncreased { get; }
+        public bool CraftingSpaceFreed { get; }
     }
 }

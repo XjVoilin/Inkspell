@@ -20,8 +20,9 @@ namespace Game
         internal int CraftingCapacity => _craftingCapacity;
         internal int RemainingCraftingCapacity => _craftingCapacity - _craftingCount;
 
-        internal void Initialize(TbSpellAssetRule rule)
+        internal void Initialize(SpellAssetRule rule)
         {
+            // 配置派生的运行时限制不写入存档，每次恢复后都要重新建立。
             _craftingCapacity = checked(rule.CraftingRows * rule.CraftingColumns);
             _equipmentSlotCount = rule.EquipmentSlotCount;
 
@@ -59,7 +60,7 @@ namespace Game
                 }
             }
 
-            return spells.AsReadOnly();
+            return spells;
         }
 
         internal bool TryGetSpell(
@@ -118,7 +119,7 @@ namespace Game
             }
 
             // 替换装备时先把旧法术放回合成区，再把新法术移入槽位；整个交换只发布一次变更。
-            var capacityIncreased = !_equippedBySlot.TryGetValue(equipmentSlot, out var replaced);
+            var craftingSpaceFreed = !_equippedBySlot.TryGetValue(equipmentSlot, out var replaced);
             if (replaced != null)
             {
                 replaced.Location = SpellLocation.CraftingArea;
@@ -131,7 +132,7 @@ namespace Game
             _craftingCount--;
             _equippedBySlot[equipmentSlot] = incoming;
 
-            CommitChange(capacityIncreased);
+            CommitChange(craftingSpaceFreed);
             return true;
         }
 
@@ -160,13 +161,16 @@ namespace Game
 
             var resultId = Data.NextInstanceId;
             var nextInstanceId = checked(resultId + 1);
-            var result = CreateSpellState(
-                resultId,
-                resultType,
-                resultTier,
-                1,
-                SpellLocation.CraftingArea,
-                -1);
+            var result = new SpellInstanceState
+            {
+                InstanceId = resultId,
+                Type = resultType,
+                Tier = resultTier,
+                Level = 1,
+                Location = SpellLocation.CraftingArea,
+                EquipmentSlot = -1,
+                IsLocked = false,
+            };
 
             // 输入消耗与产物创建共享一次提交，外部不会观察到合成中间态。
             RemoveSpell(first);
@@ -227,13 +231,16 @@ namespace Game
             var instanceId = Data.NextInstanceId;
             Data.NextInstanceId = checked(instanceId + 1);
 
-            var state = CreateSpellState(
-                instanceId,
-                type,
-                tier,
-                level,
-                location,
-                equipmentSlot);
+            var state = new SpellInstanceState
+            {
+                InstanceId = instanceId,
+                Type = type,
+                Tier = tier,
+                Level = level,
+                Location = location,
+                EquipmentSlot = equipmentSlot,
+                IsLocked = false,
+            };
             AddSpell(state);
             return state;
         }
@@ -288,30 +295,10 @@ namespace Game
             }
         }
 
-        private void CommitChange(bool capacityIncreased)
+        private void CommitChange(bool craftingSpaceFreed)
         {
             MarkDirty();
-            Publish(new SpellAssetsChangedEvent(capacityIncreased));
-        }
-
-        private static SpellInstanceState CreateSpellState(
-            long instanceId,
-            SpellType type,
-            int tier,
-            int level,
-            SpellLocation location,
-            int equipmentSlot)
-        {
-            return new SpellInstanceState
-            {
-                InstanceId = instanceId,
-                Type = type,
-                Tier = tier,
-                Level = level,
-                Location = location,
-                EquipmentSlot = equipmentSlot,
-                IsLocked = false,
-            };
+            Publish(new SpellAssetsChangedEvent(craftingSpaceFreed));
         }
 
     }
