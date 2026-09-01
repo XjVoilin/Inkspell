@@ -40,7 +40,7 @@ namespace Game
 
         internal void UpdateInterval(float intervalSeconds)
         {
-            if (Data.ActiveIntervalSeconds == intervalSeconds)
+            if (Math.Abs(Data.ActiveIntervalSeconds - intervalSeconds) < 0.01f)
             {
                 return;
             }
