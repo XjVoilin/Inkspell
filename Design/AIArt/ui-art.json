@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "documentsRoot": "Design/Docs",
+  "referencesRoot": "Design/AIArt/References",
+  "plansRoot": "Design/AIArt/Plans",
+  "artSourceRoot": "Design/AIArt/ArtSource",
+  "languageTable": "Tools/Luban/DataTables/Datas/Language.xlsx",
+  "defaultCanvas": {
+    "width": 1080,
+    "height": 1920
+  }
+}

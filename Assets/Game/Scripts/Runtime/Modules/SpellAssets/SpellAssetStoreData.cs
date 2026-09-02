@@ -18,11 +18,11 @@ namespace Game
         // 单调递增且不复用，保证删除、合成后旧实例 ID 不会重新指向新法术。
         public long NextInstanceId;
         public int MagicInk;
-        public List<SpellInstanceState> Spells = new();
+        public List<SpellInstance> Spells = new();
     }
 
     [Serializable]
-    internal sealed class SpellInstanceState
+    internal sealed class SpellInstance
     {
         public long InstanceId;
         public SpellType Type;

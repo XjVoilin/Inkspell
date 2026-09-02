@@ -9,8 +9,7 @@ namespace Game
     /// </summary>
     public sealed class BattlefieldViewData
     {
-        public long ChallengeId { get; set; }
-        public int StageId { get; set; }
+        public long BattleRunId { get; set; }
         public bool IsRunning { get; set; }
         public float BookHealth { get; set; }
         public float BookMaxHealth { get; set; }

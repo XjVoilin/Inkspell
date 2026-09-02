@@ -17,7 +17,7 @@ namespace Game
         {
             if (!_spellAssets.TryGetSpell(
                     instanceId,
-                    out SpellInstanceState currentSpell))
+                    out SpellInstance currentSpell))
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(instanceId),

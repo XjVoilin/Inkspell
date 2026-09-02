@@ -58,7 +58,7 @@ namespace Game
 
             if (!_spellAssets.TryGetSpell(
                     SpellInstanceId,
-                    out SpellInstanceState spell))
+                    out SpellInstance spell))
             {
                 throw new System.InvalidOperationException(
                     $"详情窗口绑定的法术实例不存在: {SpellInstanceId}");

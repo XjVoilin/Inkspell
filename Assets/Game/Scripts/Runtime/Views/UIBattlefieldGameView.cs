@@ -51,7 +51,7 @@ namespace Game
         private readonly List<long> _removedEnemyIds = new();
 
         private bool _hasRenderedChallenge;
-        private long _challengeId;
+        private long _battleRunId;
         private float _lastBookHealth;
         private float _lastBookShield;
         private bool _retryPending;
@@ -66,7 +66,8 @@ namespace Game
 
         public void Render(BattlefieldViewData data)
         {
-            var challengeChanged = _hasRenderedChallenge && data.ChallengeId != _challengeId;
+            var challengeChanged =
+                _hasRenderedChallenge && data.BattleRunId != _battleRunId;
             if (challengeChanged)
             {
                 if (_retryPending)
@@ -85,7 +86,7 @@ namespace Game
             RenderTransientFeedback(data.Attacks, data.Effects);
 
             _hasRenderedChallenge = true;
-            _challengeId = data.ChallengeId;
+            _battleRunId = data.BattleRunId;
             _lastBookHealth = data.BookHealth;
             _lastBookShield = data.BookShield;
         }

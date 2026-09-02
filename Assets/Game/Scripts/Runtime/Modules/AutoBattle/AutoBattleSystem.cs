@@ -11,7 +11,7 @@ namespace Game
     /// <summary>驱动一次有界自动挑战，并按固定顺序结算生成、命中、移动、施法与胜负。</summary>
     public sealed class AutoBattleSystem : SystemBase, IUpdatableSystem
     {
-        private AutoBattleState _state = new();
+        private BattleRun _currentRun = new();
         private SpellAssetStore _spellAssets;
         private TbBattleRule _battleRule;
         private TbSpellAssetRule _assetRule;
@@ -19,36 +19,38 @@ namespace Game
         private TbSpellUpgrade _spellUpgrades;
         private TbEnemy _enemies;
         private TbStageBattle _stages;
-        private BattleChallengeProcedure _currentProcedure;
+        private UniTaskCompletionSource<BattleOutcome> _battleCompletion;
+        private long _nextBattleRunId = 1;
 
-        internal AutoBattleState CurrentState => _state;
+        internal BattleRun CurrentRun => _currentRun;
 
         public async UniTask<BattleOutcome> RunChallengeAsync(
             int stageId,
             CancellationToken ct = default)
         {
-            if (_currentProcedure != null)
+            ct.ThrowIfCancellationRequested();
+            if (_battleCompletion != null)
             {
                 throw new InvalidOperationException("同一时间只能运行一次自动战斗挑战。");
             }
 
-            var procedure = new BattleChallengeProcedure(stageId);
-            _currentProcedure = procedure;
+            var completion = new UniTaskCompletionSource<BattleOutcome>();
+            _battleCompletion = completion;
 
             try
             {
-                await RunProcedure(procedure, ct);
-                return procedure.Outcome;
+                BeginChallenge(stageId);
+                return await completion.Task.AttachExternalCancellation(ct);
             }
             finally
             {
-                EndChallenge(procedure);
+                CleanupChallenge(completion);
             }
         }
 
         public void OnUpdate(float deltaTime)
         {
-            if (_currentProcedure == null || !CurrentState.IsRunning)
+            if (_battleCompletion == null || !CurrentRun.IsRunning)
             {
                 return;
             }
@@ -59,14 +61,15 @@ namespace Game
             }
             catch (Exception exception)
             {
-                if (CurrentState.IsRunning)
+                if (CurrentRun.IsRunning)
                 {
                     StopChallenge();
                     Publish(new BattleStateChangedEvent());
                 }
 
-                _currentProcedure?.Fail(exception);
-                throw;
+                // 通过 RunChallengeAsync 的单一异步通道向调用方报告错误，
+                // 避免同一异常又从 Unity Update 重复抛出。
+                _battleCompletion?.TrySetException(exception);
             }
         }
 
@@ -84,18 +87,12 @@ namespace Game
             return UniTask.CompletedTask;
         }
 
-        internal void StartChallenge(BattleChallengeProcedure procedure, int stageId)
+        private void BeginChallenge(int stageId)
         {
-            if (!ReferenceEquals(_currentProcedure, procedure))
-            {
-                throw new InvalidOperationException("挑战 Procedure 与当前运行引用不一致。");
-            }
-
             var stage = _stages.Get(stageId);
-            var challengeId = CurrentState.ChallengeId + 1;
-            StartChallengeState(
-                challengeId,
-                stageId,
+            _currentRun = new BattleRun(
+                _nextBattleRunId++,
+                stage.StageId,
                 _battleRule.BookMaxHealth,
                 _assetRule.EquipmentSlotCount);
 
@@ -103,43 +100,43 @@ namespace Game
             Publish(new BattleStateChangedEvent());
         }
 
-        private void EndChallenge(BattleChallengeProcedure procedure)
+        private void CleanupChallenge(UniTaskCompletionSource<BattleOutcome> completion)
         {
-            if (!ReferenceEquals(_currentProcedure, procedure))
+            if (!ReferenceEquals(_battleCompletion, completion))
             {
                 return;
             }
 
-            if (CurrentState.IsRunning)
+            if (CurrentRun.IsRunning)
             {
                 StopChallenge();
                 Publish(new BattleStateChangedEvent());
             }
 
-            _currentProcedure = null;
+            _battleCompletion = null;
         }
 
         private void AdvanceBattle(float deltaTime)
         {
-            var stage = _stages.Get(CurrentState.StageId);
-            var previousSpawnElapsed = CurrentState.SpawnElapsedSeconds;
+            var stage = _stages.Get(CurrentRun.StageId);
+            var previousSpawnElapsed = CurrentRun.SpawnElapsedSeconds;
 
             // 结算顺序属于战斗规则：新敌人/已到达攻击先结算，再判胜、移动攻击、判负、最后施法。
             AdvanceTimers(deltaTime);
             AdvanceSpawnProgress(deltaTime);
-            SpawnEnemies(stage, previousSpawnElapsed, CurrentState.SpawnElapsedSeconds);
+            SpawnEnemies(stage, previousSpawnElapsed, CurrentRun.SpawnElapsedSeconds);
             ResolveArrivedSpellAttacks();
-            RemoveDefeatedEnemies();
+            CurrentRun.Enemies.RemoveDefeated();
             RemoveExpiredEffects();
 
-            if (CurrentState.Enemies.Count == 0 && !HasPendingSpawns(stage))
+            if (CurrentRun.Enemies.Count == 0 && !HasPendingSpawns(stage))
             {
                 FinalizeChallenge(true);
                 return;
             }
 
             AdvanceEnemies(deltaTime);
-            if (CurrentState.BookHealth <= 0f && CurrentState.Enemies.Count > 0)
+            if (CurrentRun.Book.IsDestroyed && CurrentRun.Enemies.Count > 0)
             {
                 FinalizeChallenge(false);
                 return;
@@ -179,7 +176,7 @@ namespace Game
         private void SpawnEnemy(EnemyType enemyType)
         {
             var enemy = _enemies.Get(enemyType);
-            SpawnEnemyState(
+            CurrentRun.Enemies.Spawn(
                 enemyType,
                 enemy.MaxHealth,
                 _battleRule.EnemySpawnPosition,
@@ -190,7 +187,7 @@ namespace Game
         {
             foreach (var spawn in stage.Spawns)
             {
-                if (spawn.SpawnTimeSeconds > CurrentState.SpawnElapsedSeconds)
+                if (spawn.SpawnTimeSeconds > CurrentRun.SpawnElapsedSeconds)
                 {
                     return true;
                 }
@@ -202,7 +199,7 @@ namespace Game
         private void ResolveArrivedSpellAttacks()
         {
             var arrivedAttackIds = new List<long>();
-            foreach (var attack in CurrentState.Attacks)
+            foreach (var attack in CurrentRun.Attacks)
             {
                 if (attack.RemainingTravelSeconds <= 0f)
                 {
@@ -215,7 +212,9 @@ namespace Game
                 var attack = FindAttack(attackId);
                 if (attack.SpellType == SpellType.Shield)
                 {
-                    ApplyBookShield(attack.Shield, attack.EffectDurationSeconds);
+                    CurrentRun.Book.ApplyShield(
+                        attack.Shield,
+                        attack.EffectDurationSeconds);
                     AddEffect(
                         attack.SpellType,
                         0,
@@ -231,21 +230,20 @@ namespace Game
             }
         }
 
-        private void ResolveDamageAttack(BattleAttackState attack)
+        private void ResolveDamageAttack(BattleAttack attack)
         {
             foreach (var targetId in attack.TargetEnemyIds)
             {
-                var target = FindLivingEnemy(targetId);
+                var target = CurrentRun.Enemies.FindLiving(targetId);
                 if (target == null)
                 {
                     continue;
                 }
 
-                ApplyEnemyDamage(targetId, attack.Damage);
+                target.ApplyDamage(attack.Damage);
                 if (attack.SpellType == SpellType.FrostRing)
                 {
-                    SetEnemySlow(
-                        targetId,
+                    target.ApplySlow(
                         attack.EffectDurationSeconds,
                         attack.SlowMultiplier);
                 }
@@ -264,7 +262,7 @@ namespace Game
         private void RemoveExpiredEffects()
         {
             var expiredEffectIds = new List<long>();
-            foreach (var effect in CurrentState.Effects)
+            foreach (var effect in CurrentRun.Effects)
             {
                 if (effect.RemainingSeconds <= 0f)
                 {
@@ -280,48 +278,33 @@ namespace Game
 
         private void AdvanceEnemies(float deltaTime)
         {
-            // 固定本帧要处理的敌人集合，后续均通过 ID 回查移动后的最新状态。
-            var enemyIds = new List<long>(CurrentState.Enemies.Count);
-            foreach (var enemy in CurrentState.Enemies)
+            foreach (var enemy in CurrentRun.Enemies.Items)
             {
-                enemyIds.Add(enemy.RuntimeId);
-            }
+                var config = _enemies.Get(enemy.Type);
+                enemy.MoveTowards(
+                    _battleRule.BookContactPosition,
+                    config.MoveSpeedPerSecond,
+                    deltaTime);
 
-            foreach (var enemyId in enemyIds)
-            {
-                var state = FindLivingEnemy(enemyId);
-                var config = _enemies.Get(state.Type);
-
-                if (state.PathPosition > _battleRule.BookContactPosition)
+                if (enemy.CanAttack(_battleRule.BookContactPosition))
                 {
-                    var nextPosition = Math.Max(
-                        _battleRule.BookContactPosition,
-                        state.PathPosition -
-                        config.MoveSpeedPerSecond * state.SlowMultiplier * deltaTime);
-                    SetEnemyPathPosition(enemyId, nextPosition);
-                    state = FindLivingEnemy(enemyId);
-                }
-
-                if (state.PathPosition <= _battleRule.BookContactPosition &&
-                    state.AttackRemainingSeconds <= 0f)
-                {
-                    ApplyBookDamage(config.AttackDamage);
-                    ResetEnemyAttack(enemyId, config.AttackIntervalSeconds);
+                    CurrentRun.Book.ApplyDamage(config.AttackDamage);
+                    enemy.ResetAttack(config.AttackIntervalSeconds);
                 }
             }
         }
 
         private void CastReadySpells()
         {
-            foreach (var cooldown in CurrentState.Cooldowns)
+            foreach (var cooldown in CurrentRun.Cooldowns.Items)
             {
                 if (cooldown.RemainingSeconds > 0f)
                 {
                     continue;
                 }
 
-                var target = FindNearestEnemyToBook();
-                SpellInstanceState spell;
+                var target = CurrentRun.Enemies.FindNearestToBook();
+                SpellInstance spell;
                 if (!_spellAssets.TryGetEquippedSpell(
                         cooldown.EquipmentSlot,
                         out spell) ||
@@ -336,8 +319,8 @@ namespace Game
 
         private void CastSpell(
             int equipmentSlot,
-            SpellInstanceState spell,
-            EnemyBattleState primaryTarget)
+            SpellInstance spell,
+            BattleEnemy primaryTarget)
         {
             var combat = _spellCombat.Get(spell.Type, spell.Tier);
             var upgrade = _spellUpgrades.Get(spell.Type, spell.Tier, spell.Level);
@@ -359,24 +342,26 @@ namespace Game
                 combat.EffectRange,
                 combat.EffectDurationSeconds,
                 combat.SlowMultiplier);
-            SetSpellCooldown(equipmentSlot, combat.CooldownSeconds);
+            CurrentRun.Cooldowns.Set(equipmentSlot, combat.CooldownSeconds);
         }
 
         private IReadOnlyList<long> SelectTargets(
             SpellCombat combat,
-            EnemyBattleState primaryTarget)
+            BattleEnemy primaryTarget)
         {
             switch (combat.SpellType)
             {
                 case SpellType.Fireball:
                     return new[] { primaryTarget.RuntimeId };
                 case SpellType.ChainLightning:
-                    return SelectChainTargets(
+                    return CurrentRun.Enemies.SelectChainTargets(
                         primaryTarget,
                         combat.ChainTargetCount,
                         combat.EffectRange);
                 case SpellType.FrostRing:
-                    return SelectAreaTargets(primaryTarget.PathPosition, combat.EffectRange);
+                    return CurrentRun.Enemies.SelectAreaTargets(
+                        primaryTarget.PathPosition,
+                        combat.EffectRange);
                 case SpellType.Shield:
                     return Array.Empty<long>();
                 default:
@@ -387,242 +372,20 @@ namespace Game
             }
         }
 
-        private IReadOnlyList<long> SelectChainTargets(
-            EnemyBattleState primaryTarget,
-            int targetCount,
-            float chainRange)
+        private BattleAttack FindAttack(long attackId)
         {
-            var selected = new List<long>(targetCount) { primaryTarget.RuntimeId };
-            var current = primaryTarget;
-
-            while (selected.Count < targetCount)
-            {
-                var next = FindNearestUnselectedEnemy(
-                    current.PathPosition,
-                    chainRange,
-                    selected);
-                if (next == null)
-                {
-                    break;
-                }
-
-                selected.Add(next.RuntimeId);
-                current = next;
-            }
-
-            return selected;
-        }
-
-        private IReadOnlyList<long> SelectAreaTargets(float center, float range)
-        {
-            var targets = new List<EnemyBattleState>();
-            foreach (var enemy in CurrentState.Enemies)
-            {
-                if (enemy.Health > 0f && Math.Abs(enemy.PathPosition - center) <= range)
-                {
-                    targets.Add(enemy);
-                }
-            }
-
-            targets.Sort(CompareEnemiesByPathThenId);
-            var targetIds = new List<long>(targets.Count);
-            foreach (var target in targets)
-            {
-                targetIds.Add(target.RuntimeId);
-            }
-
-            return targetIds;
-        }
-
-        private EnemyBattleState FindNearestEnemyToBook()
-        {
-            EnemyBattleState nearest = null;
-            foreach (var enemy in CurrentState.Enemies)
-            {
-                if (enemy.Health <= 0f ||
-                    nearest != null && CompareEnemiesByPathThenId(enemy, nearest) >= 0)
-                {
-                    continue;
-                }
-
-                nearest = enemy;
-            }
-
-            return nearest;
-        }
-
-        private EnemyBattleState FindNearestUnselectedEnemy(
-            float origin,
-            float range,
-            IReadOnlyList<long> selected)
-        {
-            EnemyBattleState nearest = null;
-            var nearestDistance = float.MaxValue;
-
-            foreach (var enemy in CurrentState.Enemies)
-            {
-                if (enemy.Health <= 0f || Contains(selected, enemy.RuntimeId))
-                {
-                    continue;
-                }
-
-                var distance = Math.Abs(enemy.PathPosition - origin);
-                if (distance > range)
-                {
-                    continue;
-                }
-
-                if (nearest == null ||
-                    distance < nearestDistance ||
-                    distance == nearestDistance && CompareEnemiesByPathThenId(enemy, nearest) < 0)
-                {
-                    nearest = enemy;
-                    nearestDistance = distance;
-                }
-            }
-
-            return nearest;
-        }
-
-        private EnemyBattleState FindLivingEnemy(long runtimeId)
-        {
-            return CurrentState.Enemies.Find(
-                enemy => enemy.RuntimeId == runtimeId && enemy.Health > 0f);
-        }
-
-        private BattleAttackState FindAttack(long attackId)
-        {
-            return CurrentState.Attacks.Find(attack => attack.AttackId == attackId)
+            return CurrentRun.Attacks.Find(attack => attack.AttackId == attackId)
                    ?? throw new InvalidOperationException($"攻击不存在: {attackId}");
-        }
-
-        private static int CompareEnemiesByPathThenId(
-            EnemyBattleState left,
-            EnemyBattleState right)
-        {
-            // 路径相同时以运行时 ID 打破平局，保证目标选择可复现。
-            var pathComparison = left.PathPosition.CompareTo(right.PathPosition);
-            return pathComparison != 0
-                ? pathComparison
-                : left.RuntimeId.CompareTo(right.RuntimeId);
-        }
-
-        private static bool Contains(IReadOnlyList<long> values, long value)
-        {
-            for (var i = 0; i < values.Count; i++)
-            {
-                if (values[i] == value)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private void StartChallengeState(
-            long challengeId,
-            int stageId,
-            float bookMaxHealth,
-            int equipmentSlotCount)
-        {
-            // 每次挑战整体替换瞬时状态，敌人、弹道、冷却和临时效果不会泄漏到下一局。
-            _state = new AutoBattleState
-            {
-                ChallengeId = challengeId,
-                StageId = stageId,
-                IsRunning = true,
-                BookHealth = bookMaxHealth,
-                BookMaxHealth = bookMaxHealth,
-            };
-
-            for (var slot = 0; slot < equipmentSlotCount; slot++)
-            {
-                CurrentState.Cooldowns.Add(new SpellSlotCooldownState
-                {
-                    EquipmentSlot = slot,
-                });
-            }
         }
 
         private void StopChallenge()
         {
-            CurrentState.IsRunning = false;
+            CurrentRun.IsRunning = false;
         }
 
         private void AdvanceSpawnProgress(float deltaTime)
         {
-            CurrentState.SpawnElapsedSeconds += deltaTime;
-        }
-
-        private void SpawnEnemyState(
-            EnemyType type,
-            float maxHealth,
-            float pathPosition,
-            float attackIntervalSeconds)
-        {
-            var runtimeId = CurrentState.NextEnemyRuntimeId++;
-            CurrentState.Enemies.Add(new EnemyBattleState
-            {
-                RuntimeId = runtimeId,
-                Type = type,
-                Health = maxHealth,
-                MaxHealth = maxHealth,
-                PathPosition = pathPosition,
-                AttackRemainingSeconds = attackIntervalSeconds,
-            });
-        }
-
-        private void SetEnemyPathPosition(long runtimeId, float pathPosition)
-        {
-            FindEnemy(runtimeId).PathPosition = pathPosition;
-        }
-
-        private void ResetEnemyAttack(long runtimeId, float attackIntervalSeconds)
-        {
-            FindEnemy(runtimeId).AttackRemainingSeconds = attackIntervalSeconds;
-        }
-
-        private void SetEnemySlow(
-            long runtimeId,
-            float remainingSeconds,
-            float multiplier)
-        {
-            var enemy = FindEnemy(runtimeId);
-            enemy.SlowRemainingSeconds = remainingSeconds;
-            enemy.SlowMultiplier = multiplier;
-        }
-
-        private void ApplyEnemyDamage(long runtimeId, float damage)
-        {
-            var enemy = FindEnemy(runtimeId);
-            enemy.Health = Math.Max(0f, enemy.Health - damage);
-        }
-
-        private void RemoveDefeatedEnemies()
-        {
-            CurrentState.Enemies.RemoveAll(enemy => enemy.Health <= 0f);
-        }
-
-        private void ApplyBookDamage(float damage)
-        {
-            // 护盾优先吸收伤害，只有溢出部分扣减魔法书生命。
-            var shieldDamage = Math.Min(CurrentState.BookShield, damage);
-            CurrentState.BookShield -= shieldDamage;
-            CurrentState.BookHealth = Math.Max(
-                0f,
-                CurrentState.BookHealth - (damage - shieldDamage));
-        }
-
-        private void ApplyBookShield(float shield, float durationSeconds)
-        {
-            CurrentState.BookShield = Math.Max(CurrentState.BookShield, shield);
-            CurrentState.BookShieldRemainingSeconds = durationSeconds;
-        }
-
-        private void SetSpellCooldown(int equipmentSlot, float remainingSeconds)
-        {
-            FindCooldown(equipmentSlot).RemainingSeconds = remainingSeconds;
+            CurrentRun.SpawnElapsedSeconds += deltaTime;
         }
 
         private void LaunchAttack(
@@ -637,8 +400,8 @@ namespace Game
             float effectDurationSeconds,
             float slowMultiplier)
         {
-            var attackId = CurrentState.NextAttackId++;
-            CurrentState.Attacks.Add(new BattleAttackState
+            var attackId = CurrentRun.NextAttackId++;
+            CurrentRun.Attacks.Add(new BattleAttack
             {
                 AttackId = attackId,
                 EquipmentSlot = equipmentSlot,
@@ -656,7 +419,7 @@ namespace Game
 
         private void RemoveAttack(long attackId)
         {
-            CurrentState.Attacks.Remove(FindAttack(attackId));
+            CurrentRun.Attacks.Remove(FindAttack(attackId));
         }
 
         private void AddEffect(
@@ -665,8 +428,8 @@ namespace Game
             float pathPosition,
             float remainingSeconds)
         {
-            var effectId = CurrentState.NextEffectId++;
-            CurrentState.Effects.Add(new BattleEffectState
+            var effectId = CurrentRun.NextEffectId++;
+            CurrentRun.Effects.Add(new BattleEffect
             {
                 EffectId = effectId,
                 SpellType = spellType,
@@ -678,92 +441,50 @@ namespace Game
 
         private void RemoveEffect(long effectId)
         {
-            CurrentState.Effects.Remove(FindEffect(effectId));
+            CurrentRun.Effects.Remove(FindEffect(effectId));
         }
 
         private void AdvanceTimers(float deltaTime)
         {
-            foreach (var enemy in CurrentState.Enemies)
-            {
-                enemy.AttackRemainingSeconds -= deltaTime;
-                if (enemy.SlowRemainingSeconds > 0f)
-                {
-                    enemy.SlowRemainingSeconds = Math.Max(
-                        0f,
-                        enemy.SlowRemainingSeconds - deltaTime);
-                    if (enemy.SlowRemainingSeconds == 0f)
-                    {
-                        enemy.SlowMultiplier = 1f;
-                    }
-                }
-            }
+            CurrentRun.Book.Tick(deltaTime);
+            CurrentRun.Enemies.Tick(deltaTime);
+            CurrentRun.Cooldowns.Tick(deltaTime);
 
-            foreach (var cooldown in CurrentState.Cooldowns)
-            {
-                cooldown.RemainingSeconds = Math.Max(
-                    0f,
-                    cooldown.RemainingSeconds - deltaTime);
-            }
-
-            foreach (var attack in CurrentState.Attacks)
+            foreach (var attack in CurrentRun.Attacks)
             {
                 attack.RemainingTravelSeconds = Math.Max(
                     0f,
                     attack.RemainingTravelSeconds - deltaTime);
             }
 
-            foreach (var effect in CurrentState.Effects)
+            foreach (var effect in CurrentRun.Effects)
             {
                 effect.RemainingSeconds = Math.Max(
                     0f,
                     effect.RemainingSeconds - deltaTime);
-            }
-
-            if (CurrentState.BookShieldRemainingSeconds > 0f)
-            {
-                CurrentState.BookShieldRemainingSeconds = Math.Max(
-                    0f,
-                    CurrentState.BookShieldRemainingSeconds - deltaTime);
-                if (CurrentState.BookShieldRemainingSeconds == 0f)
-                {
-                    CurrentState.BookShield = 0f;
-                }
             }
         }
 
         private BattleOutcome FinalizeOutcome(bool victory)
         {
             // Outcome 是一次性终态；重复结算说明战斗时序被破坏，应立即暴露。
-            if (CurrentState.Outcome.HasValue)
+            if (CurrentRun.Outcome.HasValue)
             {
                 throw new InvalidOperationException("当前挑战已经产生最终结果。");
             }
 
             var outcome = new BattleOutcome(
-                CurrentState.ChallengeId,
-                CurrentState.StageId,
+                CurrentRun.BattleRunId,
+                CurrentRun.StageId,
                 victory);
-            CurrentState.Outcome = outcome;
-            CurrentState.IsRunning = false;
+            CurrentRun.Outcome = outcome;
+            CurrentRun.IsRunning = false;
             return outcome;
         }
 
-        private EnemyBattleState FindEnemy(long runtimeId)
+        private BattleEffect FindEffect(long effectId)
         {
-            return CurrentState.Enemies.Find(enemy => enemy.RuntimeId == runtimeId)
-                   ?? throw new KeyNotFoundException($"敌人不存在: {runtimeId}");
-        }
-
-        private SpellSlotCooldownState FindCooldown(int equipmentSlot)
-        {
-            return CurrentState.Cooldowns.Find(
-                       cooldown => cooldown.EquipmentSlot == equipmentSlot)
-                   ?? throw new KeyNotFoundException($"装备槽冷却不存在: {equipmentSlot}");
-        }
-
-        private BattleEffectState FindEffect(long effectId)
-        {
-            return CurrentState.Effects.Find(effect => effect.EffectId == effectId)
+            return CurrentRun.Effects.Find(effect => effect.EffectId == effectId)
                    ?? throw new KeyNotFoundException($"效果不存在: {effectId}");
         }
 
@@ -772,7 +493,8 @@ namespace Game
             var outcome = FinalizeOutcome(victory);
             Publish(new BattleStateChangedEvent());
             Publish(new BattleChallengeEndedEvent(outcome));
-            _currentProcedure.Complete(outcome);
+            (_battleCompletion ?? throw new InvalidOperationException("当前战斗缺少完成源。"))
+                .TrySetResult(outcome);
         }
     }
 }

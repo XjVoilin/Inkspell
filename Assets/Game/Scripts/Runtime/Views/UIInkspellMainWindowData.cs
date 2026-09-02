@@ -49,15 +49,15 @@ namespace Game
 
         public void RefreshStatus()
         {
-            var battle = _autoBattle.CurrentState;
+            var battle = _autoBattle.CurrentRun;
             Status.CurrentStageId = _stageProgressionStore.CurrentStageId;
             Status.MagicInk = _spellAssetStore.MagicInk;
             Status.PendingSpellCount = _spellGenerationStore.PendingCount;
             Status.GenerationProgressSeconds = _spellGenerationStore.CycleProgressSeconds;
             Status.GenerationIntervalSeconds = _spellGenerationStore.ActiveIntervalSeconds;
-            Status.BookHealth = battle.BookHealth;
-            Status.BookMaxHealth = battle.BookMaxHealth;
-            Status.BookShield = battle.BookShield;
+            Status.BookHealth = battle.Book.Health;
+            Status.BookMaxHealth = battle.Book.MaxHealth;
+            Status.BookShield = battle.Book.Shield;
         }
 
         public void RefreshAll()
@@ -87,7 +87,7 @@ namespace Game
             {
                 if (_spellAssetStore.TryGetEquippedSpell(
                         index,
-                        out SpellInstanceState spell))
+                        out SpellInstance spell))
                 {
                     slots[index] = CreateSpellCard(spell, false);
                 }
@@ -98,19 +98,18 @@ namespace Game
 
         public void RefreshBattlefield()
         {
-            var battle = _autoBattle.CurrentState;
-            Battlefield.ChallengeId = battle.ChallengeId;
-            Battlefield.StageId = battle.StageId;
+            var battle = _autoBattle.CurrentRun;
+            Battlefield.BattleRunId = battle.BattleRunId;
             Battlefield.IsRunning = battle.IsRunning;
-            Battlefield.BookHealth = battle.BookHealth;
-            Battlefield.BookMaxHealth = battle.BookMaxHealth;
-            Battlefield.BookShield = battle.BookShield;
-            Battlefield.BookShieldMaximum = GetBookShieldMaximum(battle.BookShield);
+            Battlefield.BookHealth = battle.Book.Health;
+            Battlefield.BookMaxHealth = battle.Book.MaxHealth;
+            Battlefield.BookShield = battle.Book.Shield;
+            Battlefield.BookShieldMaximum = GetBookShieldMaximum(battle.Book.Shield);
 
             var enemies = new EnemyBattleViewData[battle.Enemies.Count];
             for (var index = 0; index < enemies.Length; index++)
             {
-                var enemy = battle.Enemies[index];
+                var enemy = battle.Enemies.Items[index];
                 enemies[index] = new EnemyBattleViewData
                 {
                     RuntimeId = enemy.RuntimeId,
@@ -125,14 +124,14 @@ namespace Game
 
             Battlefield.Enemies = enemies;
 
-            var cooldowns = new SpellCooldownViewData[battle.Cooldowns.Count];
+            var cooldowns = new SpellCooldownViewData[battle.Cooldowns.Items.Count];
             for (var index = 0; index < cooldowns.Length; index++)
             {
-                var cooldown = battle.Cooldowns[index];
+                var cooldown = battle.Cooldowns.Items[index];
                 var totalSeconds = cooldown.RemainingSeconds;
                 if (_spellAssetStore.TryGetEquippedSpell(
                         cooldown.EquipmentSlot,
-                        out SpellInstanceState spell))
+                        out SpellInstance spell))
                 {
                     var combat = _spellCombat.Get(spell.Type, spell.Tier);
                     totalSeconds = Mathf.Max(totalSeconds, combat.CooldownSeconds);
@@ -181,7 +180,7 @@ namespace Game
         }
 
         private SpellCardViewData CreateSpellCard(
-            SpellInstanceState spell,
+            SpellInstance spell,
             bool canDrag)
         {
             return new SpellCardViewData
@@ -204,7 +203,7 @@ namespace Game
             {
                 if (!_spellAssetStore.TryGetEquippedSpell(
                         slot,
-                        out SpellInstanceState spell) ||
+                        out SpellInstance spell) ||
                     spell.Type != cfg.SpellType.Shield)
                 {
                     continue;

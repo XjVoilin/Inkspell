@@ -14,10 +14,10 @@ namespace Game
         private SpellAssetStore _store;
         private TbSpellDefinition _spellDefinitions;
 
-        internal IReadOnlyList<SpellInstanceState> GetSortedCraftingAreaSpells()
+        internal IReadOnlyList<SpellInstance> GetSortedCraftingAreaSpells()
         {
-            var spells = new List<SpellInstanceState>(
-                _store.GetCraftingAreaSpellStates());
+            var spells = new List<SpellInstance>(
+                _store.GetCraftingAreaSpells());
             spells.Sort(CompareCraftingAreaSpells);
             return spells;
         }
@@ -34,8 +34,8 @@ namespace Game
         }
 
         private int CompareCraftingAreaSpells(
-            SpellInstanceState left,
-            SpellInstanceState right)
+            SpellInstance left,
+            SpellInstance right)
         {
             var priorityComparison = _spellDefinitions
                 .Get(left.Type)

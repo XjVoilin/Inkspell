@@ -9,8 +9,8 @@ namespace Game
     internal sealed class SpellAssetStore : StoreBase<SpellAssetStoreData>
     {
         // 下列索引均由 Data 派生，不写入存档；换档后由 OnDataReplaced 统一重建。
-        private readonly Dictionary<long, SpellInstanceState> _spellsById = new();
-        private readonly Dictionary<int, SpellInstanceState> _equippedBySlot = new();
+        private readonly Dictionary<long, SpellInstance> _spellsById = new();
+        private readonly Dictionary<int, SpellInstance> _equippedBySlot = new();
 
         private int _craftingCount;
         private int _craftingCapacity;
@@ -49,14 +49,14 @@ namespace Game
             CommitChange(false);
         }
 
-        internal IReadOnlyList<SpellInstanceState> GetCraftingAreaSpellStates()
+        internal IReadOnlyList<SpellInstance> GetCraftingAreaSpells()
         {
-            var spells = new List<SpellInstanceState>(_craftingCount);
-            foreach (var state in Data.Spells)
+            var spells = new List<SpellInstance>(_craftingCount);
+            foreach (var spell in Data.Spells)
             {
-                if (state.Location == SpellLocation.CraftingArea)
+                if (spell.Location == SpellLocation.CraftingArea)
                 {
-                    spells.Add(state);
+                    spells.Add(spell);
                 }
             }
 
@@ -65,32 +65,32 @@ namespace Game
 
         internal bool TryGetSpell(
             long instanceId,
-            out SpellInstanceState spell)
+            out SpellInstance spell)
         {
             return _spellsById.TryGetValue(instanceId, out spell);
         }
 
         internal bool TryGetEquippedSpell(
             int equipmentSlot,
-            out SpellInstanceState spell)
+            out SpellInstance spell)
         {
             return _equippedBySlot.TryGetValue(equipmentSlot, out spell);
         }
 
         internal bool TrySetLocked(long instanceId, bool locked)
         {
-            if (!_spellsById.TryGetValue(instanceId, out var state))
+            if (!_spellsById.TryGetValue(instanceId, out var spell))
             {
                 JLogger.LogWarning($"[SpellAssetStore] 无法设置锁定，法术实例不存在: {instanceId}");
                 return false;
             }
 
-            if (state.IsLocked == locked)
+            if (spell.IsLocked == locked)
             {
                 return true;
             }
 
-            state.IsLocked = locked;
+            spell.IsLocked = locked;
             CommitChange(false);
             return true;
         }
@@ -161,7 +161,7 @@ namespace Game
 
             var resultId = Data.NextInstanceId;
             var nextInstanceId = checked(resultId + 1);
-            var result = new SpellInstanceState
+            var result = new SpellInstance
             {
                 InstanceId = resultId,
                 Type = resultType,
@@ -221,7 +221,7 @@ namespace Game
             RebuildIndexes();
         }
 
-        private SpellInstanceState AddNewSpell(
+        private SpellInstance AddNewSpell(
             SpellType type,
             int tier,
             int level,
@@ -231,7 +231,7 @@ namespace Game
             var instanceId = Data.NextInstanceId;
             Data.NextInstanceId = checked(instanceId + 1);
 
-            var state = new SpellInstanceState
+            var spell = new SpellInstance
             {
                 InstanceId = instanceId,
                 Type = type,
@@ -241,37 +241,37 @@ namespace Game
                 EquipmentSlot = equipmentSlot,
                 IsLocked = false,
             };
-            AddSpell(state);
-            return state;
+            AddSpell(spell);
+            return spell;
         }
 
-        private void AddSpell(SpellInstanceState state)
+        private void AddSpell(SpellInstance spell)
         {
-            Data.Spells.Add(state);
-            _spellsById.Add(state.InstanceId, state);
+            Data.Spells.Add(spell);
+            _spellsById.Add(spell.InstanceId, spell);
 
-            if (state.Location == SpellLocation.CraftingArea)
+            if (spell.Location == SpellLocation.CraftingArea)
             {
                 _craftingCount++;
             }
             else
             {
-                _equippedBySlot.Add(state.EquipmentSlot, state);
+                _equippedBySlot.Add(spell.EquipmentSlot, spell);
             }
         }
 
-        private void RemoveSpell(SpellInstanceState state)
+        private void RemoveSpell(SpellInstance spell)
         {
-            Data.Spells.Remove(state);
-            _spellsById.Remove(state.InstanceId);
+            Data.Spells.Remove(spell);
+            _spellsById.Remove(spell.InstanceId);
 
-            if (state.Location == SpellLocation.CraftingArea)
+            if (spell.Location == SpellLocation.CraftingArea)
             {
                 _craftingCount--;
             }
             else
             {
-                _equippedBySlot.Remove(state.EquipmentSlot);
+                _equippedBySlot.Remove(spell.EquipmentSlot);
             }
         }
 
@@ -281,16 +281,16 @@ namespace Game
             _equippedBySlot.Clear();
             _craftingCount = 0;
 
-            foreach (var state in Data.Spells)
+            foreach (var spell in Data.Spells)
             {
-                _spellsById.Add(state.InstanceId, state);
-                if (state.Location == SpellLocation.CraftingArea)
+                _spellsById.Add(spell.InstanceId, spell);
+                if (spell.Location == SpellLocation.CraftingArea)
                 {
                     _craftingCount++;
                 }
                 else
                 {
-                    _equippedBySlot.Add(state.EquipmentSlot, state);
+                    _equippedBySlot.Add(spell.EquipmentSlot, spell);
                 }
             }
         }

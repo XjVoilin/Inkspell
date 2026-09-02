@@ -22,8 +22,8 @@ namespace Game
 
         public bool TrySynthesize(long firstSpellId, long secondSpellId)
         {
-            if (!_spellAssets.TryGetSpell(firstSpellId, out SpellInstanceState first) ||
-                !_spellAssets.TryGetSpell(secondSpellId, out SpellInstanceState second))
+            if (!_spellAssets.TryGetSpell(firstSpellId, out SpellInstance first) ||
+                !_spellAssets.TryGetSpell(secondSpellId, out SpellInstance second))
             {
                 return Reject(firstSpellId, secondSpellId, SynthesisRejectReason.SpellNotFound);
             }

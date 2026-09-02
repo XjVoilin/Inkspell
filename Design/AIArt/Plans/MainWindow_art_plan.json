@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "screen": "MainWindow",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "requirements": [
+    "Design/Docs/策划案.md",
+    "Design/Docs/MDD/M010_主界面窗口与显示数据.md",
+    "Design/Docs/MDD/M011_法术区拖拽与装备交互.md",
+    "Design/Docs/MDD/M012_战场显示.md"
+  ],
+  "references": [
+    "Design/AIArt/References/Generated/mainWindowPaperCutInk_v1.png"
+  ],
+  "outputs": {
+    "directory": "Design/AIArt/ArtSource/MainWindow",
+    "authoringJson": "Design/AIArt/ArtSource/MainWindow/MainWindow_ui_data.json",
+    "preview": "Design/AIArt/ArtSource/MainWindow/MainWindow_preview.png"
+  },
+  "assets": [
+    {
+      "path": "MainWindow/bg_paperWarm.png",
+      "role": "full-screen warm paper background",
+      "width": 1080,
+      "height": 1920,
+      "transparent": false,
+      "action": "reuse",
+      "prompt": "Warm ivory handmade paper with subtle fibers, restrained ink-wash corners, quiet center, seamless-feeling full-screen background, no objects or text."
+    },
+    {
+      "path": "MainWindow/bg_battlefieldPaper.png",
+      "role": "single-lane battlefield panel",
+      "width": 1000,
+      "height": 720,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Wide torn-paper battlefield panel with one simple dark paper ground path, generous empty space, transparent outside the irregular paper silhouette, no characters or text."
+    },
+    {
+      "path": "MainWindow/bg_equipmentPanel.png",
+      "role": "plain equipment bar backing without baked slots",
+      "width": 1000,
+      "height": 260,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Wide layered kraft-paper equipment bar backing with restrained dark-indigo ink edging and an uninterrupted plain center. Transparent outside the irregular silhouette. Absolutely no slot wells, cards, frames, dividers, icons, symbols, or text."
+    },
+    {
+      "path": "MainWindow/bg_spellBoardPanel.png",
+      "role": "6 by 4 spell board panel",
+      "width": 1000,
+      "height": 760,
+      "transparent": false,
+      "action": "reuse",
+      "prompt": "Large opaque layered kraft-paper inventory panel with subtle irregular torn edges and dark indigo backing border, empty center for a 6 by 4 grid, no slots or text."
+    },
+    {
+      "path": "MainWindow/tile_spellSlotBase.png",
+      "role": "reusable common spell slot base for both empty and filled states",
+      "width": 192,
+      "height": 192,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Single square parchment spell slot base with one restrained dark-ink outer edge, subtle cut-paper depth, calm blank paper center, and transparent outside. No spiral, watermark, icon, tier marks, selection glow, nested frame, or text."
+    },
+    {
+      "path": "MainWindow/img_spellSlotEmptyMark.png",
+      "role": "empty-state-only spell slot watermark",
+      "width": 96,
+      "height": 96,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "One subtle pale sepia spiral watermark for an empty spell slot, centered with generous transparent padding, actual transparent background, no paper tile, border, frame, glow, icon, or text."
+    },
+    {
+      "path": "MainWindow/img_spellSelectedOverlay.png",
+      "role": "selected-state-only spell overlay",
+      "width": 160,
+      "height": 160,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Minimal selected-state overlay made only of four small antique-gold luminous corner accents and a few restrained sparks. Wide empty transparent center and transparent outside. No continuous square border, paper backing, icon, badge, or text."
+    },
+    {
+      "path": "MainWindow/icon_spellLocked.png",
+      "role": "locked state icon",
+      "width": 64,
+      "height": 64,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Small readable dark-indigo paper-cut padlock with restrained antique-gold keyhole, centered, actual transparent background, no text."
+    },
+    {
+      "path": "MainWindow/icon_spellFireball.png",
+      "role": "fireball spell icon",
+      "width": 256,
+      "height": 256,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Orange-red liquid ink fireball emblem with white-hot core, bold dark paper-cut outline, centered and readable at small size, actual transparent background, no frame or text."
+    },
+    {
+      "path": "MainWindow/icon_spellChainLightning.png",
+      "role": "chain lightning spell icon",
+      "width": 256,
+      "height": 256,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Blue-violet branching liquid-ink lightning emblem, bold dark paper-cut outline, centered and readable at small size, actual transparent background, no frame or text."
+    },
+    {
+      "path": "MainWindow/icon_spellIceRing.png",
+      "role": "ice ring spell icon",
+      "width": 256,
+      "height": 256,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Cyan liquid-ink circular frost ring with a few sharp ice crystals, bold dark paper-cut outline, centered, actual transparent background, no frame or text."
+    },
+    {
+      "path": "MainWindow/icon_spellRuneShield.png",
+      "role": "rune shield spell icon",
+      "width": 256,
+      "height": 256,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Restrained antique-gold rune shield emblem with dark indigo paper-cut outline, centered and readable at small size, actual transparent background, no frame or text."
+    },
+    {
+      "path": "MainWindow/img_livingSpellbook.png",
+      "role": "battlefield living spellbook",
+      "width": 384,
+      "height": 404,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Full-body side-facing living navy spellbook hero, standing and aiming magic to the right, bold black cut-paper outline, ivory pages and restrained gold fittings, actual transparent background, no spell effect or text."
+    },
+    {
+      "path": "MainWindow/img_enemyInkling.png",
+      "role": "normal ink spirit enemy",
+      "width": 288,
+      "height": 264,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Small normal ink-spirit monster facing left, compact round silhouette, two bright eyes, black-indigo paper-cut body with slight ink wisps, actual transparent background, no effects or text."
+    },
+    {
+      "path": "MainWindow/img_enemySwift.png",
+      "role": "swift ink spirit enemy",
+      "width": 384,
+      "height": 256,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Swift ink-spirit monster facing left, lean forward-running silhouette with swept ink-flame tail and two bright eyes, bold paper-cut outline, actual transparent background, no effects or text."
+    },
+    {
+      "path": "MainWindow/img_enemyElite.png",
+      "role": "heavy elite ink spirit enemy",
+      "width": 384,
+      "height": 408,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Heavy elite ink-spirit monster facing left, broad armored layered-paper silhouette, dark indigo-black with muted kraft accents and bright eyes, actual transparent background, no effects or text."
+    },
+    {
+      "path": "MainWindow/img_enemyBoss.png",
+      "role": "chapter boss ink spirit enemy",
+      "width": 384,
+      "height": 512,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Tall imposing chapter-boss ink spirit facing left, horned cloaked cut-paper silhouette, dark indigo-black with restrained violet ink wisps and bright eyes, actual transparent background, no effects or text."
+    },
+    {
+      "path": "MainWindow/icon_pendingChest.png",
+      "role": "pending spell reward indicator",
+      "width": 256,
+      "height": 192,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Small closed layered-paper treasure chest with dark navy body, restrained antique-gold straps and one tiny warm magical spark, actual transparent background, no badge, seal, number, or text."
+    },
+    {
+      "path": "MainWindow/img_progressTrack.png",
+      "role": "UIProgressBar track",
+      "width": 512,
+      "height": 48,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Long empty horizontal progress track, dark indigo layered-paper trough with subtle rough ink edge and clean rounded ends, actual transparent background, no fill or text."
+    },
+    {
+      "path": "MainWindow/img_progressFill.png",
+      "role": "UIProgressBar fill child",
+      "width": 512,
+      "height": 48,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Long horizontal progress fill only, luminous orange-red liquid ink strip with clean rounded ends and restrained paper texture, actual transparent background, no track or text."
+    }
+  ],
+  "localizationKeys": [
+    "MAIN_STAGE",
+    "MAIN_MAGIC_INK",
+    "MAIN_PENDING",
+    "MAIN_GENERATION",
+    "MAIN_BOOK_HEALTH",
+    "MAIN_BOOK_SHIELD",
+    "SPELL_TIER_1_NAME",
+    "SPELL_TIER_2_NAME",
+    "SPELL_TIER_3_NAME"
+  ],
+  "componentRules": {
+    "forbidSlider": true,
+    "progressBar": "Use UIProgressBar with RectMask2D. Use img_progressTrack on the container and img_progressFill as a child fill image; authoring groupPath is descriptive only and does not wire this hierarchy.",
+    "spellBoard": "Create exactly 24 reusable spell card instances in a 6-column by 4-row grid.",
+    "equipmentBar": "Create exactly four equipment spell card instances in one row. The equipment panel must not contain baked slot wells; every card reuses tile_spellSlotBase.",
+    "spellSlotStates": "The common root uses tile_spellSlotBase. EmptyRoot contains only img_spellSlotEmptyMark. FilledRoot contains only the runtime spell icon and dynamic tier/level content. EmptyRoot and FilledRoot are mutually exclusive through UIItemSlot.",
+    "spellSlotOverlays": "img_spellSelectedOverlay is a selected-state-only corner accent above the slot. icon_spellLocked is a locked-state-only badge. Do not stack another complete frame over tile_spellSlotBase.",
+    "layerOrder": "Keep the imported Unity hierarchy flat. com.july.ui.authoring sorts order descending before creation, so larger values are farther back and smaller values render in front.",
+    "dynamicText": "All stage, currency, pending count, generation, health, shield, tier, level, result, and cooldown values remain Unity-rendered text and are never baked into bitmaps."
+  }
+}
