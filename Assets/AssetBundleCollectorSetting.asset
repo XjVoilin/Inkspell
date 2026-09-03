@@ -53,6 +53,14 @@ MonoBehaviour:
         FilterRuleName: CollectAll
         AssetTags: 
         UserData:
+      - CollectPath: Assets/Game/Res/Audio
+        CollectorGUID: 63ca56dbcf7c49b0a1bbf5cbd92ac941
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags:
+        UserData:
     - GroupName: HotUpdate
       GroupDesc: HybridCLR hot-update assemblies
       AssetTags: HotUpdate

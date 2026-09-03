@@ -1,4 +1,5 @@
 using July.Arch;
+using July.Audio;
 using July.Localization;
 using July.UI;
 using UnityEngine;
@@ -32,6 +33,7 @@ namespace Game
         private SpellSynthesisSystem _spellSynthesis;
         private ILocalizationSystem _localization;
         private IUISystem _ui;
+        private IAudioSystem _audio;
 
         protected override void OnBeforeOpen()
         {
@@ -40,6 +42,7 @@ namespace Game
             _spellSynthesis = this.GetSystem<SpellSynthesisSystem>();
             _localization = this.GetSystem<ILocalizationSystem>();
             _ui = this.GetSystem<IUISystem>();
+            _audio = this.GetSystem<IAudioSystem>();
             RenderStatus();
             RenderSpellViews();
             RenderBattlefield();
@@ -97,10 +100,7 @@ namespace Game
 
         private void OnBattleChallengeEnded(BattleChallengeEndedEvent eventData)
         {
-            _data.RefreshStatus();
-            _data.RefreshBattlefield();
-            RenderStatus();
-            RenderBattlefield();
+            // AutoBattleSystem 会先发布当帧最终状态，这里只播放一次结果反馈。
             _battlefield.PlayChallengeResult(eventData.Outcome.Victory);
         }
 
@@ -124,7 +124,16 @@ namespace Game
 
         private void OnEquipRequested(long spellInstanceId, int equipmentSlot)
         {
-            _spellAssets.TryEquip(spellInstanceId, equipmentSlot);
+            _audio.PlaySfx(
+                _spellAssets.TryEquip(spellInstanceId, equipmentSlot)
+                    ? "SfxUiEquip"
+                    : "SfxUiInvalid",
+                new SfxPlayOptions
+                {
+                    Group = "UI",
+                    Volume = 0.52f,
+                    Priority = 85,
+                });
         }
 
         private void OnSpellSynthesisRejected(SpellSynthesisRejectedEvent eventData)

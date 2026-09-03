@@ -106,74 +106,68 @@ namespace Game
             Battlefield.BookShield = battle.Book.Shield;
             Battlefield.BookShieldMaximum = GetBookShieldMaximum(battle.Book.Shield);
 
-            var enemies = new EnemyBattleViewData[battle.Enemies.Count];
+            var enemies = EnsureViewData(Battlefield.Enemies, battle.Enemies.Count);
             for (var index = 0; index < enemies.Length; index++)
             {
                 var enemy = battle.Enemies.Items[index];
-                enemies[index] = new EnemyBattleViewData
+                var viewData = enemies[index];
+                if (viewData.RuntimeId != 0 && viewData.RuntimeId != enemy.RuntimeId)
                 {
-                    RuntimeId = enemy.RuntimeId,
-                    Type = enemy.Type,
-                    Health = enemy.Health,
-                    MaxHealth = enemy.MaxHealth,
-                    PathNormalized = NormalizePath(enemy.PathPosition),
-                    SlowRemainingSeconds = enemy.SlowRemainingSeconds,
-                    SlowMultiplier = enemy.SlowMultiplier,
-                };
+                    viewData = enemies[index] = new EnemyBattleViewData();
+                }
+
+                viewData.RuntimeId = enemy.RuntimeId;
+                viewData.Type = enemy.Type;
+                viewData.Health = enemy.Health;
+                viewData.MaxHealth = enemy.MaxHealth;
+                viewData.PathNormalized = NormalizePath(enemy.PathPosition);
+                viewData.SlowRemainingSeconds = enemy.SlowRemainingSeconds;
+                viewData.SlowMultiplier = enemy.SlowMultiplier;
             }
 
             Battlefield.Enemies = enemies;
 
-            var cooldowns = new SpellCooldownViewData[battle.Cooldowns.Items.Count];
+            var cooldowns = EnsureViewData(
+                Battlefield.Cooldowns,
+                battle.Cooldowns.Items.Count);
             for (var index = 0; index < cooldowns.Length; index++)
             {
                 var cooldown = battle.Cooldowns.Items[index];
-                var totalSeconds = cooldown.RemainingSeconds;
-                if (_spellAssetStore.TryGetEquippedSpell(
-                        cooldown.EquipmentSlot,
-                        out SpellInstance spell))
-                {
-                    var combat = _spellCombat.Get(spell.Type, spell.Tier);
-                    totalSeconds = Mathf.Max(totalSeconds, combat.CooldownSeconds);
-                }
-
-                cooldowns[index] = new SpellCooldownViewData
-                {
-                    EquipmentSlot = cooldown.EquipmentSlot,
-                    RemainingSeconds = cooldown.RemainingSeconds,
-                    TotalSeconds = totalSeconds,
-                };
+                var viewData = cooldowns[index];
+                viewData.EquipmentSlot = cooldown.EquipmentSlot;
+                viewData.RemainingSeconds = cooldown.RemainingSeconds;
+                viewData.TotalSeconds = cooldown.TotalSeconds;
             }
 
             Battlefield.Cooldowns = cooldowns;
 
-            var attacks = new BattleAttackFeedbackViewData[battle.Attacks.Count];
+            var attacks = EnsureViewData(Battlefield.Attacks, battle.Attacks.Count);
             for (var index = 0; index < attacks.Length; index++)
             {
                 var attack = battle.Attacks[index];
-                attacks[index] = new BattleAttackFeedbackViewData
-                {
-                    AttackId = attack.AttackId,
-                    SpellType = attack.SpellType,
-                    TargetPathNormalized = NormalizePath(attack.TargetPathPosition),
-                    RemainingTravelSeconds = attack.RemainingTravelSeconds,
-                };
+                var viewData = attacks[index];
+                viewData.AttackId = attack.AttackId;
+                viewData.SpellType = attack.SpellType;
+                viewData.TargetEnemyIds = attack.TargetEnemyIds;
+                viewData.TargetPathNormalized = NormalizePath(attack.TargetPathPosition);
+                viewData.TotalTravelSeconds = attack.TotalTravelSeconds;
+                viewData.RemainingTravelSeconds = attack.RemainingTravelSeconds;
             }
 
             Battlefield.Attacks = attacks;
 
-            var effects = new BattleEffectFeedbackViewData[battle.Effects.Count];
+            var effects = EnsureViewData(Battlefield.Effects, battle.Effects.Count);
             for (var index = 0; index < effects.Length; index++)
             {
                 var effect = battle.Effects[index];
-                effects[index] = new BattleEffectFeedbackViewData
-                {
-                    EffectId = effect.EffectId,
-                    SpellType = effect.SpellType,
-                    TargetEnemyId = effect.TargetEnemyId,
-                    PathNormalized = NormalizePath(effect.PathPosition),
-                    RemainingSeconds = effect.RemainingSeconds,
-                };
+                var viewData = effects[index];
+                viewData.EffectId = effect.EffectId;
+                viewData.SpellType = effect.SpellType;
+                viewData.TargetEnemyId = effect.TargetEnemyId;
+                viewData.PathNormalized = NormalizePath(effect.PathPosition);
+                viewData.RangeNormalized = NormalizeRange(effect.Range);
+                viewData.TotalSeconds = effect.TotalSeconds;
+                viewData.RemainingSeconds = effect.RemainingSeconds;
             }
 
             Battlefield.Effects = effects;
@@ -228,6 +222,29 @@ namespace Game
                 _battleRule.BookContactPosition,
                 _battleRule.EnemySpawnPosition,
                 pathPosition);
+        }
+
+        private float NormalizeRange(float range)
+        {
+            var pathLength = Mathf.Abs(
+                _battleRule.EnemySpawnPosition - _battleRule.BookContactPosition);
+            return pathLength > 0f ? range / pathLength : 0f;
+        }
+
+        private static T[] EnsureViewData<T>(T[] items, int count)
+            where T : class, new()
+        {
+            if (items.Length != count)
+            {
+                items = new T[count];
+            }
+
+            for (var index = 0; index < items.Length; index++)
+            {
+                items[index] ??= new T();
+            }
+
+            return items;
         }
     }
 }

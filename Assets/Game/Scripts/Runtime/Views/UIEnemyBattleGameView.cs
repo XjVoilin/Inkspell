@@ -22,6 +22,7 @@ namespace Game
 
         private float _hitFeedbackRemaining;
         private float _deathFeedbackRemaining;
+        private float _lastHealth;
 
         internal EnemyBattleViewData Data { get; private set; }
         internal bool IsDying => _deathFeedbackRemaining > 0f;
@@ -30,12 +31,13 @@ namespace Game
         {
             if (Data != null &&
                 Data.RuntimeId == data.RuntimeId &&
-                data.Health < Data.Health)
+                data.Health < _lastHealth)
             {
                 PlayHit();
             }
 
             Data = data;
+            _lastHealth = data.Health;
             gameObject.SetActive(true);
             _healthProgress.SetValue(data.Health, data.MaxHealth);
             _healthText.text = $"{data.Health:0}/{data.MaxHealth:0}";
@@ -55,6 +57,7 @@ namespace Game
         internal void PlayDeath()
         {
             Data = null;
+            _lastHealth = 0f;
             _slowIndicator.SetActive(false);
             _hitFeedback.SetActive(false);
             _hitFeedbackRemaining = 0f;
@@ -65,6 +68,7 @@ namespace Game
         internal void Clear()
         {
             Data = null;
+            _lastHealth = 0f;
             _hitFeedbackRemaining = 0f;
             _deathFeedbackRemaining = 0f;
             _slowIndicator.SetActive(false);

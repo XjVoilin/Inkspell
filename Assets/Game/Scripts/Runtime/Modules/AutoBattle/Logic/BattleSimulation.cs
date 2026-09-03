@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using cfg;
-// ReSharper disable All
 
 namespace Game
 {
@@ -55,7 +54,7 @@ namespace Game
 
             // 结算顺序属于战斗规则：新敌人/已到达攻击先结算，再判胜、移动攻击、判负、最后施法。
             AdvanceTimers(deltaTime);
-            CurrentRun.SpawnElapsedSeconds += deltaTime;
+            CurrentRun.AdvanceSpawnTime(deltaTime);
             SpawnEnemies(stage, previousSpawnElapsed, CurrentRun.SpawnElapsedSeconds);
             ResolveArrivedSpellAttacks();
             CurrentRun.Enemies.RemoveDefeated();
@@ -78,7 +77,7 @@ namespace Game
 
         internal void Stop()
         {
-            CurrentRun.IsRunning = false;
+            CurrentRun.Stop();
         }
 
         private void SpawnEnemiesAtChallengeStart(StageBattle stage)
@@ -133,18 +132,16 @@ namespace Game
 
         private void ResolveArrivedSpellAttacks()
         {
-            var arrivedAttackIds = new List<long>();
-            foreach (var attack in CurrentRun.Attacks)
+            var index = 0;
+            while (index < CurrentRun.Attacks.Count)
             {
-                if (attack.RemainingTravelSeconds <= 0f)
+                var attack = CurrentRun.Attacks[index];
+                if (attack.RemainingTravelSeconds > 0f)
                 {
-                    arrivedAttackIds.Add(attack.AttackId);
+                    index++;
+                    continue;
                 }
-            }
 
-            foreach (var attackId in arrivedAttackIds)
-            {
-                var attack = FindAttack(attackId);
                 if (attack.SpellType == SpellType.Shield)
                 {
                     CurrentRun.Book.ApplyShield(
@@ -154,6 +151,7 @@ namespace Game
                         attack.SpellType,
                         0,
                         _battleRule.BookContactPosition,
+                        0f,
                         attack.EffectDurationSeconds);
                 }
                 else
@@ -161,7 +159,7 @@ namespace Game
                     ResolveDamageAttack(attack);
                 }
 
-                RemoveAttack(attackId);
+                CurrentRun.RemoveAttackAt(index);
             }
         }
 
@@ -190,24 +188,23 @@ namespace Game
                     attack.SpellType,
                     attack.TargetEnemyIds.Count > 0 ? attack.TargetEnemyIds[0] : 0,
                     attack.TargetPathPosition,
+                    attack.EffectRange,
                     attack.EffectDurationSeconds);
             }
         }
 
         private void RemoveExpiredEffects()
         {
-            var expiredEffectIds = new List<long>();
-            foreach (var effect in CurrentRun.Effects)
+            var index = 0;
+            while (index < CurrentRun.Effects.Count)
             {
-                if (effect.RemainingSeconds <= 0f)
+                if (CurrentRun.Effects[index].RemainingSeconds > 0f)
                 {
-                    expiredEffectIds.Add(effect.EffectId);
+                    index++;
+                    continue;
                 }
-            }
 
-            foreach (var effectId in expiredEffectIds)
-            {
-                RemoveEffect(effectId);
+                CurrentRun.RemoveEffectAt(index);
             }
         }
 
@@ -267,7 +264,6 @@ namespace Game
                 : primaryTarget.PathPosition;
 
             LaunchAttack(
-                equipmentSlot,
                 spell.Type,
                 targetIds,
                 targetPosition,
@@ -307,14 +303,7 @@ namespace Game
             }
         }
 
-        private BattleAttack FindAttack(long attackId)
-        {
-            return CurrentRun.Attacks.Find(attack => attack.AttackId == attackId)
-                   ?? throw new InvalidOperationException($"攻击不存在: {attackId}");
-        }
-
         private void LaunchAttack(
-            int equipmentSlot,
             SpellType spellType,
             IReadOnlyList<long> targetEnemyIds,
             float targetPathPosition,
@@ -325,48 +314,33 @@ namespace Game
             float effectDurationSeconds,
             float slowMultiplier)
         {
-            var attackId = CurrentRun.NextAttackId++;
-            CurrentRun.Attacks.Add(new BattleAttack
-            {
-                AttackId = attackId,
-                EquipmentSlot = equipmentSlot,
-                SpellType = spellType,
-                TargetEnemyIds = new List<long>(targetEnemyIds),
-                TargetPathPosition = targetPathPosition,
-                RemainingTravelSeconds = travelSeconds,
-                Damage = damage,
-                Shield = shield,
-                EffectRange = effectRange,
-                EffectDurationSeconds = effectDurationSeconds,
-                SlowMultiplier = slowMultiplier,
-            });
-        }
-
-        private void RemoveAttack(long attackId)
-        {
-            CurrentRun.Attacks.Remove(FindAttack(attackId));
+            CurrentRun.AddAttack(new BattleAttack(
+                CurrentRun.AllocateAttackId(),
+                spellType,
+                targetEnemyIds,
+                targetPathPosition,
+                travelSeconds,
+                damage,
+                shield,
+                effectRange,
+                effectDurationSeconds,
+                slowMultiplier));
         }
 
         private void AddEffect(
             SpellType spellType,
             long targetEnemyId,
             float pathPosition,
+            float range,
             float remainingSeconds)
         {
-            var effectId = CurrentRun.NextEffectId++;
-            CurrentRun.Effects.Add(new BattleEffect
-            {
-                EffectId = effectId,
-                SpellType = spellType,
-                TargetEnemyId = targetEnemyId,
-                PathPosition = pathPosition,
-                RemainingSeconds = remainingSeconds,
-            });
-        }
-
-        private void RemoveEffect(long effectId)
-        {
-            CurrentRun.Effects.Remove(FindEffect(effectId));
+            CurrentRun.AddEffect(new BattleEffect(
+                CurrentRun.AllocateEffectId(),
+                spellType,
+                targetEnemyId,
+                pathPosition,
+                range,
+                remainingSeconds));
         }
 
         private void AdvanceTimers(float deltaTime)
@@ -392,91 +366,7 @@ namespace Game
 
         private BattleOutcome FinalizeOutcome(bool victory)
         {
-            // Outcome 是一次性终态；重复结算说明战斗时序被破坏，应立即暴露。
-            if (CurrentRun.Outcome.HasValue)
-            {
-                throw new InvalidOperationException("当前挑战已经产生最终结果。");
-            }
-
-            var outcome = new BattleOutcome(
-                CurrentRun.BattleRunId,
-                CurrentRun.StageId,
-                victory);
-            CurrentRun.Outcome = outcome;
-            CurrentRun.IsRunning = false;
-            return outcome;
+            return CurrentRun.Complete(victory);
         }
-
-        private BattleEffect FindEffect(long effectId)
-        {
-            return CurrentRun.Effects.Find(effect => effect.EffectId == effectId)
-                   ?? throw new KeyNotFoundException($"效果不存在: {effectId}");
-        }
-    }
-
-    /// <summary>单次战斗运行实例；随 AutoBattleSystem 生命周期存在且不持久化。</summary>
-    internal sealed class BattleRun
-    {
-        internal BattleRun()
-        {
-        }
-
-        internal BattleRun(
-            long battleRunId,
-            int stageId,
-            float bookMaxHealth,
-            int equipmentSlotCount)
-        {
-            BattleRunId = battleRunId;
-            StageId = stageId;
-            IsRunning = true;
-            Book = new BattleBook(bookMaxHealth);
-            Cooldowns.Initialize(equipmentSlotCount);
-        }
-
-        // BattleRunId 标识某一次战斗尝试；同一 StageId 重试时会产生新值。
-        internal long BattleRunId { get; }
-
-        // StageId 标识稳定的关卡配置；同一关的多次尝试共享此值。
-        internal int StageId { get; }
-        internal bool IsRunning { get; set; }
-        internal float SpawnElapsedSeconds { get; set; }
-
-        internal BattleBook Book { get; } = new();
-        internal EnemyRoster Enemies { get; } = new();
-        internal SpellCooldownSet Cooldowns { get; } = new();
-
-        // 攻击和效果 ID 在当次战斗内单调递增，供 View 去重。
-        internal long NextAttackId { get; set; } = 1;
-        internal long NextEffectId { get; set; } = 1;
-        internal List<BattleAttack> Attacks { get; } = new();
-        internal List<BattleEffect> Effects { get; } = new();
-        internal BattleOutcome? Outcome { get; set; }
-    }
-
-    internal sealed class BattleAttack
-    {
-        public long AttackId;
-        public int EquipmentSlot;
-        public SpellType SpellType;
-        public List<long> TargetEnemyIds = new();
-        public float TargetPathPosition;
-        public float RemainingTravelSeconds;
-
-        // 以下数值在施法瞬间固化，后续升级或换装不会追溯修改已发出的攻击。
-        public float Damage;
-        public float Shield;
-        public float EffectRange;
-        public float EffectDurationSeconds;
-        public float SlowMultiplier = 1f;
-    }
-
-    internal sealed class BattleEffect
-    {
-        public long EffectId;
-        public SpellType SpellType;
-        public long TargetEnemyId;
-        public float PathPosition;
-        public float RemainingSeconds;
     }
 }

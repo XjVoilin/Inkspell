@@ -1,4 +1,5 @@
 using July.Arch;
+using July.Audio;
 using July.Localization;
 using July.UI;
 using UnityEngine;
@@ -31,6 +32,7 @@ namespace Game
         private SpellProgressionSystem _spellProgression;
         private ILocalizationSystem _localization;
         private IUISystem _ui;
+        private IAudioSystem _audio;
 
         protected override void OnBeforeOpen()
         {
@@ -39,6 +41,7 @@ namespace Game
             _spellProgression = this.GetSystem<SpellProgressionSystem>();
             _localization = this.GetSystem<ILocalizationSystem>();
             _ui = this.GetSystem<IUISystem>();
+            _audio = this.GetSystem<IAudioSystem>();
             Render();
         }
 
@@ -67,6 +70,14 @@ namespace Game
 
             _ui.ShowTip(_localization.Get(
                 locked ? "SPELL_DETAIL_LOCKED" : "SPELL_DETAIL_UNLOCKED"));
+            _audio.PlaySfx(
+                locked ? "SfxUiLock" : "SfxUiUnlock",
+                new SfxPlayOptions
+                {
+                    Group = "UI",
+                    Volume = 0.46f,
+                    Priority = 95,
+                });
         }
 
         private void OnUpgradeClicked()

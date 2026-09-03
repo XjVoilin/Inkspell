@@ -1,5 +1,6 @@
 using System;
 using July.Arch;
+using July.Audio;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -17,6 +18,7 @@ namespace Game
         [SerializeField] private CanvasGroup _dragShadowCanvasGroup;
 
         private long? _selectedSpellId;
+        private IAudioSystem _audio;
 
         public event Action<long> SpellClicked;
         public event Action<long, long> SynthesisRequested;
@@ -42,6 +44,7 @@ namespace Game
 
         protected override void OnViewAwake()
         {
+            _audio = this.GetSystem<IAudioSystem>();
             foreach (var slot in _slots)
             {
                 slot.Clicked += OnCardClicked;
@@ -69,6 +72,7 @@ namespace Game
 
         private void OnCardClicked(UISpellCardGameView card)
         {
+            Play("CommonBtnClick", 0.42f, 105);
             _selectedSpellId = card.Data.InstanceId;
             SetSelection();
             SpellClicked?.Invoke(card.Data.InstanceId);
@@ -78,6 +82,7 @@ namespace Game
             UISpellCardGameView card,
             PointerEventData eventData)
         {
+            Play("SfxUiCardPickup", 0.44f, 105);
             _selectedSpellId = card.Data.InstanceId;
             SetSelection();
             _dragShadowCard.Render(card.Data);
@@ -97,6 +102,7 @@ namespace Game
             UISpellCardGameView card,
             PointerEventData eventData)
         {
+            Play("SfxUiCardDrop", 0.40f, 110);
             _dragShadowRoot.gameObject.SetActive(false);
             _dragShadowCard.Render(null);
         }
@@ -107,10 +113,26 @@ namespace Game
         {
             if (target.Data == null || source.Data.InstanceId == target.Data.InstanceId)
             {
+                Play("SfxUiInvalid", 0.48f, 85);
                 return;
             }
 
+            Play("SfxSynthesisStart", 0.55f, 75, "Synthesis");
             SynthesisRequested?.Invoke(source.Data.InstanceId, target.Data.InstanceId);
+        }
+
+        private void Play(
+            string address,
+            float volume,
+            int priority,
+            string group = "UI")
+        {
+            _audio.PlaySfx(address, new SfxPlayOptions
+            {
+                Group = group,
+                Volume = volume,
+                Priority = priority,
+            });
         }
 
         private void SetSelection()

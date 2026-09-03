@@ -77,6 +77,7 @@ namespace Game
             context.RegisterSystem(new StageProgressionSystem());
             context.RegisterSystem(new SpellGenerationSystem());
             context.RegisterSystem(new OfflineRewardPresentationSystem());
+            context.RegisterSystem(new InkspellAudioPresentationSystem());
         }
 
         public async UniTask PreInitializeAsync(CancellationToken ct = default)

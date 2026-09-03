@@ -4,6 +4,7 @@ using cfg;
 using Cysharp.Threading.Tasks;
 using July.Arch;
 using July.Config;
+using UnityEngine;
 
 namespace Game
 {
@@ -11,16 +12,17 @@ namespace Game
     public sealed class AutoBattleSystem : SystemBase, IUpdatableSystem
     {
         private BattleSimulation _simulation;
+        private readonly BattleSimulationClock _clock = new();
         private UniTaskCompletionSource<BattleOutcome> _battleCompletion;
         private long _nextBattleRunId = 1;
+        private bool _hasFocus;
 
-        internal BattleRun CurrentRun => _simulation.CurrentRun;
+        internal IReadOnlyBattleRun CurrentRun => _simulation.CurrentRun;
 
         public async UniTask<BattleOutcome> RunChallengeAsync(
             int stageId,
             CancellationToken ct = default)
         {
-            ct.ThrowIfCancellationRequested();
             if (_battleCompletion != null)
             {
                 throw new InvalidOperationException("同一时间只能运行一次自动战斗挑战。");
@@ -31,6 +33,7 @@ namespace Game
 
             try
             {
+                _clock.Reset();
                 _simulation.Begin(_nextBattleRunId++, stageId);
                 Publish(new BattleStateChangedEvent());
                 return await completion.Task.AttachExternalCancellation(ct);
@@ -43,15 +46,31 @@ namespace Game
 
         public void OnUpdate(float deltaTime)
         {
-            if (_battleCompletion == null || !CurrentRun.IsRunning)
+            if (_battleCompletion == null || !CurrentRun.IsRunning || !_hasFocus)
             {
                 return;
             }
 
             try
             {
-                var outcome = _simulation.Advance(deltaTime);
-                Publish(new BattleStateChangedEvent());
+                var stepCount = _clock.TakeSteps(deltaTime);
+                if (stepCount == 0)
+                {
+                    return;
+                }
+
+                BattleOutcome? outcome = null;
+                for (var step = 0; step < stepCount && CurrentRun.IsRunning; step++)
+                {
+                    outcome = _simulation.Advance(BattleSimulationClock.StepSeconds);
+                    // 每个固定步都发布一次，避免长帧内短暂产生又消失的攻击反馈被跳过。
+                    Publish(new BattleStateChangedEvent());
+                    if (outcome.HasValue)
+                    {
+                        break;
+                    }
+                }
+
                 if (!outcome.HasValue)
                 {
                     return;
@@ -86,7 +105,23 @@ namespace Game
                 config.GetTable<TbSpellUpgrade>(),
                 config.GetTable<TbEnemy>(),
                 config.GetTable<TbStageBattle>());
+            _hasFocus = Application.isFocused;
+            Application.focusChanged += OnFocusChanged;
             return UniTask.CompletedTask;
+        }
+
+        protected override void OnShutdown()
+        {
+            Application.focusChanged -= OnFocusChanged;
+            _clock.Reset();
+
+            if (CurrentRun.IsRunning)
+            {
+                _simulation.Stop();
+            }
+
+            _battleCompletion?.TrySetCanceled();
+            _battleCompletion = null;
         }
 
         private void CleanupChallenge(UniTaskCompletionSource<BattleOutcome> completion)
@@ -103,6 +138,16 @@ namespace Game
             }
 
             _battleCompletion = null;
+        }
+
+        private void OnFocusChanged(bool hasFocus)
+        {
+            _hasFocus = hasFocus;
+            if (!hasFocus)
+            {
+                // 丢弃不足一个固定步的余量，恢复前台时不补算后台战斗。
+                _clock.Reset();
+            }
         }
     }
 }

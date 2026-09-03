@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using cfg;
 
 namespace Game
@@ -50,7 +51,9 @@ namespace Game
     {
         public long AttackId { get; set; }
         public SpellType SpellType { get; set; }
+        public IReadOnlyList<long> TargetEnemyIds { get; set; } = Array.Empty<long>();
         public float TargetPathNormalized { get; set; }
+        public float TotalTravelSeconds { get; set; }
         public float RemainingTravelSeconds { get; set; }
     }
 
@@ -63,6 +66,8 @@ namespace Game
         public SpellType SpellType { get; set; }
         public long TargetEnemyId { get; set; }
         public float PathNormalized { get; set; }
+        public float RangeNormalized { get; set; }
+        public float TotalSeconds { get; set; }
         public float RemainingSeconds { get; set; }
     }
 }

@@ -2,8 +2,17 @@ using System;
 
 namespace Game
 {
+    internal interface IReadOnlyBattleBook
+    {
+        float Health { get; }
+        float MaxHealth { get; }
+        float Shield { get; }
+        float ShieldRemainingSeconds { get; }
+        bool IsDestroyed { get; }
+    }
+
     /// <summary>单次战斗中魔法书的生命与护盾边界。</summary>
-    internal sealed class BattleBook
+    internal sealed class BattleBook : IReadOnlyBattleBook
     {
         internal BattleBook()
         {
@@ -15,11 +24,11 @@ namespace Game
             Health = maxHealth;
         }
 
-        internal float Health { get; private set; }
-        internal float MaxHealth { get; private set; }
-        internal float Shield { get; private set; }
-        internal float ShieldRemainingSeconds { get; private set; }
-        internal bool IsDestroyed => Health <= 0f;
+        public float Health { get; private set; }
+        public float MaxHealth { get; private set; }
+        public float Shield { get; private set; }
+        public float ShieldRemainingSeconds { get; private set; }
+        public bool IsDestroyed => Health <= 0f;
 
         internal void ApplyDamage(float damage)
         {
