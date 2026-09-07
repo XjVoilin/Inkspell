@@ -46,14 +46,10 @@ namespace Game
         [SerializeField] private UILocalizedText _retryFeedback;
 
         private readonly Dictionary<long, UIEnemyBattleGameView> _enemyViewsById = new();
-        private readonly HashSet<long> _shownAttackIds = new();
-        private readonly HashSet<long> _shownEffectIds = new();
         private readonly List<long> _removedEnemyIds = new();
 
         private bool _hasRenderedChallenge;
         private long _battleRunId;
-        private float _lastBookHealth;
-        private float _lastBookShield;
         private bool _retryPending;
         private float _bookHitFeedbackRemaining;
         private float _shieldFeedbackRemaining;
@@ -69,7 +65,7 @@ namespace Game
             if (data.BattleRunId == 0)
             {
                 ResetPresentation();
-                RenderBook(data, false);
+                RenderBook(data);
                 RenderCooldowns(data.Cooldowns);
                 return;
             }
@@ -84,19 +80,14 @@ namespace Game
                 }
 
                 ClearEnemyViews();
-                _shownAttackIds.Clear();
-                _shownEffectIds.Clear();
             }
 
-            RenderBook(data, !challengeChanged && _hasRenderedChallenge);
+            RenderBook(data);
             RenderEnemies(data.Enemies);
             RenderCooldowns(data.Cooldowns);
-            RenderTransientFeedback(data.Attacks, data.Effects);
 
             _hasRenderedChallenge = true;
             _battleRunId = data.BattleRunId;
-            _lastBookHealth = data.BookHealth;
-            _lastBookShield = data.BookShield;
         }
 
         public void PlayChallengeResult(bool victory)
@@ -131,25 +122,8 @@ namespace Game
             TickFeedback(_retryFeedback.gameObject, ref _retryFeedbackRemaining);
         }
 
-        private void RenderBook(BattlefieldViewData data, bool comparePrevious)
+        private void RenderBook(BattlefieldViewData data)
         {
-            if (comparePrevious)
-            {
-                if (data.BookHealth < _lastBookHealth)
-                {
-                    Pulse(_bookHitFeedback, ref _bookHitFeedbackRemaining, BookFeedbackSeconds);
-                }
-
-                if (data.BookShield > _lastBookShield)
-                {
-                    Pulse(_shieldFeedback, ref _shieldFeedbackRemaining, BookFeedbackSeconds);
-                }
-                else if (data.BookShield < _lastBookShield)
-                {
-                    Pulse(_bookHitFeedback, ref _bookHitFeedbackRemaining, BookFeedbackSeconds);
-                }
-            }
-
             _bookHealthProgress.SetValue(data.BookHealth, data.BookMaxHealth);
             _bookHealthText.SetKey(
                 "MAIN_BOOK_HEALTH",
@@ -176,7 +150,7 @@ namespace Game
             {
                 var enemyView = _enemyViewsById[runtimeId];
                 _enemyViewsById.Remove(runtimeId);
-                enemyView.PlayDeath();
+                enemyView.Clear();
             }
 
             foreach (var enemy in enemies)
@@ -214,28 +188,33 @@ namespace Game
             }
         }
 
-        private void RenderTransientFeedback(
-            IReadOnlyList<BattleAttackFeedbackViewData> attacks,
-            IReadOnlyList<BattleEffectFeedbackViewData> effects)
+        internal void PlayBookFeedback(BattleFactKind kind)
         {
-            foreach (var attack in attacks)
-            {
-                if (_shownAttackIds.Add(attack.AttackId))
-                {
-                    PlaySpellFeedback(attack.SpellType, attack.TargetPathNormalized);
-                }
-            }
+            if (kind == BattleFactKind.ShieldApplied)
+                Pulse(_shieldFeedback, ref _shieldFeedbackRemaining, BookFeedbackSeconds);
+            else
+                Pulse(_bookHitFeedback, ref _bookHitFeedbackRemaining, BookFeedbackSeconds);
+        }
 
-            foreach (var effect in effects)
+        internal void PlayEnemyFeedback(BattleFactKind kind, EnemyBattleViewData data)
+        {
+            if (!_enemyViewsById.TryGetValue(data.RuntimeId, out var view))
             {
-                if (_shownEffectIds.Add(effect.EffectId))
-                {
-                    PlaySpellFeedback(effect.SpellType, effect.PathNormalized);
-                }
+                view = AcquireEnemyView();
+                _enemyViewsById.Add(data.RuntimeId, view);
+            }
+            view.SetPathPosition(_enemyPathRoot, data.PathNormalized);
+            view.Render(data);
+            if (kind == BattleFactKind.EnemyDamaged)
+                view.PlayHit();
+            else if (kind == BattleFactKind.EnemyDied)
+            {
+                _enemyViewsById.Remove(data.RuntimeId);
+                view.PlayDeath();
             }
         }
 
-        private void PlaySpellFeedback(SpellType spellType, float pathNormalized)
+        internal void PlaySpellFeedback(SpellType spellType, float pathNormalized)
         {
             switch (spellType)
             {
@@ -304,8 +283,6 @@ namespace Game
         {
             _hasRenderedChallenge = false;
             _retryPending = false;
-            _shownAttackIds.Clear();
-            _shownEffectIds.Clear();
             ClearEnemyViews();
 
             ResetFeedback(_bookHitFeedback, ref _bookHitFeedbackRemaining);

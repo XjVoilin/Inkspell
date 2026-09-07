@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using cfg;
 using Cysharp.Threading.Tasks;
 using July.Arch;
@@ -12,17 +11,10 @@ namespace Game
         private const string MainBgm = "BgmMainLoop";
         private const string BossBgm = "BgmBossLoop";
 
-        private readonly Dictionary<long, AttackAudioState> _activeAttacks = new();
-        private readonly HashSet<long> _seenEffects = new();
-        private readonly Dictionary<long, float> _enemyHealth = new();
-        private readonly List<long> _removedIds = new();
-
         private IAudioSystem _audio;
         private AutoBattleSystem _battle;
         private SpellGenerationStore _generation;
         private long _battleRunId;
-        private float _bookHealth;
-        private float _bookShield;
         private int _pendingCount;
         private int _hitVariant;
         private int _deathVariant;
@@ -30,18 +22,6 @@ namespace Game
         private int _shieldHitVariant;
         private string _currentBgm;
         private bool _retryPending;
-
-        private readonly struct AttackAudioState
-        {
-            internal AttackAudioState(SpellType spellType, int targetCount)
-            {
-                SpellType = spellType;
-                TargetCount = targetCount;
-            }
-
-            internal SpellType SpellType { get; }
-            internal int TargetCount { get; }
-        }
 
         protected override UniTask OnInitializeAsync()
         {
@@ -57,6 +37,7 @@ namespace Game
             Subscribe<SpellUpgradedEvent>(OnSpellUpgraded);
             Subscribe<SpellUpgradeRejectedEvent>(OnSpellUpgradeRejected);
             Subscribe<BattleStateChangedEvent>(OnBattleStateChanged);
+            Subscribe<BattleFactsEvent>(OnBattleFacts);
             Subscribe<BattleChallengeEndedEvent>(OnBattleChallengeEnded);
 
             SwitchBgm(MainBgm);
@@ -66,10 +47,6 @@ namespace Game
         protected override void OnShutdown()
         {
             _audio?.StopBGM(0.25f);
-            _activeAttacks.Clear();
-            _seenEffects.Clear();
-            _enemyHealth.Clear();
-            _removedIds.Clear();
         }
 
         private void OnSpellGenerationChanged(SpellGenerationChangedEvent eventData)
@@ -134,9 +111,6 @@ namespace Game
             {
                 _battleRunId = 0;
                 _retryPending = false;
-                _activeAttacks.Clear();
-                _seenEffects.Clear();
-                _enemyHealth.Clear();
                 SwitchBgm(MainBgm);
                 return;
             }
@@ -146,20 +120,11 @@ namespace Game
                 BeginRun(run);
             }
 
-            RenderAttacks(run);
-            RenderEffects(run);
-            RenderEnemies(run);
-            RenderBook(run);
         }
 
         private void BeginRun(BattleRun run)
         {
             _battleRunId = run.BattleRunId;
-            _activeAttacks.Clear();
-            _seenEffects.Clear();
-            _enemyHealth.Clear();
-            _bookHealth = run.Book.Health;
-            _bookShield = run.Book.Shield;
             SwitchBgm(run.StageId == 10 ? BossBgm : MainBgm);
 
             if (_retryPending)
@@ -169,129 +134,47 @@ namespace Game
             }
         }
 
-        private void RenderAttacks(BattleRun run)
+        private void OnBattleFacts(BattleFactsEvent eventData)
         {
-            _removedIds.Clear();
-            foreach (var pair in _activeAttacks)
+            if (eventData.BattleRunId != _battleRunId)
+                return; // 其他监听方可能已经同步取消或开始下一局。
+
+            foreach (var fact in eventData.Facts)
             {
-                if (!ContainsAttack(run.Attacks, pair.Key))
+                switch (fact.Kind)
                 {
-                    _removedIds.Add(pair.Key);
-                }
-            }
-
-            foreach (var attack in run.Attacks)
-            {
-                if (_activeAttacks.ContainsKey(attack.AttackId))
-                {
-                    continue;
-                }
-
-                _activeAttacks.Add(
-                    attack.AttackId,
-                    new AttackAudioState(attack.SpellType, attack.TargetEnemyIds.Count));
-                PlayCast(attack.SpellType);
-            }
-
-            foreach (var attackId in _removedIds)
-            {
-                var attack = _activeAttacks[attackId];
-                _activeAttacks.Remove(attackId);
-                PlayImpact(attack);
-            }
-        }
-
-        private void RenderEffects(BattleRun run)
-        {
-            foreach (var effect in run.Effects)
-            {
-                if (!_seenEffects.Add(effect.EffectId))
-                {
-                    continue;
-                }
-
-                if (effect.SpellType == SpellType.FrostRing)
-                {
-                    Play("SfxFrostImpact", "Spell", 0.48f, 105);
+                    case BattleFactKind.SpellCast:
+                        PlayCast(fact.SpellType);
+                        break;
+                    case BattleFactKind.SpellImpact:
+                        PlayImpact(fact);
+                        break;
+                    case BattleFactKind.EnemySpawned:
+                        if (fact.EnemyType == EnemyType.ChapterBoss)
+                            Play("SfxBossEnter", "Stage", 0.72f, 55);
+                        break;
+                    case BattleFactKind.EnemyDamaged:
+                        _hitVariant = _hitVariant % 3 + 1;
+                        Play($"SfxEnemyHit{_hitVariant}", "Battle", 0.28f, 155);
+                        break;
+                    case BattleFactKind.EnemyDied:
+                        _deathVariant = _deathVariant % 2 + 1;
+                        Play($"SfxEnemyDeath{_deathVariant}", "Battle", 0.42f, 135);
+                        break;
+                    case BattleFactKind.BookDamaged:
+                        _bookHitVariant = _bookHitVariant % 2 + 1;
+                        Play($"SfxBookHit{_bookHitVariant}", "Battle", 0.48f, 115);
+                        break;
+                    case BattleFactKind.ShieldAbsorbed:
+                        _shieldHitVariant = _shieldHitVariant % 2 + 1;
+                        Play($"SfxShieldAbsorb{_shieldHitVariant}", "Spell", 0.38f, 125);
+                        break;
+                    case BattleFactKind.ShieldBroken:
+                        Play("SfxShieldBreak", "Spell", 0.54f, 95);
+                        break;
                 }
             }
         }
-
-        private void RenderEnemies(BattleRun run)
-        {
-            _removedIds.Clear();
-            foreach (var pair in _enemyHealth)
-            {
-                if (!ContainsEnemy(run.Enemies.Items, pair.Key))
-                {
-                    _removedIds.Add(pair.Key);
-                }
-            }
-
-            var damaged = false;
-            foreach (var enemy in run.Enemies.Items)
-            {
-                if (!_enemyHealth.TryGetValue(enemy.RuntimeId, out var previous))
-                {
-                    _enemyHealth.Add(enemy.RuntimeId, enemy.Health);
-                    if (enemy.Type == EnemyType.ChapterBoss)
-                    {
-                        Play("SfxBossEnter", "Stage", 0.72f, 55);
-                    }
-
-                    continue;
-                }
-
-                if (enemy.Health < previous)
-                {
-                    damaged = true;
-                }
-
-                _enemyHealth[enemy.RuntimeId] = enemy.Health;
-            }
-
-            if (damaged)
-            {
-                _hitVariant = _hitVariant % 3 + 1;
-                Play($"SfxEnemyHit{_hitVariant}", "Battle", 0.28f, 155);
-            }
-
-            if (_removedIds.Count > 0)
-            {
-                _deathVariant = _deathVariant % 2 + 1;
-                Play($"SfxEnemyDeath{_deathVariant}", "Battle", 0.42f, 135);
-                foreach (var runtimeId in _removedIds)
-                {
-                    _enemyHealth.Remove(runtimeId);
-                }
-            }
-        }
-
-        private void RenderBook(BattleRun run)
-        {
-            if (run.Book.Health < _bookHealth)
-            {
-                _bookHitVariant = _bookHitVariant % 2 + 1;
-                Play($"SfxBookHit{_bookHitVariant}", "Battle", 0.48f, 115);
-            }
-
-            if (run.Book.Shield < _bookShield)
-            {
-                if (_bookShield > 0f && run.Book.Shield <= 0f)
-                {
-                    Play("SfxShieldBreak", "Spell", 0.54f, 95);
-                }
-                else
-                {
-                    _shieldHitVariant = _shieldHitVariant % 2 + 1;
-                    Play($"SfxShieldAbsorb{_shieldHitVariant}", "Spell", 0.38f, 125);
-                }
-            }
-
-            _bookHealth = run.Book.Health;
-            _bookShield = run.Book.Shield;
-        }
-
         private void PlayCast(SpellType spellType)
         {
             var address = spellType switch
@@ -305,7 +188,7 @@ namespace Game
             Play(address, "Spell", 0.42f, 135);
         }
 
-        private void PlayImpact(AttackAudioState attack)
+        private void PlayImpact(BattleFact attack)
         {
             switch (attack.SpellType)
             {
@@ -321,10 +204,10 @@ namespace Game
                     }
                     break;
                 case SpellType.FrostRing:
-                    // Frost 的持续效果 ID 是更准确的命中事实，避免重复播放。
+                    Play("SfxFrostImpact", "Spell", 0.48f, 105);
                     break;
                 case SpellType.Shield:
-                    // 护盾施放音在攻击提交时播放，吸收与破碎由数值变化播放。
+                    // 护盾施放、吸收与破碎分别消费对应事实。
                     break;
             }
         }
@@ -367,34 +250,5 @@ namespace Game
             });
         }
 
-        private static bool ContainsAttack(
-            IReadOnlyList<BattleAttack> attacks,
-            long attackId)
-        {
-            for (var index = 0; index < attacks.Count; index++)
-            {
-                if (attacks[index].AttackId == attackId)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static bool ContainsEnemy(
-            IReadOnlyList<BattleEnemy> enemies,
-            long runtimeId)
-        {
-            for (var index = 0; index < enemies.Count; index++)
-            {
-                if (enemies[index].RuntimeId == runtimeId)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
     }
 }

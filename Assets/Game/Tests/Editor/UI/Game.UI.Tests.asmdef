@@ -1,0 +1,8 @@
+{
+  "name": "Game.UI.Tests",
+  "rootNamespace": "Game.Tests",
+  "references": ["Game.Runtime", "July.Arch", "July.UI", "July.Localization", "Unity.TextMeshPro", "UnityEngine.UI"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": false,
+  "optionalUnityReferences": ["TestAssemblies"]
+}

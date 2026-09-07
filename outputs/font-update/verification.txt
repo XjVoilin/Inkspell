@@ -1,0 +1,4 @@
+Family: LXGW WenKai / Regular
+Assets/Game/Res/Prefabs/UI/MainWindow/MainWindow.prefab: TMP=66, Text=41
+Assets/Game/Res/Prefabs/UIOfflineRewardWindow.prefab: TMP=4, Text=0
+Assets/Game/Res/Prefabs/UITipItem.prefab: TMP=1, Text=0

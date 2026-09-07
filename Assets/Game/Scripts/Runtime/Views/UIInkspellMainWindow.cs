@@ -54,6 +54,7 @@ namespace Game
             this.Subscribe<SpellGenerationChangedEvent>(OnSpellGenerationChanged);
             this.Subscribe<StageProgressChangedEvent>(OnStageProgressChanged);
             this.Subscribe<BattleStateChangedEvent>(OnBattleStateChanged);
+            this.Subscribe<BattleFactsEvent>(OnBattleFacts);
             this.Subscribe<BattleChallengeEndedEvent>(OnBattleChallengeEnded);
             this.Subscribe<SpellSynthesisRejectedEvent>(OnSpellSynthesisRejected);
             this.Subscribe<SpellSynthesisResolvedEvent>(OnSpellSynthesisResolved);
@@ -102,6 +103,41 @@ namespace Game
         {
             // AutoBattleSystem 会先发布当帧最终状态，这里只播放一次结果反馈。
             _battlefield.PlayChallengeResult(eventData.Outcome.Victory);
+        }
+
+        private void OnBattleFacts(BattleFactsEvent eventData)
+        {
+            if (_data.Battlefield.BattleRunId != eventData.BattleRunId)
+                return; // 同步监听方已经切换了战斗，或窗口尚未显示这一局。
+
+            foreach (var fact in eventData.Facts)
+            {
+                switch (fact.Kind)
+                {
+                    case BattleFactKind.SpellCast:
+                    case BattleFactKind.SpellImpact:
+                        _battlefield.PlaySpellFeedback(fact.SpellType, _data.NormalizePath(fact.PathPosition));
+                        break;
+                    case BattleFactKind.EnemySpawned:
+                    case BattleFactKind.EnemyDamaged:
+                    case BattleFactKind.EnemyDied:
+                        _battlefield.PlayEnemyFeedback(fact.Kind, new EnemyBattleViewData
+                        {
+                            RuntimeId = fact.EnemyId,
+                            Type = fact.EnemyType,
+                            Health = fact.Health,
+                            MaxHealth = fact.MaxHealth,
+                            PathNormalized = _data.NormalizePath(fact.PathPosition),
+                        });
+                        break;
+                    case BattleFactKind.BookDamaged:
+                    case BattleFactKind.ShieldApplied:
+                    case BattleFactKind.ShieldAbsorbed:
+                    case BattleFactKind.ShieldBroken:
+                        _battlefield.PlayBookFeedback(fact.Kind);
+                        break;
+                }
+            }
         }
 
         private void RefreshAndRenderStatus()

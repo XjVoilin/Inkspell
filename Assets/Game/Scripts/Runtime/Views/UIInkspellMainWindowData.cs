@@ -151,36 +151,6 @@ namespace Game
 
             Battlefield.Cooldowns = cooldowns;
 
-            var attacks = EnsureViewData(Battlefield.Attacks, battle.Attacks.Count);
-            for (var index = 0; index < attacks.Length; index++)
-            {
-                var attack = battle.Attacks[index];
-                var viewData = attacks[index];
-                viewData.AttackId = attack.AttackId;
-                viewData.SpellType = attack.SpellType;
-                viewData.TargetEnemyIds = attack.TargetEnemyIds;
-                viewData.TargetPathNormalized = NormalizePath(attack.TargetPathPosition);
-                viewData.TotalTravelSeconds = attack.TotalTravelSeconds;
-                viewData.RemainingTravelSeconds = attack.RemainingTravelSeconds;
-            }
-
-            Battlefield.Attacks = attacks;
-
-            var effects = EnsureViewData(Battlefield.Effects, battle.Effects.Count);
-            for (var index = 0; index < effects.Length; index++)
-            {
-                var effect = battle.Effects[index];
-                var viewData = effects[index];
-                viewData.EffectId = effect.EffectId;
-                viewData.SpellType = effect.SpellType;
-                viewData.TargetEnemyId = effect.TargetEnemyId;
-                viewData.PathNormalized = NormalizePath(effect.PathPosition);
-                viewData.RangeNormalized = NormalizeRange(effect.Range);
-                viewData.TotalSeconds = effect.TotalSeconds;
-                viewData.RemainingSeconds = effect.RemainingSeconds;
-            }
-
-            Battlefield.Effects = effects;
         }
 
         private SpellCardViewData CreateSpellCard(
@@ -226,19 +196,12 @@ namespace Game
             return maximum;
         }
 
-        private float NormalizePath(float pathPosition)
+        internal float NormalizePath(float pathPosition)
         {
             return Mathf.InverseLerp(
                 _battleRule.BookContactPosition,
                 _battleRule.EnemySpawnPosition,
                 pathPosition);
-        }
-
-        private float NormalizeRange(float range)
-        {
-            var pathLength = Mathf.Abs(
-                _battleRule.EnemySpawnPosition - _battleRule.BookContactPosition);
-            return pathLength > 0f ? range / pathLength : 0f;
         }
 
         private static T[] EnsureViewData<T>(T[] items, int count)

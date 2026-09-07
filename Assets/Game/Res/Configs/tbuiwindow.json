@@ -13,7 +13,7 @@
   {
     "id": 12,
     "desc": "Inkspell 主界面",
-    "windowName": "UIInkspellMainWindow",
+    "windowName": "MainWindow",
     "isNeedBlackMask": false,
     "isClickBlankQuit": false,
     "enterAnimType": 0,

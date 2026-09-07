@@ -1,0 +1,8 @@
+Capture requested
+Text: 第 1 关; overflow=False
+Text: 魔法墨水：0; overflow=False
+Text: 待领取：0; overflow=False
+Text: 生成：0/180 秒; overflow=False
+Tier: 一阶; overflow=False
+Text: 魔法书生命：100/100; overflow=False
+Text: 护盾：0; overflow=False

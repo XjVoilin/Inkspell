@@ -47,6 +47,11 @@ namespace Game
             run.AdvanceSpawnTime(deltaTime);
             SpawnEnemies(run, stage, previousSpawnElapsed, run.SpawnElapsedSeconds);
             ResolveArrivedSpellAttacks(run);
+            foreach (var enemy in run.Enemies.Items)
+            {
+                if (enemy.Health <= 0f)
+                    run.RecordFact(new BattleFact(BattleFactKind.EnemyDied, enemy));
+            }
             run.Enemies.RemoveDefeated();
             RemoveExpiredEffects(run);
 
@@ -95,11 +100,12 @@ namespace Game
         private void SpawnEnemy(BattleRun run, EnemyType enemyType)
         {
             var enemy = _enemies.Get(enemyType);
-            run.Enemies.Spawn(
+            var spawned = run.Enemies.Spawn(
                 enemyType,
                 enemy.MaxHealth,
                 _battleRule.EnemySpawnPosition,
                 enemy.AttackIntervalSeconds);
+            run.RecordFact(new BattleFact(BattleFactKind.EnemySpawned, spawned));
         }
 
         private bool HasPendingSpawns(BattleRun run, StageBattle stage)
@@ -129,21 +135,26 @@ namespace Game
 
                 if (attack.SpellType == SpellType.Shield)
                 {
+                    var previousShield = run.Book.Shield;
                     run.Book.ApplyShield(
                         attack.Shield,
                         attack.EffectDurationSeconds);
-                    AddEffect(run,
-                        attack.SpellType,
-                        0,
-                        _battleRule.BookContactPosition,
-                        0f,
-                        attack.EffectDurationSeconds);
+                    if (run.Book.Shield > previousShield)
+                        run.RecordFact(new BattleFact(BattleFactKind.ShieldApplied));
+                    run.AddEffect(
+                        spellType: attack.SpellType,
+                        targetEnemyId: 0,
+                        pathPosition: _battleRule.BookContactPosition,
+                        range: 0f,
+                        durationSeconds: attack.EffectDurationSeconds);
                 }
                 else
                 {
                     ResolveDamageAttack(run, attack);
                 }
 
+                run.RecordFact(new BattleFact(BattleFactKind.SpellImpact,
+                    attack.SpellType, attack.TargetPathPosition, attack.TargetEnemyIds.Count));
                 run.RemoveAttackAt(index);
             }
         }
@@ -158,7 +169,10 @@ namespace Game
                     continue;
                 }
 
+                var previousHealth = target.Health;
                 target.ApplyDamage(attack.Damage);
+                if (target.Health < previousHealth)
+                    run.RecordFact(new BattleFact(BattleFactKind.EnemyDamaged, target));
                 if (attack.SpellType == SpellType.FrostRing)
                 {
                     target.ApplySlow(
@@ -169,12 +183,12 @@ namespace Game
 
             if (attack.EffectDurationSeconds > 0f)
             {
-                AddEffect(run,
-                    attack.SpellType,
-                    attack.TargetEnemyIds.Count > 0 ? attack.TargetEnemyIds[0] : 0,
-                    attack.TargetPathPosition,
-                    attack.EffectRange,
-                    attack.EffectDurationSeconds);
+                run.AddEffect(
+                    spellType: attack.SpellType,
+                    targetEnemyId: attack.TargetEnemyIds.Count > 0 ? attack.TargetEnemyIds[0] : 0,
+                    pathPosition: attack.TargetPathPosition,
+                    range: attack.EffectRange,
+                    durationSeconds: attack.EffectDurationSeconds);
             }
         }
 
@@ -205,7 +219,14 @@ namespace Game
 
                 if (enemy.CanAttack(_battleRule.BookContactPosition))
                 {
+                    var previousHealth = run.Book.Health;
+                    var previousShield = run.Book.Shield;
                     run.Book.ApplyDamage(config.AttackDamage);
+                    if (run.Book.Shield < previousShield)
+                        run.RecordFact(new BattleFact(run.Book.Shield == 0f
+                            ? BattleFactKind.ShieldBroken : BattleFactKind.ShieldAbsorbed));
+                    if (run.Book.Health < previousHealth)
+                        run.RecordFact(new BattleFact(BattleFactKind.BookDamaged));
                     enemy.ResetAttack(config.AttackIntervalSeconds);
                 }
             }
@@ -245,17 +266,19 @@ namespace Game
                 ? _battleRule.BookContactPosition
                 : primaryTarget.PathPosition;
 
-            LaunchAttack(run,
-                spell.Type,
-                targetIds,
-                targetPosition,
-                _battleRule.AttackTravelSeconds,
-                damage,
-                shield,
-                combat.EffectRange,
-                combat.EffectDurationSeconds,
-                combat.SlowMultiplier);
+            run.AddAttack(
+                spellType: spell.Type,
+                targetEnemyIds: targetIds,
+                targetPathPosition: targetPosition,
+                travelSeconds: _battleRule.AttackTravelSeconds,
+                damage: damage,
+                shield: shield,
+                effectRange: combat.EffectRange,
+                effectDurationSeconds: combat.EffectDurationSeconds,
+                slowMultiplier: combat.SlowMultiplier);
             run.Cooldowns.Set(equipmentSlot, combat.CooldownSeconds);
+            run.RecordFact(new BattleFact(BattleFactKind.SpellCast,
+                spell.Type, targetPosition, targetIds.Count));
         }
 
         private IReadOnlyList<long> SelectTargets(BattleRun run,
@@ -285,49 +308,12 @@ namespace Game
             }
         }
 
-        private void LaunchAttack(BattleRun run,
-            SpellType spellType,
-            IReadOnlyList<long> targetEnemyIds,
-            float targetPathPosition,
-            float travelSeconds,
-            float damage,
-            float shield,
-            float effectRange,
-            float effectDurationSeconds,
-            float slowMultiplier)
-        {
-            run.AddAttack(new BattleAttack(
-                run.AllocateAttackId(),
-                spellType,
-                targetEnemyIds,
-                targetPathPosition,
-                travelSeconds,
-                damage,
-                shield,
-                effectRange,
-                effectDurationSeconds,
-                slowMultiplier));
-        }
-
-        private void AddEffect(BattleRun run,
-            SpellType spellType,
-            long targetEnemyId,
-            float pathPosition,
-            float range,
-            float remainingSeconds)
-        {
-            run.AddEffect(new BattleEffect(
-                run.AllocateEffectId(),
-                spellType,
-                targetEnemyId,
-                pathPosition,
-                range,
-                remainingSeconds));
-        }
-
         private void AdvanceTimers(BattleRun run, float deltaTime)
         {
+            var previousShield = run.Book.Shield;
             run.Book.Tick(deltaTime);
+            if (previousShield > 0f && run.Book.Shield == 0f)
+                run.RecordFact(new BattleFact(BattleFactKind.ShieldExpired));
             run.Enemies.Tick(deltaTime);
             run.Cooldowns.Tick(deltaTime);
 

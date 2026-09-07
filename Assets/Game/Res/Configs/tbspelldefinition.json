@@ -4,27 +4,27 @@
     "isOpen": true,
     "displayPriority": 10,
     "displayNameKey": "SPELL_FIREBALL_NAME",
-    "iconResourceKey": "Spell/Icon/Fireball"
+    "iconResourceKey": "icon_spellFireball"
   },
   {
     "spellType": 2,
     "isOpen": true,
     "displayPriority": 20,
     "displayNameKey": "SPELL_CHAIN_LIGHTNING_NAME",
-    "iconResourceKey": "Spell/Icon/ChainLightning"
+    "iconResourceKey": "icon_spellChainLightning"
   },
   {
     "spellType": 3,
     "isOpen": true,
     "displayPriority": 30,
     "displayNameKey": "SPELL_FROST_RING_NAME",
-    "iconResourceKey": "Spell/Icon/FrostRing"
+    "iconResourceKey": "icon_spellIceRing"
   },
   {
     "spellType": 4,
     "isOpen": true,
     "displayPriority": 40,
     "displayNameKey": "SPELL_SHIELD_NAME",
-    "iconResourceKey": "Spell/Icon/Shield"
+    "iconResourceKey": "icon_spellRuneShield"
   }
 ]

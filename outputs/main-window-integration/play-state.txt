@@ -1,0 +1,10 @@
+Window=MainWindow(Clone); IsOpened=True
+第 1 关
+魔法墨水：0
+待领取：0
+生成：24/180 秒
+一阶
+魔法书生命：100/100
+护盾：0
+重新挑战
+Card=SpellSlotBaseTile; Sprite=icon_spellFireball

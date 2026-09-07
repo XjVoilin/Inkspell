@@ -38,6 +38,8 @@ namespace Game
             try
             {
                 Publish(new BattleStateChangedEvent());
+                if (ReferenceEquals(_battleCompletion, completion))
+                    PublishFacts(run);
                 return await completion.Task.AttachExternalCancellation(ct);
             }
             finally
@@ -75,9 +77,9 @@ namespace Game
                 return;
 
             var run = CurrentRun;
+            BattleOutcome? outcome = null;
             for (var step = 0; step < stepCount; step++)
             {
-                BattleOutcome? outcome;
                 try
                 {
                     outcome = _simulation.Advance(run, BattleSimulationClock.StepSeconds);
@@ -90,25 +92,35 @@ namespace Game
                 }
 
                 if (outcome.HasValue)
-                {
-                    try
-                    {
-                        Publish(new BattleStateChangedEvent());
-                        Publish(new BattleChallengeEndedEvent(outcome.Value));
-                    }
-                    finally
-                    {
-                        // 即使表现监听失败，已结束的业务等待也必须完成。
-                        completion.TrySetResult(outcome.Value);
-                    }
-                    return;
-                }
+                    break;
+            }
 
-                // 每步交付状态，保证同一长帧内发起又命中的攻击也被表现消费。
-                Publish(new BattleStateChangedEvent());
+            if (stepCount == 0)
+                return;
+
+            try
+            {
+                // 瞬时事实完整交付，连续状态每帧只刷新一次。
+                PublishFacts(run);
                 if (!ReferenceEquals(_battleCompletion, completion))
                     return;
+                Publish(new BattleStateChangedEvent());
+                if (outcome.HasValue && ReferenceEquals(_battleCompletion, completion))
+                    Publish(new BattleChallengeEndedEvent(outcome.Value));
             }
+            finally
+            {
+                // 即使表现监听失败，已结束的业务等待也必须完成。
+                if (outcome.HasValue)
+                    completion.TrySetResult(outcome.Value);
+            }
+        }
+
+        private void PublishFacts(BattleRun run)
+        {
+            var facts = run.TakeFacts();
+            if (facts.Count > 0)
+                Publish(new BattleFactsEvent(run.BattleRunId, facts));
         }
 
         protected override UniTask OnInitializeAsync()

@@ -1,3 +1,5 @@
+using System;
+using cfg;
 using July.Arch;
 using July.UI;
 using UnityEngine;
@@ -14,6 +16,11 @@ namespace Game
         private const float DeathFeedbackSeconds = 0.35f;
 
         [SerializeField] private RectTransform _rectTransform;
+        [SerializeField] private Image _art;
+        [SerializeField] private Sprite _normalSprite;
+        [SerializeField] private Sprite _swiftSprite;
+        [SerializeField] private Sprite _eliteSprite;
+        [SerializeField] private Sprite _bossSprite;
         [SerializeField] private UIProgressBar _healthProgress;
         [SerializeField] private Text _healthText;
         [SerializeField] private GameObject _slowIndicator;
@@ -22,22 +29,21 @@ namespace Game
 
         private float _hitFeedbackRemaining;
         private float _deathFeedbackRemaining;
-        private float _lastHealth;
 
         internal EnemyBattleViewData Data { get; private set; }
         internal bool IsDying => _deathFeedbackRemaining > 0f;
 
         public void Render(EnemyBattleViewData data)
         {
-            if (Data != null &&
-                Data.RuntimeId == data.RuntimeId &&
-                data.Health < _lastHealth)
-            {
-                PlayHit();
-            }
-
             Data = data;
-            _lastHealth = data.Health;
+            _art.sprite = data.Type switch
+            {
+                EnemyType.NormalInkling => _normalSprite,
+                EnemyType.SwiftInkling => _swiftSprite,
+                EnemyType.ThickInkElite => _eliteSprite,
+                EnemyType.ChapterBoss => _bossSprite,
+                _ => throw new ArgumentOutOfRangeException(nameof(data.Type), data.Type, null),
+            };
             gameObject.SetActive(true);
             _healthProgress.SetValue(data.Health, data.MaxHealth);
             _healthText.text = $"{data.Health:0}/{data.MaxHealth:0}";
@@ -57,7 +63,6 @@ namespace Game
         internal void PlayDeath()
         {
             Data = null;
-            _lastHealth = 0f;
             _slowIndicator.SetActive(false);
             _hitFeedback.SetActive(false);
             _hitFeedbackRemaining = 0f;
@@ -68,18 +73,12 @@ namespace Game
         internal void Clear()
         {
             Data = null;
-            _lastHealth = 0f;
             _hitFeedbackRemaining = 0f;
             _deathFeedbackRemaining = 0f;
             _slowIndicator.SetActive(false);
             _hitFeedback.SetActive(false);
             _deathFeedback.SetActive(false);
             gameObject.SetActive(false);
-        }
-
-        protected override void OnViewAwake()
-        {
-            Clear();
         }
 
         private void Update()
@@ -106,7 +105,7 @@ namespace Game
             }
         }
 
-        private void PlayHit()
+        internal void PlayHit()
         {
             _hitFeedback.SetActive(true);
             _hitFeedbackRemaining = HitFeedbackSeconds;

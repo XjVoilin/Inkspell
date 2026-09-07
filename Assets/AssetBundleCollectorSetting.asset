@@ -61,6 +61,38 @@ MonoBehaviour:
         FilterRuleName: CollectAll
         AssetTags:
         UserData:
+      - CollectPath: Assets/Game/Arts/Textures/MainWindow/icon_spellFireball.png
+        CollectorGUID: 69596ec444feb4f8785ab74cba90da9a
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags:
+        UserData:
+      - CollectPath: Assets/Game/Arts/Textures/MainWindow/icon_spellChainLightning.png
+        CollectorGUID: 90e63d971798248edbd782314f4c9b97
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags:
+        UserData:
+      - CollectPath: Assets/Game/Arts/Textures/MainWindow/icon_spellIceRing.png
+        CollectorGUID: 3689b89dc6b9f48ada7fa0213eca4a1f
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags:
+        UserData:
+      - CollectPath: Assets/Game/Arts/Textures/MainWindow/icon_spellRuneShield.png
+        CollectorGUID: 0a52620675872484086111ffdd1fa906
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags:
+        UserData:
     - GroupName: HotUpdate
       GroupDesc: HybridCLR hot-update assemblies
       AssetTags: HotUpdate

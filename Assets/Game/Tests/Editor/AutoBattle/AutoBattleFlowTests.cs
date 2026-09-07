@@ -133,10 +133,22 @@ namespace Game.Tests
             enemy.MoveTowards(0f, 100f, 1f);
             enemy.Tick(100f);
             run.Book.ApplyDamage(99f);
-            run.AddAttack(new BattleAttack(1, SpellType.Fireball,
-                new[] { enemy.RuntimeId }, 0f, 0f, 10000f, 0f, 0f, 0f, 1f));
+            run.AddAttack(
+                spellType: SpellType.Fireball,
+                targetEnemyIds: new[] { enemy.RuntimeId },
+                targetPathPosition: 0f,
+                travelSeconds: 0f,
+                damage: 10000f,
+                shield: 0f,
+                effectRange: 0f,
+                effectDurationSeconds: 0f,
+                slowMultiplier: 1f);
 
             var observations = new List<string>();
+            _game.Subscribe<BattleFactsEvent>(e =>
+            {
+                foreach (var fact in e.Facts) observations.Add(fact.Kind.ToString());
+            });
             _game.Subscribe<BattleStateChangedEvent>(_ =>
                 observations.Add(run.IsRunning ? "running" : "final"));
             _game.Subscribe<BattleChallengeEndedEvent>(_ => observations.Add("ended"));
@@ -144,10 +156,13 @@ namespace Game.Tests
             var outcome = request.GetAwaiter().GetResult();
             Assert.That(outcome.Victory, Is.True);
             Assert.That(run.Book.Health, Is.EqualTo(1f));
-            Assert.That(observations, Is.EqualTo(new[] { "final", "ended" }));
+            Assert.That(observations, Is.EqualTo(new[]
+            {
+                "EnemyDamaged", "SpellImpact", "EnemyDied", "final", "ended",
+            }));
             Assert.That(_game.Battle.CurrentRun, Is.SameAs(run));
             _game.Tick();
-            Assert.That(observations.Count, Is.EqualTo(2));
+            Assert.That(observations.Count, Is.EqualTo(5));
         }
 
         [Test]
@@ -206,18 +221,88 @@ namespace Game.Tests
         {
             _game = new BattleFixture();
             var request = _game.Battle.RunChallengeAsync(1);
-            var seenAttack = false;
-            var seenImpactAfterAttack = false;
-            _game.Subscribe<BattleStateChangedEvent>(_ =>
+            var facts = new List<BattleFactKind>();
+            var changes = 0;
+            _game.Subscribe<BattleStateChangedEvent>(_ => changes++);
+            _game.Subscribe<BattleFactsEvent>(e =>
             {
-                var run = _game.Battle.CurrentRun;
-                if (run == null) return;
-                if (run.Attacks.Count > 0) seenAttack = true;
-                else if (seenAttack) seenImpactAfterAttack = true;
+                foreach (var fact in e.Facts) facts.Add(fact.Kind);
             });
             _game.Battle.OnUpdate(0.3f);
-            Assert.That(seenAttack, Is.True);
-            Assert.That(seenImpactAfterAttack, Is.True);
+            Assert.That(changes, Is.EqualTo(1));
+            Assert.That(facts, Is.EqualTo(new[]
+            {
+                BattleFactKind.SpellCast, BattleFactKind.EnemyDamaged, BattleFactKind.SpellImpact,
+            }));
+            Assert.That(_game.Battle.CurrentRun.Attacks, Is.Empty);
+            _game.Tick();
+            Assert.That(facts.Count, Is.EqualTo(3), "已交付事实不能在下一帧重复播放");
+            _game.Context.Shutdown();
+            Assert.Throws<OperationCanceledException>(() => request.GetAwaiter().GetResult());
+        }
+
+        [Test]
+        public void NoSimulationStep_DoesNotPublishStateOrFacts()
+        {
+            _game = new BattleFixture();
+            var request = _game.Battle.RunChallengeAsync(1);
+            var notifications = 0;
+            _game.Subscribe<BattleStateChangedEvent>(_ => notifications++);
+            _game.Subscribe<BattleFactsEvent>(_ => notifications++);
+            _game.Battle.OnUpdate(0f);
+            Assert.That(notifications, Is.Zero);
+            _game.Context.Shutdown();
+            Assert.Throws<OperationCanceledException>(() => request.GetAwaiter().GetResult());
+        }
+
+        [Test]
+        public void CancelFromFactsListener_KeepsBatchAndReplacementIndependent()
+        {
+            _game = new BattleFixture();
+            using var cancellation = new CancellationTokenSource();
+            var request = _game.Battle.RunChallengeAsync(1, cancellation.Token);
+            var old = _game.Battle.CurrentRun;
+            IReadOnlyList<BattleFact> oldFacts = null;
+            UniTask<BattleOutcome> replacement = default;
+            var changes = 0;
+            _game.Subscribe<BattleStateChangedEvent>(_ => changes++);
+            _game.Subscribe<BattleFactsEvent>(e =>
+            {
+                if (e.BattleRunId != old.BattleRunId) return;
+                oldFacts = e.Facts;
+                cancellation.Cancel();
+                replacement = _game.Battle.RunChallengeAsync(1);
+            });
+            _game.Battle.OnUpdate(0.3f);
+            Assert.Throws<OperationCanceledException>(() => request.GetAwaiter().GetResult());
+            Assert.That(changes, Is.EqualTo(2), "只有取消清理和新局初始状态");
+            Assert.That(oldFacts.Count, Is.EqualTo(3));
+            Assert.That(oldFacts[0].Kind, Is.EqualTo(BattleFactKind.SpellCast));
+            Assert.That(_game.Battle.CurrentRun.SpawnElapsedSeconds, Is.Zero);
+            _game.Context.Shutdown();
+            Assert.Throws<OperationCanceledException>(() => replacement.GetAwaiter().GetResult());
+        }
+
+        [Test]
+        public void ShieldAppliedAndBrokenInOneFrame_PreservesBothFacts()
+        {
+            _game = new BattleFixture();
+            var request = _game.Battle.RunChallengeAsync(1);
+            var run = _game.Battle.CurrentRun;
+            var enemy = run.Enemies.Items[0];
+            enemy.MoveTowards(0f, 100f, 1f);
+            enemy.Tick(100f);
+            run.AddAttack(SpellType.Shield, Array.Empty<long>(), 0f, 0f, 0f, 1f, 0f, 10f, 1f);
+            var facts = new List<BattleFactKind>();
+            _game.Subscribe<BattleFactsEvent>(e =>
+            {
+                foreach (var fact in e.Facts) facts.Add(fact.Kind);
+            });
+            _game.Battle.OnUpdate(0.3f);
+            Assert.That(run.Book.Shield, Is.Zero);
+            Assert.That(facts.IndexOf(BattleFactKind.ShieldApplied), Is.GreaterThanOrEqualTo(0));
+            Assert.That(facts.IndexOf(BattleFactKind.ShieldBroken),
+                Is.GreaterThan(facts.IndexOf(BattleFactKind.ShieldApplied)));
             _game.Context.Shutdown();
             Assert.Throws<OperationCanceledException>(() => request.GetAwaiter().GetResult());
         }
@@ -392,4 +477,3 @@ namespace Game.Tests
         }
     }
 }
-

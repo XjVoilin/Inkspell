@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using cfg;
 
 namespace Game
 {
@@ -8,16 +9,13 @@ namespace Game
     {
         private readonly List<BattleAttack> _attacks = new();
         private readonly List<BattleEffect> _effects = new();
+        private readonly List<BattleFact> _pendingFacts = new();
         private readonly ReadOnlyCollection<BattleAttack> _attacksView;
         private readonly ReadOnlyCollection<BattleEffect> _effectsView;
         private long _nextAttackId = 1;
         private long _nextEffectId = 1;
 
-        internal BattleRun(
-            long battleRunId,
-            int stageId,
-            float bookMaxHealth,
-            int equipmentSlotCount)
+        internal BattleRun(long battleRunId, int stageId, float bookMaxHealth, int equipmentSlotCount)
         {
             _attacksView = _attacks.AsReadOnly();
             _effectsView = _effects.AsReadOnly();
@@ -40,20 +38,46 @@ namespace Game
         internal IReadOnlyList<BattleAttack> Attacks => _attacksView;
         internal IReadOnlyList<BattleEffect> Effects => _effectsView;
 
+        internal void RecordFact(BattleFact fact) => _pendingFacts.Add(fact);
+
+        internal IReadOnlyList<BattleFact> TakeFacts()
+        {
+            if (_pendingFacts.Count == 0)
+                return System.Array.Empty<BattleFact>();
+            // 发布前转移所有权；同步监听方取消或开始下一局时不会改变正在交付的事实。
+            var facts = System.Array.AsReadOnly(_pendingFacts.ToArray());
+            _pendingFacts.Clear();
+            return facts;
+        }
+
 
         internal void AdvanceSpawnTime(float deltaTime)
         {
             SpawnElapsedSeconds += deltaTime;
         }
 
-        internal long AllocateAttackId()
+        internal void AddAttack(
+            SpellType spellType,
+            IReadOnlyList<long> targetEnemyIds,
+            float targetPathPosition,
+            float travelSeconds,
+            float damage,
+            float shield,
+            float effectRange,
+            float effectDurationSeconds,
+            float slowMultiplier)
         {
-            return _nextAttackId++;
-        }
-
-        internal void AddAttack(BattleAttack attack)
-        {
-            _attacks.Add(attack);
+            _attacks.Add(new BattleAttack(
+                _nextAttackId++,
+                spellType,
+                targetEnemyIds,
+                targetPathPosition,
+                travelSeconds,
+                damage,
+                shield,
+                effectRange,
+                effectDurationSeconds,
+                slowMultiplier));
         }
 
         internal void RemoveAttackAt(int index)
@@ -61,14 +85,20 @@ namespace Game
             _attacks.RemoveAt(index);
         }
 
-        internal long AllocateEffectId()
+        internal void AddEffect(
+            SpellType spellType,
+            long targetEnemyId,
+            float pathPosition,
+            float range,
+            float durationSeconds)
         {
-            return _nextEffectId++;
-        }
-
-        internal void AddEffect(BattleEffect effect)
-        {
-            _effects.Add(effect);
+            _effects.Add(new BattleEffect(
+                _nextEffectId++,
+                spellType,
+                targetEnemyId,
+                pathPosition,
+                range,
+                durationSeconds));
         }
 
         internal void RemoveEffectAt(int index)
