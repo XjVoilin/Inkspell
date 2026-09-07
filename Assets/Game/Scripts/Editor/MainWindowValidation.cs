@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Game;
 using July.UI;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,13 +26,17 @@ namespace Game.Editor
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(InkspellUIPrefabGenerator.MainPrefabPath);
             Require(prefab != null && prefab.GetComponent<UIView>() is UIInkspellMainWindow,
                 "Configured MainWindow needs UIInkspellMainWindow on its root.");
+            Require(prefab.GetComponentsInChildren<Text>(true).Length == 0,
+                "MainWindow must use TextMeshPro for all UI text.");
+            foreach (var text in prefab.GetComponentsInChildren<TMP_Text>(true))
+                Require(text.font != null, $"Missing TMP font on {text.name}.");
             Require(prefab.transform.Find("Content/PaperWarmBg") != null, "MainWindow art is missing.");
             Require(prefab.GetComponentsInChildren<UISpellBoardGameView>(true).Length == 1, "Expected one spell board.");
             Require(prefab.GetComponentsInChildren<UIEquipmentBarGameView>(true).Length == 1, "Expected one equipment bar.");
             CheckArray(prefab.GetComponentInChildren<UISpellBoardGameView>(true), "_slots", 24);
             CheckArray(prefab.GetComponentInChildren<UIEquipmentBarGameView>(true), "_slots", 4);
             CheckArray(prefab.GetComponentInChildren<UIBattlefieldGameView>(true), "_enemyViews", 8);
-            CheckArray(prefab.GetComponentInChildren<UIBattlefieldGameView>(true), "_cooldownProgresses", 4);
+            CheckArray(prefab.GetComponentInChildren<UIBattlefieldGameView>(true), "_cooldownCovers", 4);
             foreach (var component in prefab.GetComponentsInChildren<MonoBehaviour>(true))
             {
                 Require(component != null, "Missing script on MainWindow.");

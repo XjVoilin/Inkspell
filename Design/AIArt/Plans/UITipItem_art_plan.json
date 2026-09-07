@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "screen": "UITipItem",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "requirements": [
+    "Design/Docs/GDD.md"
+  ],
+  "references": [
+    "Design/AIArt/References/GooseMarket/common_tips_bg.png",
+    "outputs/font-update/MainWindow-WenKai.png"
+  ],
+  "outputs": {
+    "directory": "Design/AIArt/ArtSource/UITipItem",
+    "authoringJson": "Design/AIArt/ArtSource/UITipItem/UITipItem_ui_data.json",
+    "preview": "Design/AIArt/ArtSource/UITipItem/UITipItem_preview.png"
+  },
+  "assets": [
+    {
+      "path": "UITipItem/bg_inkToast.png",
+      "role": "background",
+      "width": 1024,
+      "height": 128,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Use case: stylized-concept. Production Unity UI toast background sprite, exactly 1024 x 128 pixels, true transparent outside. A very wide low horizontal charcoal ink ribbon, near opaque dark center, subtle hand-painted paper grain, restrained antique gold thin upper and lower edges, softly irregular clipped ends. Matches Inkspell warm parchment and black/gold illustrated spellbook UI. GooseMarket reference function: simple dark stretchable toast strip. Center 80 percent quiet and blank for white TMP text. Edge decoration confined to outer 64 pixels, suitable nine-slice. Fill nearly entire canvas with 4 pixel transparent outer margin. Flat front view, no text, no symbols, no icons, no watermark, no shadows outside the ribbon."
+    }
+  ],
+  "localizationKeys": [
+    "SYNTHESIS_RESULT_HIGHER_TIER",
+    "SYNTHESIS_RESULT_MAGIC_INK",
+    "SYNTHESIS_REJECT_DIFFERENT_TIER"
+  ],
+  "componentRules": {
+    "forbidSlider": true,
+    "background": "Sliced Image, border 64/24/64/24; no raycast; runtime TMP text, no baked text."
+  }
+}

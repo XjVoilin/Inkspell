@@ -8,6 +8,7 @@ namespace Game.Aot
     public class GameEntry : JulyGameEntry
     {
         [SerializeField] private GameConfig _gameConfig = new();
+        [SerializeField] private LaunchPresentation _presentation;
 
         protected override void ConfigurePipeline(LaunchPipeline pipeline)
         {
@@ -19,11 +20,16 @@ namespace Game.Aot
 #endif
 
             // 顺序不可交换：热更程序集依赖已初始化的资源系统，业务系统又依赖热更程序集。
-            pipeline.Add(new InitializeAotSystemsStep());
-            pipeline.Add(new InitializeResourceSystemStep());
-            pipeline.Add(new HotUpdateStep());
-            pipeline.Add(new InitializeGameSystemsStep());
-            pipeline.Add(new LaunchGameStep());
+            ILaunchStep[] steps =
+            {
+                new InitializeAotSystemsStep(),
+                new InitializeResourceSystemStep(),
+                new HotUpdateStep(),
+                new InitializeGameSystemsStep(),
+                new LaunchGameStep()
+            };
+            for (var i = 0; i < steps.Length; i++)
+                pipeline.Add(_presentation != null ? _presentation.Present(steps[i], i, steps.Length) : steps[i]);
         }
 
         private void Update()

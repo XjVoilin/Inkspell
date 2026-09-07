@@ -72,11 +72,7 @@ namespace Game
         {
             var spells = _spellAssetSystem.GetSortedCraftingAreaSpells();
             var slots = new SpellCardViewData[_spellAssetStore.CraftingCapacity];
-            for (var index = 0; index < spells.Count; index++)
-            {
-                slots[index] = CreateSpellCard(spells[index], true);
-            }
-
+            for (var i = 0; i < spells.Count; i++) slots[i] = CreateSpellCard(spells[i], true);
             SpellBoard.Slots = slots;
         }
 

@@ -22,6 +22,91 @@ namespace Game.Tests
         [TearDown]
         public void TearDown() => _game?.Dispose();
 
+#if JULYGF_DEBUG
+        [Test]
+        public void GM_MaterialsAndInkRespectCapacityAndPublishChanges()
+        {
+            _game = new BattleFixture();
+            var changed = 0;
+            _game.Subscribe<SpellAssetsChangedEvent>(_ => changed++);
+            Assert.That(_game.AssetSystem.DebugAddMaterials(SpellType.Fireball, 1, 24), Is.EqualTo(24));
+            Assert.That(_game.AssetSystem.DebugAddMaterials(SpellType.Fireball, 1, 2), Is.Zero);
+            Assert.That(_game.AssetSystem.DebugEquipFourSpells(), Is.False);
+            _game.AssetSystem.DebugAddInk(1000);
+            Assert.That(_game.Assets.MagicInk, Is.EqualTo(1000));
+            Assert.That(changed, Is.EqualTo(25));
+        }
+
+        [Test]
+        public void CraftingSort_IsTierThenLevelDescending_AndSynthesisIdentifiesActualResult()
+        {
+            _game = new BattleFixture();
+            _game.AssetSystem.DebugAddMaterials(SpellType.Fireball,1,2);
+            _game.AssetSystem.DebugAddMaterials(SpellType.Shield,3,1);
+            _game.AssetSystem.DebugAddMaterials(SpellType.ChainLightning,2,1);
+            _game.AssetSystem.DebugAddMaterials(SpellType.Shield,2,1);
+            foreach (var item in _game.Assets.GetCraftingAreaSpells())
+                if (item.Type == SpellType.Shield && item.Tier == 2) _game.Assets.CommitUpgrade(item.InstanceId,0);
+            var sorted = _game.AssetSystem.GetSortedCraftingAreaSpells();
+            Assert.That(sorted[0].Tier,Is.EqualTo(3));
+            Assert.That(sorted[1].Tier,Is.EqualTo(2));
+            Assert.That(sorted[1].Level,Is.EqualTo(2));
+            Assert.That(sorted[2].Level,Is.EqualTo(1));
+            SpellSynthesisResolvedEvent result = default;
+            _game.Subscribe<SpellSynthesisResolvedEvent>(value => result=value);
+            _game.Synthesis.DebugNextSuccess=true;
+            Assert.That(_game.Synthesis.TrySynthesize(sorted[3].InstanceId,sorted[4].InstanceId),Is.True);
+            Assert.That(_game.Assets.TryGetSpell(result.ResultInstanceId,out var spell),Is.True);
+            Assert.That(spell.Type,Is.EqualTo(result.RewardSpellType));
+            Assert.That(spell.Tier,Is.EqualTo(result.RewardTier));
+        }
+
+        [Test]
+        public void GM_OutcomeOverrideSurvivesRejectionAndIsConsumedOnce()
+        {
+            _game = new BattleFixture();
+            _game.AssetSystem.DebugAddMaterials(SpellType.Fireball, 1, 2);
+            var inputs = _game.Assets.GetCraftingAreaSpells();
+            _game.Synthesis.DebugNextSuccess = true;
+            Assert.That(_game.Synthesis.TrySynthesize(inputs[0].InstanceId, inputs[0].InstanceId), Is.False);
+            Assert.That(_game.Synthesis.DebugNextSuccess, Is.True);
+            Assert.That(_game.Synthesis.TrySynthesize(inputs[0].InstanceId, inputs[1].InstanceId), Is.True);
+            Assert.That(_game.Synthesis.DebugNextSuccess, Is.Null);
+            Assert.That(_game.Assets.GetCraftingAreaSpells()[0].Tier, Is.EqualTo(2));
+            _game.AssetSystem.DebugAddMaterials(SpellType.Fireball, 1, 2);
+            inputs = _game.Assets.GetCraftingAreaSpells();
+            _game.Synthesis.DebugNextSuccess = false;
+            Assert.That(_game.Synthesis.TrySynthesize(inputs[1].InstanceId, inputs[2].InstanceId), Is.True);
+            Assert.That(_game.Synthesis.DebugNextSuccess, Is.Null);
+            Assert.That(_game.Assets.MagicInk, Is.GreaterThan(0));
+        }
+
+        [Test]
+        public void GM_FourSpellLoadoutPreservesOriginalEquipment()
+        {
+            _game = new BattleFixture();
+            Assert.That(_game.AssetSystem.DebugEquipFourSpells(), Is.True);
+            Assert.That(_game.Assets.GetCraftingAreaSpells().Count, Is.EqualTo(1));
+            for (var i = 0; i < 4; i++)
+            {
+                Assert.That(_game.Assets.TryGetEquippedSpell(i, out var spell), Is.True);
+                Assert.That((int)spell.Type, Is.EqualTo(i + 1));
+            }
+        }
+
+        [Test]
+        public void GM_FourSpellLoadoutRejectsInsufficientSpaceBeforeAnyChange()
+        {
+            _game = new BattleFixture();
+            _game.AssetSystem.DebugAddMaterials(SpellType.Fireball, 1, 21);
+            _game.Assets.TryGetEquippedSpell(0, out var before);
+            Assert.That(_game.AssetSystem.DebugEquipFourSpells(), Is.False);
+            Assert.That(_game.Assets.GetCraftingAreaSpells().Count, Is.EqualTo(21));
+            _game.Assets.TryGetEquippedSpell(0, out var after);
+            Assert.That(after.InstanceId, Is.EqualTo(before.InstanceId));
+        }
+#endif
+
         [Test]
         public void PreCanceledRequest_DoesNotCreateOrPublishBattle()
         {
@@ -428,6 +513,8 @@ namespace Game.Tests
             internal readonly StageProgressionStore ProgressStore = new();
             internal readonly AutoBattleSystem Battle = new();
             internal readonly StageProgressionSystem Progress = new();
+            internal readonly SpellAssetSystem AssetSystem = new();
+            internal readonly SpellSynthesisSystem Synthesis = new();
             internal readonly Tables Tables;
 
             internal BattleFixture(bool emptyStages = false, bool delayedSpawn = false, int startingStage = 1)
@@ -466,6 +553,8 @@ namespace Game.Tests
                 });
                 Context.RegisterSystem(Battle);
                 Context.RegisterSystem(Progress);
+                Context.RegisterSystem(AssetSystem);
+                Context.RegisterSystem(Synthesis);
                 Context.InitializeAsync().GetAwaiter().GetResult();
                 Battle.OnFocusChanged(true);
                 Battle.OnUpdate(0f);

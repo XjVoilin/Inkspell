@@ -29,7 +29,9 @@ namespace Game.Editor
                 // A bound prefab is artist-editable. Re-running must preserve those edits.
                 if (prefab.GetComponent<UIInkspellMainWindow>() != null)
                 {
+                    SpellPresentationAuthoring.Configure(prefab);
                     ValidateMainWindow(prefab);
+                    SavePrefab(prefab, MainPrefabPath);
                     return;
                 }
 
@@ -128,6 +130,7 @@ namespace Game.Editor
                 SetObject(window, "_battlefield", battlefield);
                 // Dragged cards must draw above all other interface regions.
                 boardRoot.SetAsLastSibling();
+                SpellPresentationAuthoring.Configure(prefab);
                 ApplyUIFont(prefab);
                 ValidateMainWindow(prefab);
                 SavePrefab(prefab, MainPrefabPath);
@@ -155,7 +158,7 @@ namespace Game.Editor
             selected.GetComponent<Image>().sprite = ArtSprite("img_spellSelectedOverlay");
             var tier = CreateLocalizedText("Tier", root, new Vector2(.06f, .78f), new Vector2(.94f, .98f),
                 18, TextAlignmentOptions.Center, Ink);
-            var level = CreateLegacyText("Level", root, new Vector2(.05f, .02f), new Vector2(.28f, .23f), 18, Ink);
+            var level = CreateText("Level", root, new Vector2(.05f, .02f), new Vector2(.28f, .23f), 18, Ink);
             var locked = CreateRect("Locked", root, new Vector2(.73f, .02f), new Vector2(.98f, .35f));
             AddImage(locked.gameObject, Color.white, false).sprite = ArtSprite("icon_spellLocked");
             locked.gameObject.SetActive(false);
@@ -192,13 +195,10 @@ namespace Game.Editor
             var enemies = new UIEnemyBattleGameView[8];
             for (var i = 0; i < enemies.Length; i++)
                 enemies[i] = BindEnemy(path, i);
-            var cooldowns = new UIProgressBar[4];
-            var cooldownTexts = new Text[4];
+            var cooldownTexts = new TMP_Text[4];
             for (var i = 0; i < 4; i++)
             {
-                cooldowns[i] = CreateProgressBar($"Cooldown{i}", equipment[i].transform,
-                    new Vector2(.12f, .06f), new Vector2(.88f, .10f), Color.clear, new Color(.28f, .36f, .7f));
-                cooldownTexts[i] = CreateLegacyText($"CooldownText{i}", equipment[i].transform,
+                cooldownTexts[i] = CreateText($"CooldownText{i}", equipment[i].transform,
                     new Vector2(.7f, .08f), new Vector2(.94f, .3f), 18, Ink);
             }
             var fireball = ArtEffect("FireballFeedback", path, "icon_spellFireball");
@@ -217,7 +217,6 @@ namespace Game.Editor
             SetObject(view, "_shieldFeedback", bookShield);
             SetObject(view, "_enemyPathRoot", path);
             SetObjects(view, "_enemyViews", enemies);
-            SetObjects(view, "_cooldownProgresses", cooldowns);
             SetObjects(view, "_cooldownTexts", cooldownTexts);
             SetObject(view, "_fireballFeedback", fireball);
             SetObject(view, "_chainLightningFeedback", chain);
@@ -239,7 +238,7 @@ namespace Game.Editor
             var view = root.gameObject.AddComponent<UIEnemyBattleGameView>();
             var health = CreateProgressBar("Health", root, new Vector2(.1f, 1.02f), new Vector2(.9f, 1.07f),
                 Color.clear, new Color(.7f, .15f, .12f));
-            var text = CreateLegacyText("HealthText", root, new Vector2(0, 1.07f), new Vector2(1, 1.22f), 18, Ink);
+            var text = CreateText("HealthText", root, new Vector2(0, 1.07f), new Vector2(1, 1.22f), 18, Ink);
             var slow = CreateIndicator("Slow", root, new Color(.2f, .7f, 1, .4f));
             slow.GetComponent<Image>().sprite = ArtSprite("icon_spellIceRing");
             var hit = CreateIndicator("Hit", root, new Color(1, .3f, .15f, .4f));

@@ -4,7 +4,6 @@ using System.Linq;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Game.Editor
 {
@@ -24,6 +23,7 @@ namespace Game.Editor
             font = TMP_FontAsset.CreateFontAsset(GetUIFontSource(), 48, 5,
                 UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 2048, 2048);
             font.name = "LXGW WenKai SDF";
+            font.material.name = font.name + " Material";
             var characters = new string((string.Concat(Enumerable.Range(32, 95).Select(c => (char)c)) +
                 File.ReadAllText("Assets/Game/Res/Configs/tblanguage.json"))
                 .Where(c => !char.IsControl(c)).Distinct().ToArray());
@@ -46,8 +46,6 @@ namespace Game.Editor
                 text.font = font;
                 text.fontSharedMaterial = font.material;
             }
-            foreach (var text in root.GetComponentsInChildren<Text>(true))
-                text.font = GetUIFontSource();
         }
 
         [MenuItem("July/Inkspell/Apply Project UI Font")]

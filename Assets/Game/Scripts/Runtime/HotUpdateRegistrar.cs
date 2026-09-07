@@ -20,6 +20,10 @@ using July.Time;
 using July.UI;
 using SimpleJSON;
 using UnityEngine;
+#if JULYGF_DEBUG
+using July.Diagnostics;
+using TMPro;
+#endif
 
 namespace Game
 {
@@ -78,7 +82,20 @@ namespace Game
             context.RegisterSystem(new SpellGenerationSystem());
             context.RegisterSystem(new OfflineRewardPresentationSystem());
             context.RegisterSystem(new InkspellAudioPresentationSystem());
+#if JULYGF_DEBUG
+            RegisterGMCommands(context);
+#endif
         }
+
+#if JULYGF_DEBUG
+        private static void RegisterGMCommands(ArchContext context)
+        {
+            var gm = new GMSystem();
+            gm.Register(typeof(SpellGM));
+            gm.Register(typeof(BattleGM));
+            context.RegisterSystem(gm);
+        }
+#endif
 
         public async UniTask PreInitializeAsync(CancellationToken ct = default)
         {
@@ -136,6 +153,10 @@ namespace Game
         {
             this.GetSystem<IUISystem>().SetMainProvider(new LubanUIWindowProvider());
             await this.RunProcedure(new EnterMainGameProcedure());
+#if JULYGF_DEBUG
+            this.GetSystem<IGMSystem>().Build(TMP_Settings.defaultFontAsset);
+            GMPanelLayout.Configure();
+#endif
         }
     }
 }

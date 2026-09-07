@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "screen": "Launch",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "requirements": [
+    "Design/Docs/GDD.md",
+    "Design/Docs/Launch画面.md"
+  ],
+  "references": [
+    "outputs/font-update/MainWindow-WenKai.png"
+  ],
+  "outputs": {
+    "directory": "Design/AIArt/ArtSource/Launch",
+    "authoringJson": "Design/AIArt/ArtSource/Launch/Launch_ui_data.json",
+    "preview": "Design/AIArt/ArtSource/Launch/Launch_preview.png"
+  },
+  "assets": [
+    {
+      "path": "Launch/bg_paperWarm.png",
+      "role": "background",
+      "width": 1080,
+      "height": 1920,
+      "transparent": false,
+      "action": "reuse",
+      "prompt": "Reuse unchanged MainWindow/bg_paperWarm.png; same warm paper and black/gold ink palette."
+    },
+    {
+      "path": "Launch/img_livingSpellbook.png",
+      "role": "decoration",
+      "width": 384,
+      "height": 404,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Reuse unchanged MainWindow/img_livingSpellbook.png; same warm paper and black/gold ink palette."
+    },
+    {
+      "path": "Launch/img_spellSlotEmptyMark.png",
+      "role": "decoration",
+      "width": 96,
+      "height": 96,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Reuse unchanged MainWindow/img_spellSlotEmptyMark.png; same warm paper and black/gold ink palette."
+    },
+    {
+      "path": "Launch/img_progressTrack.png",
+      "role": "decoration",
+      "width": 512,
+      "height": 48,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Reuse unchanged MainWindow/img_progressTrack.png; same warm paper and black/gold ink palette."
+    },
+    {
+      "path": "Launch/img_progressFill.png",
+      "role": "decoration",
+      "width": 512,
+      "height": 48,
+      "transparent": true,
+      "action": "reuse",
+      "prompt": "Reuse unchanged MainWindow/img_progressFill.png; same warm paper and black/gold ink palette."
+    }
+  ],
+  "localizationKeys": [
+    "LAUNCH_TITLE",
+    "LAUNCH_AWAKEN",
+    "LAUNCH_RESOURCES",
+    "LAUNCH_UPDATE",
+    "LAUNCH_SYSTEMS",
+    "LAUNCH_ENTER",
+    "LAUNCH_FAILURE"
+  ],
+  "componentRules": {
+    "forbidSlider": true,
+    "progressBar": "Native Image horizontal fill: completed launch stages only, no download percentage.",
+    "runtime": "Bundled Canvas and font, authored by LaunchSceneAuthoring; no hot-update UI dependency."
+  }
+}

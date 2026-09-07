@@ -6,7 +6,7 @@ using July.Logging;
 
 namespace Game
 {
-    internal sealed class SpellAssetStore : StoreBase<SpellAssetStoreData>
+    internal sealed partial class SpellAssetStore : StoreBase<SpellAssetStoreData>
     {
         // 下列索引均由 Data 派生，不写入存档；换档后由 OnDataReplaced 统一重建。
         private readonly Dictionary<long, SpellInstance> _spellsById = new();
@@ -150,7 +150,8 @@ namespace Game
             return true;
         }
 
-        internal void CommitSynthesisSuccess(
+
+        internal long CommitSynthesisSuccess(
             long firstId,
             long secondId,
             SpellType resultType,
@@ -179,6 +180,7 @@ namespace Game
             AddSpell(result);
 
             CommitChange(true);
+            return resultId;
         }
 
         internal void CommitSynthesisFailure(

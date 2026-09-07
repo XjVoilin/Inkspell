@@ -1,9 +1,8 @@
 using System;
-using Cysharp.Threading.Tasks;
 using July.Arch;
 using July.Localization;
-using July.Resource;
 using July.UI;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -17,15 +16,39 @@ namespace Game
         IBeginDragHandler,
         IDragHandler,
         IEndDragHandler,
+        IPointerDownHandler,
         IDropHandler
     {
         [SerializeField] private UIItemSlot _itemSlot;
         [SerializeField] private UILocalizedText _tierText;
-        [SerializeField] private Text _levelText;
+        [SerializeField] private TMP_Text _levelText;
         [SerializeField] private GameObject _lockedIndicator;
 
-        private ResourceHandle<Sprite> _iconHandle;
-        private int _renderVersion;
+        [Serializable]
+        private struct IconBinding
+        {
+            public string ResourceKey;
+            public Sprite Sprite;
+        }
+        [SerializeField] private IconBinding[] _iconBindings;
+        private Sprite _displayedIcon;
+        [SerializeField] private SpellTierGraphic _tierGraphic;
+        [SerializeField] private CanvasGroup _presentationGroup;
+        private bool _dragged;
+        [SerializeField] private Transform _iconTransform;
+
+        internal Sprite DisplayedIcon => _displayedIcon;
+        internal void SetDragDimmed(bool dimmed)
+        {
+            _presentationGroup.alpha = dimmed ? .35f : 1f;
+        }
+
+        internal void RenderDragCopy(UISpellCardGameView source)
+        {
+            ApplyLabels(source.Data);
+            _displayedIcon = source.DisplayedIcon;
+            _itemSlot.SetItem(_displayedIcon, 1);
+        }
 
         internal SpellCardViewData Data { get; private set; }
 
@@ -37,32 +60,44 @@ namespace Game
 
         public void Render(SpellCardViewData data)
         {
-            Data = data;
-            _renderVersion++;
-            ReleaseIcon();
+            ApplyLabels(data);
+            if (data == null) return;
+            _displayedIcon = null;
+            foreach (var binding in _iconBindings)
+                if (binding.ResourceKey == data.IconResourceKey) { _displayedIcon = binding.Sprite; break; }
+            if (_displayedIcon == null)
+            {
+                _itemSlot.SetEmpty();
+                Debug.LogError($"Missing authored spell icon: {data.IconResourceKey}", this);
+                return;
+            }
+            _itemSlot.SetItem(_displayedIcon, 1);
+        }
 
+        private void ApplyLabels(SpellCardViewData data)
+        {
+            Data = data;
+            _tierGraphic.SetTier(data?.Tier ?? 0);
+            if (_iconTransform != null) _iconTransform.localScale = Vector3.one * (data == null ? 1 : .80f + Mathf.Clamp(data.Tier, 1, 3) * .07f);
+            _tierText.gameObject.SetActive(data != null);
+            _levelText.gameObject.SetActive(data != null);
+            _lockedIndicator.SetActive(data != null && data.IsLocked);
             if (data == null)
             {
                 _itemSlot.SetEmpty();
-                _tierText.gameObject.SetActive(false);
-                _levelText.gameObject.SetActive(false);
-                _lockedIndicator.SetActive(false);
+                _displayedIcon = null;
                 return;
             }
-
-            _itemSlot.SetEmpty();
-            _tierText.gameObject.SetActive(true);
             _tierText.SetKey(data.TierDisplayKey);
-            _levelText.gameObject.SetActive(true);
             _levelText.text = data.Level.ToString();
-            _lockedIndicator.SetActive(data.IsLocked);
-            LoadIconAsync(data.IconResourceKey, _renderVersion).Forget();
         }
 
         internal void SetSelected(bool selected)
         {
             _itemSlot.SetSelected(selected);
         }
+
+        public void OnPointerDown(PointerEventData eventData) => _dragged = false;
 
         public void OnBeginDrag(PointerEventData eventData)
         {
@@ -71,6 +106,7 @@ namespace Game
                 return;
             }
 
+            _dragged = true;
             DragStarted?.Invoke(this, eventData);
         }
 
@@ -86,17 +122,14 @@ namespace Game
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            if (Data == null || !Data.CanDrag)
-            {
-                return;
-            }
-
+            // A successful drop can consume this card before EndDrag is delivered.
+            // Always release the shadow even when Render has already replaced its data.
             DragEnded?.Invoke(this, eventData);
         }
 
         public void OnDrop(PointerEventData eventData)
         {
-            var source = eventData.pointerDrag.GetComponentInParent<UISpellCardGameView>();
+            var source = eventData.pointerDrag != null ? eventData.pointerDrag.GetComponentInParent<UISpellCardGameView>() : null;
             if (source == null || source.Data == null || !source.Data.CanDrag)
             {
                 return;
@@ -113,35 +146,16 @@ namespace Game
         protected override void OnViewDestroy()
         {
             _itemSlot.OnClicked -= OnItemSlotClicked;
-            _renderVersion++;
-            ReleaseIcon();
         }
 
         private void OnItemSlotClicked(UIItemSlot itemSlot)
         {
+            if (_dragged) { _dragged = false; return; }
             if (Data != null)
             {
                 Clicked?.Invoke(this);
             }
         }
 
-        private async UniTask LoadIconAsync(string resourceKey, int renderVersion)
-        {
-            var handle = await GetSystem<IResourceSystem>().LoadAssetAsync<Sprite>(resourceKey);
-            if (this == null || renderVersion != _renderVersion)
-            {
-                handle.Dispose();
-                return;
-            }
-
-            _iconHandle = handle;
-            _itemSlot.SetItem(handle.Asset, 1);
-        }
-
-        private void ReleaseIcon()
-        {
-            _iconHandle?.Dispose();
-            _iconHandle = null;
-        }
     }
 }

@@ -172,7 +172,7 @@ namespace Game
                 var previousHealth = target.Health;
                 target.ApplyDamage(attack.Damage);
                 if (target.Health < previousHealth)
-                    run.RecordFact(new BattleFact(BattleFactKind.EnemyDamaged, target));
+                    run.RecordFact(new BattleFact(BattleFactKind.EnemyDamaged, target, previousHealth - target.Health));
                 if (attack.SpellType == SpellType.FrostRing)
                 {
                     target.ApplySlow(
@@ -278,7 +278,7 @@ namespace Game
                 slowMultiplier: combat.SlowMultiplier);
             run.Cooldowns.Set(equipmentSlot, combat.CooldownSeconds);
             run.RecordFact(new BattleFact(BattleFactKind.SpellCast,
-                spell.Type, targetPosition, targetIds.Count));
+                spell.Type, targetPosition, targetIds.Count, _battleRule.AttackTravelSeconds));
         }
 
         private IReadOnlyList<long> SelectTargets(BattleRun run,

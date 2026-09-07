@@ -10,7 +10,7 @@ namespace Game
     /// <summary>
     /// 对一次玩家主动二合进行合法性判定、随机结算与完整资产提交。
     /// </summary>
-    public sealed class SpellSynthesisSystem : SystemBase
+    public sealed partial class SpellSynthesisSystem : SystemBase
     {
         // 使用 24 位离散样本，既满足 Unity Random 的整数范围，也便于复用同一次随机结果。
         private const int RandomResolution = 1 << 24;
@@ -20,8 +20,12 @@ namespace Game
         private TbSynthesisRule _synthesisRules;
         private TbSynthesisReward _synthesisRewards;
 
+
+        private static readonly Unity.Profiling.ProfilerMarker SynthesisMarker = new("Inkspell.Synthesis.Commit");
+
         public bool TrySynthesize(long firstSpellId, long secondSpellId)
         {
+            using var sample = SynthesisMarker.Auto();
             if (!_spellAssets.TryGetSpell(firstSpellId, out SpellInstance first) ||
                 !_spellAssets.TryGetSpell(secondSpellId, out SpellInstance second))
             {
@@ -61,6 +65,7 @@ namespace Game
 
             var synthesisRule = _synthesisRules.Get(first.Tier);
             var randomUnit = UnityEngine.Random.Range(0, RandomResolution) / (double)RandomResolution;
+            OverrideSynthesisRandom(synthesisRule.SuccessRate, ref randomUnit);
 
             if (randomUnit >= synthesisRule.SuccessRate)
             {
@@ -83,7 +88,7 @@ namespace Game
                 rewardTier,
                 randomUnit / synthesisRule.SuccessRate);
 
-            _spellAssets.CommitSynthesisSuccess(
+            var resultId = _spellAssets.CommitSynthesisSuccess(
                 firstSpellId,
                 secondSpellId,
                 reward.SpellType,
@@ -92,7 +97,8 @@ namespace Game
                 SynthesisOutcomeKind.HigherTierSpell,
                 reward.SpellType,
                 rewardTier,
-                0));
+                0,
+                resultId));
             return true;
         }
 
@@ -106,6 +112,8 @@ namespace Game
             _synthesisRewards = config.GetTable<TbSynthesisReward>();
             return UniTask.CompletedTask;
         }
+
+        partial void OverrideSynthesisRandom(double successRate, ref double randomUnit);
 
         private bool Reject(
             long firstSpellId,

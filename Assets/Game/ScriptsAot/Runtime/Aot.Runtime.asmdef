@@ -2,6 +2,8 @@
   "name": "Aot.Runtime",
   "rootNamespace": "GameTemplate.Aot",
   "references": [
+    "Unity.ugui",
+    "Unity.TextMeshPro",
     "July.Arch",
     "July.Launch",
     "July.Logging",

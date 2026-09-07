@@ -14,6 +14,23 @@ namespace Game.Tests
     public sealed class MainWindowPrefabTests
     {
         private const string PrefabPath = "Assets/Game/Res/Prefabs/UI/MainWindow/MainWindow.prefab";
+
+        [Test]
+        public void ConsumedCard_EndDragStillReleasesDragShadow()
+        {
+            var source = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath)
+                .GetComponentInChildren<UISpellCardGameView>(true);
+            var card = UnityEngine.Object.Instantiate(source);
+            try
+            {
+                card.Render(null);
+                var ended = false;
+                card.DragEnded += (_, __) => ended = true;
+                card.OnEndDrag(null);
+                Assert.That(ended, Is.True);
+            }
+            finally { UnityEngine.Object.DestroyImmediate(card.gameObject); }
+        }
         [Serializable] private class WindowRows { public WindowRow[] rows; }
         [Serializable] private class WindowRow { public int id; public string windowName; }
 

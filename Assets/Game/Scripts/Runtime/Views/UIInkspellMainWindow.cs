@@ -116,7 +116,8 @@ namespace Game
                 {
                     case BattleFactKind.SpellCast:
                     case BattleFactKind.SpellImpact:
-                        _battlefield.PlaySpellFeedback(fact.SpellType, _data.NormalizePath(fact.PathPosition));
+                        _battlefield.PlaySpellFeedback(fact.Kind, fact.SpellType,
+                            _data.NormalizePath(fact.PathPosition), fact.TravelSeconds);
                         break;
                     case BattleFactKind.EnemySpawned:
                     case BattleFactKind.EnemyDamaged:
@@ -128,7 +129,7 @@ namespace Game
                             Health = fact.Health,
                             MaxHealth = fact.MaxHealth,
                             PathNormalized = _data.NormalizePath(fact.PathPosition),
-                        });
+                        }, fact.Damage);
                         break;
                     case BattleFactKind.BookDamaged:
                     case BattleFactKind.ShieldApplied:
@@ -190,6 +191,7 @@ namespace Game
 
         private void OnSpellSynthesisResolved(SpellSynthesisResolvedEvent eventData)
         {
+            _spellBoard.ResolveSynthesis(eventData.Kind == SynthesisOutcomeKind.HigherTierSpell, eventData.ResultInstanceId);
             if (eventData.Kind == SynthesisOutcomeKind.HigherTierSpell)
             {
                 _ui.ShowTip(_localization.Get("SYNTHESIS_RESULT_HIGHER_TIER"));

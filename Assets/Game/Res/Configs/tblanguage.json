@@ -210,5 +210,33 @@
   {
     "Key": "OFFLINE_REWARD_CONTINUE",
     "CN": "继续"
+  },
+  {
+    "Key": "LAUNCH_TITLE",
+    "CN": "墨法奇书"
+  },
+  {
+    "Key": "LAUNCH_AWAKEN",
+    "CN": "正在唤醒魔法书……"
+  },
+  {
+    "Key": "LAUNCH_RESOURCES",
+    "CN": "正在铺展书页……"
+  },
+  {
+    "Key": "LAUNCH_UPDATE",
+    "CN": "正在准备魔法篇章……"
+  },
+  {
+    "Key": "LAUNCH_SYSTEMS",
+    "CN": "正在注入魔法墨水……"
+  },
+  {
+    "Key": "LAUNCH_ENTER",
+    "CN": "正在翻开新的篇章……"
+  },
+  {
+    "Key": "LAUNCH_FAILURE",
+    "CN": "书页未能展开，请重新启动游戏"
   }
 ]

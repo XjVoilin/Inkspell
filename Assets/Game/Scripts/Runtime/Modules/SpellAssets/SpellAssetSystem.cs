@@ -9,10 +9,11 @@ namespace Game
     /// <summary>
     /// 负责法术资产恢复后的新档初始化与配置派生的稳定排列。
     /// </summary>
-    public sealed class SpellAssetSystem : SystemBase
+    public sealed partial class SpellAssetSystem : SystemBase
     {
         private SpellAssetStore _store;
         private TbSpellDefinition _spellDefinitions;
+
 
         internal IReadOnlyList<SpellInstance> GetSortedCraftingAreaSpells()
         {
@@ -37,6 +38,10 @@ namespace Game
             SpellInstance left,
             SpellInstance right)
         {
+            var tierComparison = right.Tier.CompareTo(left.Tier);
+            if (tierComparison != 0) return tierComparison;
+            var levelComparison = right.Level.CompareTo(left.Level);
+            if (levelComparison != 0) return levelComparison;
             var priorityComparison = _spellDefinitions
                 .Get(left.Type)
                 .DisplayPriority

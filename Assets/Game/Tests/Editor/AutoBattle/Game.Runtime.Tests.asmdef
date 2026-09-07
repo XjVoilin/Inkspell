@@ -5,6 +5,7 @@
     "Game.Runtime",
     "July.Arch",
     "July.Config",
+    "July.Diagnostics",
     "July.Events",
     "Luban.Runtime",
     "UniTask"

@@ -1,0 +1,24 @@
+{
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "layers": [
+    {
+      "id": 1,
+      "name": "UITipItem/bg_inkToast",
+      "groupPath": "tip",
+      "type": "image",
+      "x": 45,
+      "y": 896,
+      "width": 990,
+      "height": 128,
+      "visible": true,
+      "order": 100,
+      "opacity": 100,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotationZ": 0
+    }
+  ]
+}

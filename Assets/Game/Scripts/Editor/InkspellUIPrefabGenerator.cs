@@ -151,7 +151,7 @@ namespace Game.Editor
             return text;
         }
 
-        private static Text CreateLegacyText(
+        private static TMP_Text CreateText(
             string name,
             Transform parent,
             Vector2 anchorMin,
@@ -160,10 +160,11 @@ namespace Game.Editor
             Color color)
         {
             var root = CreateRect(name, parent, anchorMin, anchorMax);
-            var text = root.gameObject.AddComponent<Text>();
-            text.font = GetUIFontSource();
+            var text = root.gameObject.AddComponent<TextMeshProUGUI>();
+            text.font = GetUIFont();
+            text.enableWordWrapping = false;
             text.fontSize = fontSize;
-            text.alignment = TextAnchor.MiddleCenter;
+            text.alignment = TextAlignmentOptions.Center;
             text.color = color;
             text.raycastTarget = false;
             return text;

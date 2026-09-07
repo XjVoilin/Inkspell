@@ -6,6 +6,7 @@
     "Luban.Runtime",
     "UniTask",
     "July.Arch",
+    "July.Diagnostics",
     "July.Audio",
     "July.Config",
     "July.Fsm",

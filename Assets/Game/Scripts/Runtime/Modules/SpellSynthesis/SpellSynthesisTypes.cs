@@ -42,17 +42,20 @@ namespace Game
             SynthesisOutcomeKind kind,
             SpellType rewardSpellType,
             int rewardTier,
-            int inkReward)
+            int inkReward,
+            long resultInstanceId = 0)
         {
             Kind = kind;
             RewardSpellType = rewardSpellType;
             RewardTier = rewardTier;
             InkReward = inkReward;
+            ResultInstanceId = resultInstanceId;
         }
 
         public SynthesisOutcomeKind Kind { get; }
         public SpellType RewardSpellType { get; }
         public int RewardTier { get; }
         public int InkReward { get; }
+        public long ResultInstanceId { get; }
     }
 }

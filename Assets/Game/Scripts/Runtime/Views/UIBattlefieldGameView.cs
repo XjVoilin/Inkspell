@@ -4,6 +4,7 @@ using cfg;
 using July.Arch;
 using July.Localization;
 using July.UI;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,7 +16,6 @@ namespace Game
     public sealed class UIBattlefieldGameView : GameView
     {
         private const float BookFeedbackSeconds = 0.25f;
-        private const float SpellFeedbackSeconds = 0.3f;
         private const float ResultFeedbackSeconds = 1f;
         private const float RetryFeedbackSeconds = 0.8f;
 
@@ -32,8 +32,7 @@ namespace Game
         [SerializeField] private UIEnemyBattleGameView[] _enemyViews;
 
         [Header("四槽冷却")]
-        [SerializeField] private UIProgressBar[] _cooldownProgresses;
-        [SerializeField] private Text[] _cooldownTexts;
+        [SerializeField] private TMP_Text[] _cooldownTexts;
 
         [Header("法术表现绑定入口")]
         [SerializeField] private RectTransform _fireballFeedback;
@@ -53,12 +52,14 @@ namespace Game
         private bool _retryPending;
         private float _bookHitFeedbackRemaining;
         private float _shieldFeedbackRemaining;
-        private float _fireballFeedbackRemaining;
-        private float _chainLightningFeedbackRemaining;
-        private float _frostRingFeedbackRemaining;
-        private float _spellShieldFeedbackRemaining;
         private float _resultFeedbackRemaining;
         private float _retryFeedbackRemaining;
+
+        private BattlePresentationEffects _effects;
+        private RectTransform _bookArt;
+        private Vector2 _bookRest;
+        private float _presentationTime;
+        private float _castKick;
 
         public void Render(BattlefieldViewData data)
         {
@@ -80,6 +81,7 @@ namespace Game
                 }
 
                 ClearEnemyViews();
+                _effects?.Clear();
             }
 
             RenderBook(data);
@@ -100,6 +102,8 @@ namespace Game
 
         protected override void OnViewAwake()
         {
+            _bookArt = (RectTransform)_bookHitFeedback.transform.parent;
+            _bookRest = _bookArt.anchoredPosition;
             ResetPresentation();
         }
 
@@ -112,12 +116,14 @@ namespace Game
         {
             TickFeedback(_bookHitFeedback, ref _bookHitFeedbackRemaining);
             TickFeedback(_shieldFeedback, ref _shieldFeedbackRemaining);
-            TickFeedback(_fireballFeedback.gameObject, ref _fireballFeedbackRemaining);
-            TickFeedback(
-                _chainLightningFeedback.gameObject,
-                ref _chainLightningFeedbackRemaining);
-            TickFeedback(_frostRingFeedback.gameObject, ref _frostRingFeedbackRemaining);
-            TickFeedback(_spellShieldFeedback.gameObject, ref _spellShieldFeedbackRemaining);
+            _effects?.Tick(Time.deltaTime);
+            _presentationTime += Time.deltaTime;
+            _castKick = Mathf.MoveTowards(_castKick, 0, Time.deltaTime * 5);
+            if (_bookArt != null)
+            {
+                _bookArt.anchoredPosition = _bookRest + new Vector2(-_castKick * 12, Mathf.Sin(_presentationTime * 2) * 4);
+                _bookArt.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(_presentationTime) * 1.5f - _castKick * 4);
+            }
             TickFeedback(_resultFeedback.gameObject, ref _resultFeedbackRemaining);
             TickFeedback(_retryFeedback.gameObject, ref _retryFeedbackRemaining);
         }
@@ -166,25 +172,18 @@ namespace Game
             }
         }
 
+        [SerializeField] private Image[] _cooldownCovers;
+
         private void RenderCooldowns(IReadOnlyList<SpellCooldownViewData> cooldowns)
         {
-            foreach (var progress in _cooldownProgresses)
+            for (var i = 0; i < _cooldownCovers.Length; i++)
             {
-                progress.SetValue(0f, 0f);
-            }
-
-            foreach (var text in _cooldownTexts)
-            {
-                text.text = string.Empty;
-            }
-
-            foreach (var cooldown in cooldowns)
-            {
-                var slot = cooldown.EquipmentSlot;
-                _cooldownProgresses[slot].SetValue(
-                    cooldown.ReadyProgressSeconds,
-                    cooldown.TotalSeconds);
-                _cooldownTexts[slot].text = cooldown.RemainingSeconds.ToString("0.0");
+                SpellCooldownViewData state = null;
+                foreach (var cooldown in cooldowns) if (cooldown.EquipmentSlot == i) { state = cooldown; break; }
+                var remaining = state?.RemainingSeconds ?? 0;
+                _cooldownCovers[i].fillAmount = state != null && state.TotalSeconds > 0 ? Mathf.Clamp01(remaining / state.TotalSeconds) : 0;
+                if (remaining > .01f) _cooldownTexts[i].SetText("{0:1}", remaining);
+                else _cooldownTexts[i].text = string.Empty;
             }
         }
 
@@ -196,7 +195,7 @@ namespace Game
                 Pulse(_bookHitFeedback, ref _bookHitFeedbackRemaining, BookFeedbackSeconds);
         }
 
-        internal void PlayEnemyFeedback(BattleFactKind kind, EnemyBattleViewData data)
+        internal void PlayEnemyFeedback(BattleFactKind kind, EnemyBattleViewData data, float damage = 0f)
         {
             if (!_enemyViewsById.TryGetValue(data.RuntimeId, out var view))
             {
@@ -206,7 +205,7 @@ namespace Game
             view.SetPathPosition(_enemyPathRoot, data.PathNormalized);
             view.Render(data);
             if (kind == BattleFactKind.EnemyDamaged)
-                view.PlayHit();
+                view.PlayHit(damage);
             else if (kind == BattleFactKind.EnemyDied)
             {
                 _enemyViewsById.Remove(data.RuntimeId);
@@ -214,37 +213,24 @@ namespace Game
             }
         }
 
-        internal void PlaySpellFeedback(SpellType spellType, float pathNormalized)
+        internal void PlaySpellFeedback(BattleFactKind kind, SpellType spellType, float pathNormalized, float travelSeconds)
         {
-            switch (spellType)
+            _effects ??= new BattlePresentationEffects(_enemyPathRoot);
+            var book = (RectTransform)_bookHitFeedback.transform.parent;
+            var origin = (Vector2)_enemyPathRoot.InverseTransformPoint(book.TransformPoint(book.rect.center));
+            var target = new Vector2(Mathf.Lerp(_enemyPathRoot.rect.xMin, _enemyPathRoot.rect.xMax, pathNormalized),
+                _enemyPathRoot.rect.yMin + 90);
+            var template = spellType switch
             {
-                case SpellType.Fireball:
-                    PulseSpell(
-                        _fireballFeedback,
-                        pathNormalized,
-                        ref _fireballFeedbackRemaining);
-                    break;
-                case SpellType.ChainLightning:
-                    PulseSpell(
-                        _chainLightningFeedback,
-                        pathNormalized,
-                        ref _chainLightningFeedbackRemaining);
-                    break;
-                case SpellType.FrostRing:
-                    PulseSpell(
-                        _frostRingFeedback,
-                        pathNormalized,
-                        ref _frostRingFeedbackRemaining);
-                    break;
-                case SpellType.Shield:
-                    PulseSpell(
-                        _spellShieldFeedback,
-                        pathNormalized,
-                        ref _spellShieldFeedbackRemaining);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(spellType), spellType, null);
-            }
+                SpellType.Fireball => _fireballFeedback,
+                SpellType.ChainLightning => _chainLightningFeedback,
+                SpellType.FrostRing => _frostRingFeedback,
+                SpellType.Shield => _spellShieldFeedback,
+                _ => throw new ArgumentOutOfRangeException(nameof(spellType))
+            };
+            var impact = kind == BattleFactKind.SpellImpact;
+            if (!impact) _castKick = 1;
+            _effects.Play(spellType, template.GetComponent<Image>().sprite, origin, target, impact, travelSeconds);
         }
 
         private void PlayRetryFeedback()
@@ -267,6 +253,9 @@ namespace Game
                 }
             }
 
+            // A new wave can arrive while all spare views are still fading out.
+            foreach (var enemyView in _enemyViews)
+                if (enemyView.Data == null) { enemyView.Clear(); return enemyView; }
             throw new InvalidOperationException("战场敌人显示项数量不足。请补充 Prefab Inspector 绑定。");
         }
 
@@ -287,28 +276,19 @@ namespace Game
 
             ResetFeedback(_bookHitFeedback, ref _bookHitFeedbackRemaining);
             ResetFeedback(_shieldFeedback, ref _shieldFeedbackRemaining);
-            ResetFeedback(_fireballFeedback.gameObject, ref _fireballFeedbackRemaining);
-            ResetFeedback(
-                _chainLightningFeedback.gameObject,
-                ref _chainLightningFeedbackRemaining);
-            ResetFeedback(_frostRingFeedback.gameObject, ref _frostRingFeedbackRemaining);
-            ResetFeedback(_spellShieldFeedback.gameObject, ref _spellShieldFeedbackRemaining);
+            _effects?.Clear();
+            _castKick = 0;
+            if (_bookArt != null)
+            {
+                _bookArt.anchoredPosition = _bookRest;
+                _bookArt.localRotation = Quaternion.identity;
+            }
+            _fireballFeedback.gameObject.SetActive(false);
+            _chainLightningFeedback.gameObject.SetActive(false);
+            _frostRingFeedback.gameObject.SetActive(false);
+            _spellShieldFeedback.gameObject.SetActive(false);
             ResetFeedback(_resultFeedback.gameObject, ref _resultFeedbackRemaining);
             ResetFeedback(_retryFeedback.gameObject, ref _retryFeedbackRemaining);
-        }
-
-        private void PulseSpell(
-            RectTransform effect,
-            float pathNormalized,
-            ref float remaining)
-        {
-            var position = effect.anchoredPosition;
-            position.x = Mathf.Lerp(
-                _enemyPathRoot.rect.xMin,
-                _enemyPathRoot.rect.xMax,
-                pathNormalized);
-            effect.anchoredPosition = position;
-            Pulse(effect.gameObject, ref remaining, SpellFeedbackSeconds);
         }
 
         private static bool ContainsEnemy(

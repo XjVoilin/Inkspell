@@ -18,21 +18,23 @@ namespace Game
             Kind = kind;
         }
 
-        internal BattleFact(BattleFactKind kind, SpellType spellType, float pathPosition, int targetCount)
+        internal BattleFact(BattleFactKind kind, SpellType spellType, float pathPosition, int targetCount, float travelSeconds = 0f)
             : this(kind)
         {
             SpellType = spellType;
             PathPosition = pathPosition;
             TargetCount = targetCount;
+            TravelSeconds = travelSeconds;
         }
 
-        internal BattleFact(BattleFactKind kind, BattleEnemy enemy) : this(kind)
+        internal BattleFact(BattleFactKind kind, BattleEnemy enemy, float damage = 0f) : this(kind)
         {
             EnemyId = enemy.RuntimeId;
             EnemyType = enemy.Type;
             PathPosition = enemy.PathPosition;
             Health = enemy.Health;
             MaxHealth = enemy.MaxHealth;
+            Damage = damage;
         }
 
         internal BattleFactKind Kind { get; }
@@ -43,6 +45,8 @@ namespace Game
         internal EnemyType EnemyType { get; }
         internal float Health { get; }
         internal float MaxHealth { get; }
+        internal float TravelSeconds { get; }
+        internal float Damage { get; }
     }
 
     internal readonly struct BattleFactsEvent
