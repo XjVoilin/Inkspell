@@ -2,19 +2,8 @@ using cfg;
 
 namespace Game
 {
-    internal interface IReadOnlyBattleEffect
-    {
-        long EffectId { get; }
-        SpellType SpellType { get; }
-        long TargetEnemyId { get; }
-        float PathPosition { get; }
-        float Range { get; }
-        float TotalSeconds { get; }
-        float RemainingSeconds { get; }
-    }
-
     /// <summary>已经生效、仍需持续显示的临时战斗效果。</summary>
-    internal sealed class BattleEffect : IReadOnlyBattleEffect
+    internal sealed class BattleEffect
     {
         internal BattleEffect(
             long effectId,

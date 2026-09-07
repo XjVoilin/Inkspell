@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Game
 {
-    /// <summary>编排一次有界自动挑战的生命周期，并把逐帧推进交给战斗模拟。</summary>
+    /// <summary>拥有一局战斗及其时间、等待和结束；内部模拟负责战斗规则。</summary>
     public sealed class AutoBattleSystem : SystemBase, IUpdatableSystem
     {
         private BattleSimulation _simulation;
@@ -16,81 +16,98 @@ namespace Game
         private UniTaskCompletionSource<BattleOutcome> _battleCompletion;
         private long _nextBattleRunId = 1;
         private bool _hasFocus;
-
-        internal IReadOnlyBattleRun CurrentRun => _simulation.CurrentRun;
+        private bool _discardResumeFrame;
+        
+        // 无挑战时为 null；正常胜负后保留末帧，供结果停顿期间读取。
+        internal BattleRun CurrentRun { get; private set; }
+        internal double ForegroundElapsedSeconds { get; private set; }
 
         public async UniTask<BattleOutcome> RunChallengeAsync(
-            int stageId,
-            CancellationToken ct = default)
+            int stageId, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             if (_battleCompletion != null)
-            {
                 throw new InvalidOperationException("同一时间只能运行一次自动战斗挑战。");
-            }
 
+            var run = _simulation.CreateRun(_nextBattleRunId++, stageId);
             var completion = new UniTaskCompletionSource<BattleOutcome>();
+            CurrentRun = run;
             _battleCompletion = completion;
+            _clock.Reset();
 
             try
             {
-                _clock.Reset();
-                _simulation.Begin(_nextBattleRunId++, stageId);
                 Publish(new BattleStateChangedEvent());
                 return await completion.Task.AttachExternalCancellation(ct);
             }
             finally
             {
-                CleanupChallenge(completion);
+                // 取消或关闭可以同步触发 continuation；旧调用不能清理下一局。
+                if (ReferenceEquals(_battleCompletion, completion))
+                {
+                    _battleCompletion = null;
+                    if (!run.Outcome.HasValue)
+                    {
+                        run.Stop();
+                        CurrentRun = null;
+                        _clock.Reset();
+                        Publish(new BattleStateChangedEvent());
+                    }
+                }
             }
         }
 
         public void OnUpdate(float deltaTime)
         {
-            if (_battleCompletion == null || !CurrentRun.IsRunning || !_hasFocus)
+            if (!_hasFocus)
+                return;
+            if (_discardResumeFrame)
             {
+                _discardResumeFrame = false;
                 return;
             }
 
-            try
+            var stepCount = _clock.TakeSteps(deltaTime);
+            // 结算停顿也使用这条前台时间轴；切后台不会跳过结果停顿。
+            ForegroundElapsedSeconds += stepCount * (double)BattleSimulationClock.StepSeconds;
+            var completion = _battleCompletion;
+            if (completion == null)
+                return;
+
+            var run = CurrentRun;
+            for (var step = 0; step < stepCount; step++)
             {
-                var stepCount = _clock.TakeSteps(deltaTime);
-                if (stepCount == 0)
+                BattleOutcome? outcome;
+                try
                 {
+                    outcome = _simulation.Advance(run, BattleSimulationClock.StepSeconds);
+                }
+                catch (Exception exception)
+                {
+                    // 将逐帧模拟异常交给等待这局的调用方，finally 释放战况及占用。
+                    completion.TrySetException(exception);
                     return;
                 }
 
-                BattleOutcome? outcome = null;
-                for (var step = 0; step < stepCount && CurrentRun.IsRunning; step++)
+                if (outcome.HasValue)
                 {
-                    outcome = _simulation.Advance(BattleSimulationClock.StepSeconds);
-                    // 每个固定步都发布一次，避免长帧内短暂产生又消失的攻击反馈被跳过。
-                    Publish(new BattleStateChangedEvent());
-                    if (outcome.HasValue)
+                    try
                     {
-                        break;
+                        Publish(new BattleStateChangedEvent());
+                        Publish(new BattleChallengeEndedEvent(outcome.Value));
                     }
-                }
-
-                if (!outcome.HasValue)
-                {
+                    finally
+                    {
+                        // 即使表现监听失败，已结束的业务等待也必须完成。
+                        completion.TrySetResult(outcome.Value);
+                    }
                     return;
                 }
 
-                Publish(new BattleChallengeEndedEvent(outcome.Value));
-                (_battleCompletion ?? throw new InvalidOperationException("当前战斗缺少完成源。"))
-                    .TrySetResult(outcome.Value);
-            }
-            catch (Exception exception)
-            {
-                if (CurrentRun.IsRunning)
-                {
-                    _simulation.Stop();
-                    Publish(new BattleStateChangedEvent());
-                }
-
-                // 通过 RunChallengeAsync 的单一异步通道向调用方报告错误，
-                // 避免同一异常又从 Unity Update 重复抛出。
-                _battleCompletion?.TrySetException(exception);
+                // 每步交付状态，保证同一长帧内发起又命中的攻击也被表现消费。
+                Publish(new BattleStateChangedEvent());
+                if (!ReferenceEquals(_battleCompletion, completion))
+                    return;
             }
         }
 
@@ -113,41 +130,30 @@ namespace Game
         protected override void OnShutdown()
         {
             Application.focusChanged -= OnFocusChanged;
+            var completion = _battleCompletion;
+            _battleCompletion = null;
+            CurrentRun?.Stop();
+            CurrentRun = null;
             _clock.Reset();
-
-            if (CurrentRun.IsRunning)
-            {
-                _simulation.Stop();
-            }
-
-            _battleCompletion?.TrySetCanceled();
-            _battleCompletion = null;
+            completion?.TrySetCanceled();
         }
 
-        private void CleanupChallenge(UniTaskCompletionSource<BattleOutcome> completion)
+        internal void ClearFinishedChallenge()
         {
-            if (!ReferenceEquals(_battleCompletion, completion))
-            {
+            if (_battleCompletion != null)
+                throw new InvalidOperationException("尚未结束的挑战不能作为结算画面清理。");
+            if (CurrentRun == null)
                 return;
-            }
-
-            if (CurrentRun.IsRunning)
-            {
-                _simulation.Stop();
-                Publish(new BattleStateChangedEvent());
-            }
-
-            _battleCompletion = null;
+            CurrentRun = null;
+            Publish(new BattleStateChangedEvent());
         }
 
-        private void OnFocusChanged(bool hasFocus)
+        internal void OnFocusChanged(bool hasFocus)
         {
             _hasFocus = hasFocus;
-            if (!hasFocus)
-            {
-                // 丢弃不足一个固定步的余量，恢复前台时不补算后台战斗。
-                _clock.Reset();
-            }
+            _clock.Reset();
+            // Unity 返回前台的首帧 deltaTime 可能包含后台时长。
+            _discardResumeFrame = hasFocus;
         }
     }
 }

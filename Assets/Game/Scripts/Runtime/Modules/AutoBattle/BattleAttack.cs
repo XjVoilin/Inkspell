@@ -3,18 +3,8 @@ using cfg;
 
 namespace Game
 {
-    internal interface IReadOnlyBattleAttack
-    {
-        long AttackId { get; }
-        SpellType SpellType { get; }
-        IReadOnlyList<long> TargetEnemyIds { get; }
-        float TargetPathPosition { get; }
-        float TotalTravelSeconds { get; }
-        float RemainingTravelSeconds { get; }
-    }
-
     /// <summary>施法瞬间冻结的跨帧攻击数据。</summary>
-    internal sealed class BattleAttack : IReadOnlyBattleAttack
+    internal sealed class BattleAttack
     {
         internal BattleAttack(
             long attackId,

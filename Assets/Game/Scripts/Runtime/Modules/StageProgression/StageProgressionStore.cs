@@ -1,36 +1,26 @@
-using cfg;
 using July.Arch;
 
 namespace Game
 {
+    /// <summary>独立维护长期关卡记录；通关判断和关卡选择属于 System。</summary>
     internal sealed class StageProgressionStore : StoreBase<StageProgressionStoreData>
     {
-        private TbStageProgression _stages;
-
         internal int CurrentStageId => Data.CurrentHighestStageId;
 
-        internal void Initialize(TbStageProgression stages)
+        internal void Initialize(int initialStageId)
         {
-            _stages = stages;
             if (Data.Initialized)
-            {
                 return;
-            }
-
             Data.Initialized = true;
-            Data.CurrentHighestStageId = stages.DataList[0].StageId;
+            Data.CurrentHighestStageId = initialStageId;
             MarkDirty();
         }
 
-        internal void AdvanceOneStage()
+        internal void SetCurrentStage(int stageId)
         {
-            var current = _stages.Get(Data.CurrentHighestStageId);
-            var currentIndex = _stages.DataList.IndexOf(current);
-            var next = _stages.DataList[currentIndex + 1];
-
-            Data.CurrentHighestStageId = next.StageId;
+            Data.CurrentHighestStageId = stageId;
             MarkDirty();
-            Publish(new StageProgressChangedEvent(next.StageId));
+            Publish(new StageProgressChangedEvent(stageId));
         }
     }
 }

@@ -130,6 +130,17 @@ namespace Game
         private void OnBattleStateChanged(BattleStateChangedEvent eventData)
         {
             var run = _battle.CurrentRun;
+            if (run == null)
+            {
+                _battleRunId = 0;
+                _retryPending = false;
+                _activeAttacks.Clear();
+                _seenEffects.Clear();
+                _enemyHealth.Clear();
+                SwitchBgm(MainBgm);
+                return;
+            }
+
             if (run.BattleRunId != _battleRunId)
             {
                 BeginRun(run);
@@ -141,7 +152,7 @@ namespace Game
             RenderBook(run);
         }
 
-        private void BeginRun(IReadOnlyBattleRun run)
+        private void BeginRun(BattleRun run)
         {
             _battleRunId = run.BattleRunId;
             _activeAttacks.Clear();
@@ -158,7 +169,7 @@ namespace Game
             }
         }
 
-        private void RenderAttacks(IReadOnlyBattleRun run)
+        private void RenderAttacks(BattleRun run)
         {
             _removedIds.Clear();
             foreach (var pair in _activeAttacks)
@@ -190,7 +201,7 @@ namespace Game
             }
         }
 
-        private void RenderEffects(IReadOnlyBattleRun run)
+        private void RenderEffects(BattleRun run)
         {
             foreach (var effect in run.Effects)
             {
@@ -206,7 +217,7 @@ namespace Game
             }
         }
 
-        private void RenderEnemies(IReadOnlyBattleRun run)
+        private void RenderEnemies(BattleRun run)
         {
             _removedIds.Clear();
             foreach (var pair in _enemyHealth)
@@ -256,7 +267,7 @@ namespace Game
             }
         }
 
-        private void RenderBook(IReadOnlyBattleRun run)
+        private void RenderBook(BattleRun run)
         {
             if (run.Book.Health < _bookHealth)
             {
@@ -357,7 +368,7 @@ namespace Game
         }
 
         private static bool ContainsAttack(
-            IReadOnlyList<IReadOnlyBattleAttack> attacks,
+            IReadOnlyList<BattleAttack> attacks,
             long attackId)
         {
             for (var index = 0; index < attacks.Count; index++)
@@ -372,7 +383,7 @@ namespace Game
         }
 
         private static bool ContainsEnemy(
-            IReadOnlyList<IReadOnlyBattleEnemy> enemies,
+            IReadOnlyList<BattleEnemy> enemies,
             long runtimeId)
         {
             for (var index = 0; index < enemies.Count; index++)

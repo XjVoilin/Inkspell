@@ -1,16 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Game
 {
-    internal interface IReadOnlySpellCooldownSet
-    {
-        IReadOnlyList<IReadOnlySpellSlotCooldown> Items { get; }
-    }
-
     /// <summary>单次战斗中按装备槽唯一维护的法术冷却集合。</summary>
-    internal sealed class SpellCooldownSet : IReadOnlySpellCooldownSet
+    internal sealed class SpellCooldownSet
     {
         private readonly List<SpellSlotCooldown> _items = new();
         private readonly ReadOnlyCollection<SpellSlotCooldown> _itemsView;
@@ -22,7 +16,6 @@ namespace Game
 
         internal IReadOnlyList<SpellSlotCooldown> Items => _itemsView;
 
-        IReadOnlyList<IReadOnlySpellSlotCooldown> IReadOnlySpellCooldownSet.Items => _itemsView;
 
         internal void Initialize(int equipmentSlotCount)
         {
@@ -47,36 +40,6 @@ namespace Game
             {
                 cooldown.Tick(deltaTime);
             }
-        }
-    }
-
-    internal interface IReadOnlySpellSlotCooldown
-    {
-        int EquipmentSlot { get; }
-        float TotalSeconds { get; }
-        float RemainingSeconds { get; }
-    }
-
-    internal sealed class SpellSlotCooldown : IReadOnlySpellSlotCooldown
-    {
-        internal SpellSlotCooldown(int equipmentSlot)
-        {
-            EquipmentSlot = equipmentSlot;
-        }
-
-        public int EquipmentSlot { get; }
-        public float TotalSeconds { get; private set; }
-        public float RemainingSeconds { get; private set; }
-
-        internal void Set(float remainingSeconds)
-        {
-            TotalSeconds = Math.Max(0f, remainingSeconds);
-            RemainingSeconds = TotalSeconds;
-        }
-
-        internal void Tick(float deltaTime)
-        {
-            RemainingSeconds = Math.Max(0f, RemainingSeconds - deltaTime);
         }
     }
 }

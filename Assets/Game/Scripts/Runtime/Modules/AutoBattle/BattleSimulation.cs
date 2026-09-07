@@ -15,14 +15,8 @@ namespace Game
         private readonly TbEnemy _enemies;
         private readonly TbStageBattle _stages;
 
-        internal BattleSimulation(
-            SpellAssetStore spellAssets,
-            TbBattleRule battleRule,
-            TbSpellAssetRule assetRule,
-            TbSpellCombat spellCombat,
-            TbSpellUpgrade spellUpgrades,
-            TbEnemy enemies,
-            TbStageBattle stages)
+        internal BattleSimulation(SpellAssetStore spellAssets, TbBattleRule battleRule, TbSpellAssetRule assetRule,
+            TbSpellCombat spellCombat, TbSpellUpgrade spellUpgrades, TbEnemy enemies, TbStageBattle stages)
         {
             _spellAssets = spellAssets;
             _battleRule = battleRule;
@@ -33,54 +27,45 @@ namespace Game
             _stages = stages;
         }
 
-        internal BattleRun CurrentRun { get; private set; } = new();
-
-        internal void Begin(long battleRunId, int stageId)
+        internal BattleRun CreateRun(long battleRunId, int stageId)
         {
             var stage = _stages.Get(stageId);
-            CurrentRun = new BattleRun(
-                battleRunId,
-                stage.StageId,
-                _battleRule.BookMaxHealth,
-                _assetRule.EquipmentSlotCount);
+            var run = new BattleRun(
+                battleRunId, stage.StageId, _battleRule.BookMaxHealth, _assetRule.EquipmentSlotCount);
 
-            SpawnEnemiesAtChallengeStart(stage);
+            SpawnEnemiesAtChallengeStart(run, stage);
+            return run;
         }
 
-        internal BattleOutcome? Advance(float deltaTime)
+        internal BattleOutcome? Advance(BattleRun run, float deltaTime)
         {
-            var stage = _stages.Get(CurrentRun.StageId);
-            var previousSpawnElapsed = CurrentRun.SpawnElapsedSeconds;
+            var stage = _stages.Get(run.StageId);
+            var previousSpawnElapsed = run.SpawnElapsedSeconds;
 
             // 结算顺序属于战斗规则：新敌人/已到达攻击先结算，再判胜、移动攻击、判负、最后施法。
-            AdvanceTimers(deltaTime);
-            CurrentRun.AdvanceSpawnTime(deltaTime);
-            SpawnEnemies(stage, previousSpawnElapsed, CurrentRun.SpawnElapsedSeconds);
-            ResolveArrivedSpellAttacks();
-            CurrentRun.Enemies.RemoveDefeated();
-            RemoveExpiredEffects();
+            AdvanceTimers(run, deltaTime);
+            run.AdvanceSpawnTime(deltaTime);
+            SpawnEnemies(run, stage, previousSpawnElapsed, run.SpawnElapsedSeconds);
+            ResolveArrivedSpellAttacks(run);
+            run.Enemies.RemoveDefeated();
+            RemoveExpiredEffects(run);
 
-            if (CurrentRun.Enemies.Count == 0 && !HasPendingSpawns(stage))
+            if (run.Enemies.Count == 0 && !HasPendingSpawns(run, stage))
             {
-                return FinalizeOutcome(true);
+                return run.Complete(true);
             }
 
-            AdvanceEnemies(deltaTime);
-            if (CurrentRun.Book.IsDestroyed && CurrentRun.Enemies.Count > 0)
+            AdvanceEnemies(run, deltaTime);
+            if (run.Book.IsDestroyed && run.Enemies.Count > 0)
             {
-                return FinalizeOutcome(false);
+                return run.Complete(false);
             }
 
-            CastReadySpells();
+            CastReadySpells(run);
             return null;
         }
 
-        internal void Stop()
-        {
-            CurrentRun.Stop();
-        }
-
-        private void SpawnEnemiesAtChallengeStart(StageBattle stage)
+        private void SpawnEnemiesAtChallengeStart(BattleRun run, StageBattle stage)
         {
             foreach (var spawn in stage.Spawns)
             {
@@ -89,11 +74,11 @@ namespace Game
                     continue;
                 }
 
-                SpawnEnemy(spawn.EnemyType);
+                SpawnEnemy(run, spawn.EnemyType);
             }
         }
 
-        private void SpawnEnemies(StageBattle stage, float previousElapsed, float currentElapsed)
+        private void SpawnEnemies(BattleRun run, StageBattle stage, float previousElapsed, float currentElapsed)
         {
             foreach (var spawn in stage.Spawns)
             {
@@ -103,25 +88,25 @@ namespace Game
                     continue;
                 }
 
-                SpawnEnemy(spawn.EnemyType);
+                SpawnEnemy(run, spawn.EnemyType);
             }
         }
 
-        private void SpawnEnemy(EnemyType enemyType)
+        private void SpawnEnemy(BattleRun run, EnemyType enemyType)
         {
             var enemy = _enemies.Get(enemyType);
-            CurrentRun.Enemies.Spawn(
+            run.Enemies.Spawn(
                 enemyType,
                 enemy.MaxHealth,
                 _battleRule.EnemySpawnPosition,
                 enemy.AttackIntervalSeconds);
         }
 
-        private bool HasPendingSpawns(StageBattle stage)
+        private bool HasPendingSpawns(BattleRun run, StageBattle stage)
         {
             foreach (var spawn in stage.Spawns)
             {
-                if (spawn.SpawnTimeSeconds > CurrentRun.SpawnElapsedSeconds)
+                if (spawn.SpawnTimeSeconds > run.SpawnElapsedSeconds)
                 {
                     return true;
                 }
@@ -130,12 +115,12 @@ namespace Game
             return false;
         }
 
-        private void ResolveArrivedSpellAttacks()
+        private void ResolveArrivedSpellAttacks(BattleRun run)
         {
             var index = 0;
-            while (index < CurrentRun.Attacks.Count)
+            while (index < run.Attacks.Count)
             {
-                var attack = CurrentRun.Attacks[index];
+                var attack = run.Attacks[index];
                 if (attack.RemainingTravelSeconds > 0f)
                 {
                     index++;
@@ -144,10 +129,10 @@ namespace Game
 
                 if (attack.SpellType == SpellType.Shield)
                 {
-                    CurrentRun.Book.ApplyShield(
+                    run.Book.ApplyShield(
                         attack.Shield,
                         attack.EffectDurationSeconds);
-                    AddEffect(
+                    AddEffect(run,
                         attack.SpellType,
                         0,
                         _battleRule.BookContactPosition,
@@ -156,18 +141,18 @@ namespace Game
                 }
                 else
                 {
-                    ResolveDamageAttack(attack);
+                    ResolveDamageAttack(run, attack);
                 }
 
-                CurrentRun.RemoveAttackAt(index);
+                run.RemoveAttackAt(index);
             }
         }
 
-        private void ResolveDamageAttack(BattleAttack attack)
+        private void ResolveDamageAttack(BattleRun run, BattleAttack attack)
         {
             foreach (var targetId in attack.TargetEnemyIds)
             {
-                var target = CurrentRun.Enemies.FindLiving(targetId);
+                var target = run.Enemies.FindLiving(targetId);
                 if (target == null)
                 {
                     continue;
@@ -184,7 +169,7 @@ namespace Game
 
             if (attack.EffectDurationSeconds > 0f)
             {
-                AddEffect(
+                AddEffect(run,
                     attack.SpellType,
                     attack.TargetEnemyIds.Count > 0 ? attack.TargetEnemyIds[0] : 0,
                     attack.TargetPathPosition,
@@ -193,24 +178,24 @@ namespace Game
             }
         }
 
-        private void RemoveExpiredEffects()
+        private void RemoveExpiredEffects(BattleRun run)
         {
             var index = 0;
-            while (index < CurrentRun.Effects.Count)
+            while (index < run.Effects.Count)
             {
-                if (CurrentRun.Effects[index].RemainingSeconds > 0f)
+                if (run.Effects[index].RemainingSeconds > 0f)
                 {
                     index++;
                     continue;
                 }
 
-                CurrentRun.RemoveEffectAt(index);
+                run.RemoveEffectAt(index);
             }
         }
 
-        private void AdvanceEnemies(float deltaTime)
+        private void AdvanceEnemies(BattleRun run, float deltaTime)
         {
-            foreach (var enemy in CurrentRun.Enemies.Items)
+            foreach (var enemy in run.Enemies.Items)
             {
                 var config = _enemies.Get(enemy.Type);
                 enemy.MoveTowards(
@@ -220,22 +205,22 @@ namespace Game
 
                 if (enemy.CanAttack(_battleRule.BookContactPosition))
                 {
-                    CurrentRun.Book.ApplyDamage(config.AttackDamage);
+                    run.Book.ApplyDamage(config.AttackDamage);
                     enemy.ResetAttack(config.AttackIntervalSeconds);
                 }
             }
         }
 
-        private void CastReadySpells()
+        private void CastReadySpells(BattleRun run)
         {
-            foreach (var cooldown in CurrentRun.Cooldowns.Items)
+            foreach (var cooldown in run.Cooldowns.Items)
             {
                 if (cooldown.RemainingSeconds > 0f)
                 {
                     continue;
                 }
 
-                var target = CurrentRun.Enemies.FindNearestToBook();
+                var target = run.Enemies.FindNearestToBook();
                 SpellInstance spell;
                 if (!_spellAssets.TryGetEquippedSpell(
                         cooldown.EquipmentSlot,
@@ -245,25 +230,22 @@ namespace Game
                     continue;
                 }
 
-                CastSpell(cooldown.EquipmentSlot, spell, target);
+                CastSpell(run, cooldown.EquipmentSlot, spell, target);
             }
         }
 
-        private void CastSpell(
-            int equipmentSlot,
-            SpellInstance spell,
-            BattleEnemy primaryTarget)
+        private void CastSpell(BattleRun run, int equipmentSlot, SpellInstance spell, BattleEnemy primaryTarget)
         {
             var combat = _spellCombat.Get(spell.Type, spell.Tier);
             var upgrade = _spellUpgrades.Get(spell.Type, spell.Tier, spell.Level);
-            var targetIds = SelectTargets(combat, primaryTarget);
+            var targetIds = SelectTargets(run, combat, primaryTarget);
             var damage = combat.BaseDamage * upgrade.CurrentPowerMultiplier;
             var shield = combat.BaseShield * upgrade.CurrentPowerMultiplier;
             var targetPosition = spell.Type == SpellType.Shield
                 ? _battleRule.BookContactPosition
                 : primaryTarget.PathPosition;
 
-            LaunchAttack(
+            LaunchAttack(run,
                 spell.Type,
                 targetIds,
                 targetPosition,
@@ -273,10 +255,10 @@ namespace Game
                 combat.EffectRange,
                 combat.EffectDurationSeconds,
                 combat.SlowMultiplier);
-            CurrentRun.Cooldowns.Set(equipmentSlot, combat.CooldownSeconds);
+            run.Cooldowns.Set(equipmentSlot, combat.CooldownSeconds);
         }
 
-        private IReadOnlyList<long> SelectTargets(
+        private IReadOnlyList<long> SelectTargets(BattleRun run,
             SpellCombat combat,
             BattleEnemy primaryTarget)
         {
@@ -285,12 +267,12 @@ namespace Game
                 case SpellType.Fireball:
                     return new[] { primaryTarget.RuntimeId };
                 case SpellType.ChainLightning:
-                    return CurrentRun.Enemies.SelectChainTargets(
+                    return run.Enemies.SelectChainTargets(
                         primaryTarget,
                         combat.ChainTargetCount,
                         combat.EffectRange);
                 case SpellType.FrostRing:
-                    return CurrentRun.Enemies.SelectAreaTargets(
+                    return run.Enemies.SelectAreaTargets(
                         primaryTarget.PathPosition,
                         combat.EffectRange);
                 case SpellType.Shield:
@@ -303,7 +285,7 @@ namespace Game
             }
         }
 
-        private void LaunchAttack(
+        private void LaunchAttack(BattleRun run,
             SpellType spellType,
             IReadOnlyList<long> targetEnemyIds,
             float targetPathPosition,
@@ -314,8 +296,8 @@ namespace Game
             float effectDurationSeconds,
             float slowMultiplier)
         {
-            CurrentRun.AddAttack(new BattleAttack(
-                CurrentRun.AllocateAttackId(),
+            run.AddAttack(new BattleAttack(
+                run.AllocateAttackId(),
                 spellType,
                 targetEnemyIds,
                 targetPathPosition,
@@ -327,15 +309,15 @@ namespace Game
                 slowMultiplier));
         }
 
-        private void AddEffect(
+        private void AddEffect(BattleRun run,
             SpellType spellType,
             long targetEnemyId,
             float pathPosition,
             float range,
             float remainingSeconds)
         {
-            CurrentRun.AddEffect(new BattleEffect(
-                CurrentRun.AllocateEffectId(),
+            run.AddEffect(new BattleEffect(
+                run.AllocateEffectId(),
                 spellType,
                 targetEnemyId,
                 pathPosition,
@@ -343,30 +325,25 @@ namespace Game
                 remainingSeconds));
         }
 
-        private void AdvanceTimers(float deltaTime)
+        private void AdvanceTimers(BattleRun run, float deltaTime)
         {
-            CurrentRun.Book.Tick(deltaTime);
-            CurrentRun.Enemies.Tick(deltaTime);
-            CurrentRun.Cooldowns.Tick(deltaTime);
+            run.Book.Tick(deltaTime);
+            run.Enemies.Tick(deltaTime);
+            run.Cooldowns.Tick(deltaTime);
 
-            foreach (var attack in CurrentRun.Attacks)
+            foreach (var attack in run.Attacks)
             {
                 attack.RemainingTravelSeconds = Math.Max(
                     0f,
                     attack.RemainingTravelSeconds - deltaTime);
             }
 
-            foreach (var effect in CurrentRun.Effects)
+            foreach (var effect in run.Effects)
             {
                 effect.RemainingSeconds = Math.Max(
                     0f,
                     effect.RemainingSeconds - deltaTime);
             }
-        }
-
-        private BattleOutcome FinalizeOutcome(bool victory)
-        {
-            return CurrentRun.Complete(victory);
         }
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using cfg;
 using Cysharp.Threading.Tasks;
@@ -6,6 +5,7 @@ using July.Arch;
 
 namespace Game
 {
+    /// <summary>一次挑战、进度提交和结果停顿的异步先后顺序。</summary>
     internal sealed class StageChallengeProcedure : ProcedureBase
     {
         private readonly StageProgression _stage;
@@ -17,20 +17,16 @@ namespace Game
 
         protected override async UniTask OnExecuteAsync(CancellationToken ct)
         {
-            var outcome = await GetSystem<AutoBattleSystem>()
-                .RunChallengeAsync(_stage.StageId, ct);
+            var battle = GetSystem<AutoBattleSystem>();
+            var outcome = await battle.RunChallengeAsync(_stage.StageId, ct);
+            GetSystem<StageProgressionSystem>().CommitChallenge(outcome);
 
-            if (outcome.Victory && !_stage.IsMaxStage)
-            {
-                GetStore<StageProgressionStore>().AdvanceOneStage();
-            }
-
-            // 进度先提交再等待表现停顿；停顿结束后外层循环才会发起下一场挑战。
             var pauseSeconds = outcome.Victory
                 ? _stage.VictoryPauseSeconds
                 : _stage.FailurePauseSeconds;
-            await UniTask.Delay(
-                TimeSpan.FromSeconds(pauseSeconds),
+            var resumeAt = battle.ForegroundElapsedSeconds + pauseSeconds;
+            await UniTask.WaitUntil(
+                () => battle.ForegroundElapsedSeconds >= resumeAt,
                 cancellationToken: ct);
         }
     }

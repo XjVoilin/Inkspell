@@ -55,9 +55,9 @@ namespace Game
             Status.PendingSpellCount = _spellGenerationStore.PendingCount;
             Status.GenerationProgressSeconds = _spellGenerationStore.CycleProgressSeconds;
             Status.GenerationIntervalSeconds = _spellGenerationStore.ActiveIntervalSeconds;
-            Status.BookHealth = battle.Book.Health;
-            Status.BookMaxHealth = battle.Book.MaxHealth;
-            Status.BookShield = battle.Book.Shield;
+            Status.BookHealth = battle == null ? _battleRule.BookMaxHealth : battle.Book.Health;
+            Status.BookMaxHealth = battle == null ? _battleRule.BookMaxHealth : battle.Book.MaxHealth;
+            Status.BookShield = battle == null ? 0f : battle.Book.Shield;
         }
 
         public void RefreshAll()
@@ -99,6 +99,16 @@ namespace Game
         public void RefreshBattlefield()
         {
             var battle = _autoBattle.CurrentRun;
+            if (battle == null)
+            {
+                Battlefield = new BattlefieldViewData
+                {
+                    BookHealth = _battleRule.BookMaxHealth,
+                    BookMaxHealth = _battleRule.BookMaxHealth,
+                };
+                return;
+            }
+
             Battlefield.BattleRunId = battle.BattleRunId;
             Battlefield.IsRunning = battle.IsRunning;
             Battlefield.BookHealth = battle.Book.Health;

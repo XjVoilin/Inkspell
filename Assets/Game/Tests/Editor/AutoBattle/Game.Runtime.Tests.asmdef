@@ -2,7 +2,12 @@
   "name": "Game.Runtime.Tests",
   "rootNamespace": "Game.Tests",
   "references": [
-    "Game.Runtime"
+    "Game.Runtime",
+    "July.Arch",
+    "July.Config",
+    "July.Events",
+    "Luban.Runtime",
+    "UniTask"
   ],
   "includePlatforms": [
     "Editor"

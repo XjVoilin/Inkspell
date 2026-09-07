@@ -3,23 +3,8 @@ using System.Collections.ObjectModel;
 
 namespace Game
 {
-    /// <summary>当前战斗运行态的实时只读契约。</summary>
-    internal interface IReadOnlyBattleRun
-    {
-        long BattleRunId { get; }
-        int StageId { get; }
-        bool IsRunning { get; }
-        float SpawnElapsedSeconds { get; }
-        IReadOnlyBattleBook Book { get; }
-        IReadOnlyEnemyRoster Enemies { get; }
-        IReadOnlySpellCooldownSet Cooldowns { get; }
-        IReadOnlyList<IReadOnlyBattleAttack> Attacks { get; }
-        IReadOnlyList<IReadOnlyBattleEffect> Effects { get; }
-        BattleOutcome? Outcome { get; }
-    }
-
     /// <summary>单次战斗运行聚合；随 AutoBattleSystem 生命周期存在且不持久化。</summary>
-    internal sealed class BattleRun : IReadOnlyBattleRun
+    internal sealed class BattleRun
     {
         private readonly List<BattleAttack> _attacks = new();
         private readonly List<BattleEffect> _effects = new();
@@ -28,19 +13,14 @@ namespace Game
         private long _nextAttackId = 1;
         private long _nextEffectId = 1;
 
-        internal BattleRun()
-        {
-            _attacksView = _attacks.AsReadOnly();
-            _effectsView = _effects.AsReadOnly();
-        }
-
         internal BattleRun(
             long battleRunId,
             int stageId,
             float bookMaxHealth,
             int equipmentSlotCount)
-            : this()
         {
+            _attacksView = _attacks.AsReadOnly();
+            _effectsView = _effects.AsReadOnly();
             BattleRunId = battleRunId;
             StageId = stageId;
             IsRunning = true;
@@ -54,17 +34,12 @@ namespace Game
         public float SpawnElapsedSeconds { get; private set; }
         public BattleOutcome? Outcome { get; private set; }
 
-        internal BattleBook Book { get; } = new();
+        internal BattleBook Book { get; }
         internal EnemyRoster Enemies { get; } = new();
         internal SpellCooldownSet Cooldowns { get; } = new();
         internal IReadOnlyList<BattleAttack> Attacks => _attacksView;
         internal IReadOnlyList<BattleEffect> Effects => _effectsView;
 
-        IReadOnlyBattleBook IReadOnlyBattleRun.Book => Book;
-        IReadOnlyEnemyRoster IReadOnlyBattleRun.Enemies => Enemies;
-        IReadOnlySpellCooldownSet IReadOnlyBattleRun.Cooldowns => Cooldowns;
-        IReadOnlyList<IReadOnlyBattleAttack> IReadOnlyBattleRun.Attacks => _attacksView;
-        IReadOnlyList<IReadOnlyBattleEffect> IReadOnlyBattleRun.Effects => _effectsView;
 
         internal void AdvanceSpawnTime(float deltaTime)
         {
@@ -103,7 +78,7 @@ namespace Game
 
         internal BattleOutcome Complete(bool victory)
         {
-            if (Outcome.HasValue)
+            if (!IsRunning)
             {
                 throw new System.InvalidOperationException("当前挑战已经产生最终结果。");
             }

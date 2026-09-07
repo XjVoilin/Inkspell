@@ -2,22 +2,9 @@ using System;
 
 namespace Game
 {
-    internal interface IReadOnlyBattleBook
-    {
-        float Health { get; }
-        float MaxHealth { get; }
-        float Shield { get; }
-        float ShieldRemainingSeconds { get; }
-        bool IsDestroyed { get; }
-    }
-
     /// <summary>单次战斗中魔法书的生命与护盾边界。</summary>
-    internal sealed class BattleBook : IReadOnlyBattleBook
+    internal sealed class BattleBook
     {
-        internal BattleBook()
-        {
-        }
-
         internal BattleBook(float maxHealth)
         {
             MaxHealth = maxHealth;

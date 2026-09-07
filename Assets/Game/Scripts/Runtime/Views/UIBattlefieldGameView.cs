@@ -66,6 +66,14 @@ namespace Game
 
         public void Render(BattlefieldViewData data)
         {
+            if (data.BattleRunId == 0)
+            {
+                ResetPresentation();
+                RenderBook(data, false);
+                RenderCooldowns(data.Cooldowns);
+                return;
+            }
+
             var challengeChanged =
                 _hasRenderedChallenge && data.BattleRunId != _battleRunId;
             if (challengeChanged)
