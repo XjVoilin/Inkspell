@@ -101,6 +101,9 @@ namespace Game.Editor
             bindings.FindProperty("_failure").stringValue = L("LAUNCH_FAILURE");
             bindings.ApplyModifiedPropertiesWithoutUndo();
             var entryBindings = new SerializedObject(entry);
+            var config = AssetDatabase.LoadAssetAtPath<GameConfig>("Assets/Settings/GameConfig.asset");
+            if (config == null) throw new InvalidOperationException("缺少 Assets/Settings/GameConfig.asset。");
+            entryBindings.FindProperty("_gameConfig").objectReferenceValue = config;
             entryBindings.FindProperty("_presentation").objectReferenceValue = view;
             entryBindings.ApplyModifiedPropertiesWithoutUndo();
             EditorSceneManager.MarkSceneDirty(scene);

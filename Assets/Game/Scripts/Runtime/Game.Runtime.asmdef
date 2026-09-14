@@ -6,6 +6,7 @@
     "Luban.Runtime",
     "UniTask",
     "July.Arch",
+    "July.Events",
     "July.Diagnostics",
     "July.Audio",
     "July.Config",
@@ -20,7 +21,9 @@
     "July.Scene",
     "July.Time",
     "July.UI",
-    "Unity.TextMeshPro"
+    "Unity.TextMeshPro",
+    "July.Bootstrap",
+    "July.Networking"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -1,4 +1,4 @@
-﻿.idea
+.idea
 Library
 Logs
 obj
@@ -13,3 +13,7 @@ HybridCLRData
 Assets/Game/Res/HotUpdateDlls/*
 Assets/Game/Res/AOTMetaDlls/*
 Assets/StreamingAssets
+AOTBackup/
+Tools/coscli/.cos.yaml
+*.sln.DotSettings.user
+.codex-temp/

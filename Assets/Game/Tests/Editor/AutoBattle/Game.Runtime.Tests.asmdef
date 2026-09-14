@@ -8,7 +8,8 @@
     "July.Diagnostics",
     "July.Events",
     "Luban.Runtime",
-    "UniTask"
+    "UniTask",
+    "July.Persistence"
   ],
   "includePlatforms": [
     "Editor"

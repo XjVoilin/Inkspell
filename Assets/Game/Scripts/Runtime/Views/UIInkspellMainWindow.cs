@@ -34,9 +34,11 @@ namespace Game
         private ILocalizationSystem _localization;
         private IUISystem _ui;
         private IAudioSystem _audio;
+        private ArchContext _architecture;
 
         protected override void OnBeforeOpen()
         {
+            _architecture = ArchContext.Current;
             _data = GetData<UIInkspellMainWindowData>() ?? new UIInkspellMainWindowData();
             _spellAssets = this.GetStore<SpellAssetStore>();
             _spellSynthesis = this.GetSystem<SpellSynthesisSystem>();
@@ -50,6 +52,26 @@ namespace Game
 
         protected override void OnOpen()
         {
+            SubscribeWindowEvents();
+            _spellBoard.SpellClicked += OnSpellClicked;
+            _spellBoard.SynthesisRequested += OnSynthesisRequested;
+            _equipmentBar.EquipRequested += OnEquipRequested;
+        }
+
+        private void OnEnable()
+        {
+            if (IsOpened) SubscribeWindowEvents();
+        }
+
+        private void OnDisable()
+        {
+            // Unity 退出时可先销毁子控件，再由 GameEntry 取消战斗；停用时即结束窗口订阅。
+            // 未打开的 Prefab 也会经历 OnDisable，此时尚未绑定架构。
+            _architecture?.Event.UnsubscribeAll(this);
+        }
+
+        private void SubscribeWindowEvents()
+        {
             this.Subscribe<SpellAssetsChangedEvent>(OnSpellAssetsChanged);
             this.Subscribe<SpellGenerationChangedEvent>(OnSpellGenerationChanged);
             this.Subscribe<StageProgressChangedEvent>(OnStageProgressChanged);
@@ -58,9 +80,6 @@ namespace Game
             this.Subscribe<BattleChallengeEndedEvent>(OnBattleChallengeEnded);
             this.Subscribe<SpellSynthesisRejectedEvent>(OnSpellSynthesisRejected);
             this.Subscribe<SpellSynthesisResolvedEvent>(OnSpellSynthesisResolved);
-            _spellBoard.SpellClicked += OnSpellClicked;
-            _spellBoard.SynthesisRequested += OnSynthesisRequested;
-            _equipmentBar.EquipRequested += OnEquipRequested;
         }
 
         protected override void OnClose()

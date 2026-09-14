@@ -1,47 +1,35 @@
+using System;
 using July.Arch;
+using July.Bootstrap;
 using July.Launch;
 using UnityEngine;
 
 namespace Game.Aot
 {
-    /// <summary>AOT 启动入口，负责组装固定启动步骤并把 Unity 帧循环转交给架构上下文。</summary>
-    public class GameEntry : JulyGameEntry
+    /// <summary>组装标准启动流程，业务模块仍由热更入口注册。</summary>
+    public class GameEntry : BootstrapGameEntry
     {
-        [SerializeField] private GameConfig _gameConfig = new();
+        [SerializeField] private GameConfig _gameConfig;
         [SerializeField] private LaunchPresentation _presentation;
 
         protected override void ConfigurePipeline(LaunchPipeline pipeline)
         {
-            SeedServices.Register(_gameConfig);
+            if (_presentation == null) throw new InvalidOperationException("GameEntry 未指定启动画面。");
+            ArchContext.Current.RegisterStore(new LaunchStore(_gameConfig));
 
 #if !JULYGF_DEBUG
             Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
             Application.SetStackTraceLogType(LogType.Warning, StackTraceLogType.None);
 #endif
 
-            // 顺序不可交换：热更程序集依赖已初始化的资源系统，业务系统又依赖热更程序集。
-            ILaunchStep[] steps =
-            {
-                new InitializeAotSystemsStep(),
-                new InitializeResourceSystemStep(),
-                new HotUpdateStep(),
-                new InitializeGameSystemsStep(),
-                new LaunchGameStep()
-            };
-            for (var i = 0; i < steps.Length; i++)
-                pipeline.Add(_presentation != null ? _presentation.Present(steps[i], i, steps.Length) : steps[i]);
+            Bootstrap.Configure(pipeline, _gameConfig.Bootstrap, _presentation,
+                AOTGenericReferences.PatchedAOTAssemblyList);
         }
 
-        private void Update()
+        protected override void OnShutdown()
         {
-            if (!IsInitialized) return;
-            ArchContext.Current.Update(Time.deltaTime);
-        }
-
-        protected override void OnDestroy()
-        {
-            SeedServices.Clear();
-            base.OnDestroy();
+            base.OnShutdown();
+            if (_presentation != null) Destroy(_presentation.gameObject);
         }
     }
 }

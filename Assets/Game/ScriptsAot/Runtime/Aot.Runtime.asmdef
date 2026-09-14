@@ -2,7 +2,7 @@
   "name": "Aot.Runtime",
   "rootNamespace": "GameTemplate.Aot",
   "references": [
-    "Unity.ugui",
+    "UnityEngine.UI",
     "Unity.TextMeshPro",
     "July.Arch",
     "July.Launch",
@@ -19,7 +19,10 @@
     "YooAsset.MiniGame",
     "HybridCLR.Runtime",
     "UniTask",
-    "YooAsset"
+    "YooAsset",
+    "July.Bootstrap",
+    "July.Networking",
+    "July.Release.Runtime"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -5,6 +5,7 @@ using cfg;
 using Cysharp.Threading.Tasks;
 using Game.Aot;
 using July.Arch;
+using July.Bootstrap;
 using July.Audio;
 using July.Launch;
 using July.Config;
@@ -12,6 +13,7 @@ using July.Fsm;
 using July.Input;
 using July.Localization;
 using July.Logging;
+using July.Networking;
 using July.Persistence;
 using July.Pooling;
 using July.Resource;
@@ -38,7 +40,8 @@ namespace Game
         public void Register()
         {
             var context = ArchContext.Current;
-            var gameConfig = SeedServices.Resolve<GameConfig>();
+            var launch = context.GetStore<LaunchStore>();
+            var gameConfig = launch.GetProjectConfig<GameConfig>();
             context.RegisterSystem(new PoolSystem());
 
             var uiSystem = new UISystem();
@@ -53,7 +56,7 @@ namespace Game
             context.RegisterSystem(new ConfigSystem());
             context.RegisterSystem(new JsonSerializeSystem());
             context.RegisterSystem(new NoEncryptionSystem());
-            var saveSystem = new LocalFileSaveSystem();
+            var saveSystem = new PlatformPreferencesSaveSystem();
             context.RegisterSystem(saveSystem);
             context.RegisterSystem(new SceneSystem());
             context.RegisterSystem(new UnityInputSystem());
@@ -61,17 +64,30 @@ namespace Game
             context.RegisterSystem(new TimeSystem());
             context.RegisterSystem(new LocalizationSystem());
 
+            context.RegisterStore(new HttpPendingQueueStore());
+            var http = new HttpSystem();
+            context.RegisterSystem(http);
+            http.Configure(new HttpModuleOptions
+            {
+                BaseUrl = launch.Current.ServerUrl,
+                TimeoutSeconds = gameConfig.Http.TimeoutSeconds,
+                MaxRetryCount = gameConfig.Http.MaxRetryCount,
+                RetryBaseDelayMs = gameConfig.Http.RetryBaseDelayMs,
+                RetryBackoffMultiplier = gameConfig.Http.RetryBackoffMultiplier,
+                RetryMaxDelayMs = gameConfig.Http.RetryMaxDelayMs,
+            }, null);
+
             context.RegisterStore(saveSystem.Persist(
                 new SpellAssetStore(),
-                "inkspell.spell-assets",
+                InkspellSaveMigration.SpellAssetsKey,
                 SaveImportance.Important));
             context.RegisterStore(saveSystem.Persist(
                 new StageProgressionStore(),
-                "inkspell.stage-progression",
+                InkspellSaveMigration.StageProgressionKey,
                 SaveImportance.Important));
             context.RegisterStore(saveSystem.Persist(
                 new SpellGenerationStore(),
-                "inkspell.spell-generation",
+                InkspellSaveMigration.SpellGenerationKey,
                 SaveImportance.Important));
             
             context.RegisterSystem(new SpellAssetSystem());
@@ -99,6 +115,7 @@ namespace Game
 
         public async UniTask PreInitializeAsync(CancellationToken ct = default)
         {
+            await InkspellSaveMigration.MigrateAsync(ct);
             await LoadLubanTablesAsync(ct);
             SetupLocalization();
         }
@@ -119,7 +136,7 @@ namespace Game
             for (var i = 0; i < names.Length; i++)
             {
                 var name = names[i];
-                tasks[i] = LoadSingleJsonAsync(resource, name);
+                tasks[i] = LoadSingleJsonAsync(resource, name, ct);
             }
 
             // 表文件并行读取，全部到齐后再一次性构造 Tables，防止系统看到不完整配置。
@@ -141,18 +158,18 @@ namespace Game
         }
 
         private static async UniTask<(string name, string json)> LoadSingleJsonAsync(
-            IResourceSystem resource, string name)
+            IResourceSystem resource, string name, CancellationToken ct)
         {
-            using var handle = await resource.LoadAssetAsync<TextAsset>(name);
+            using var handle = await resource.LoadAssetAsync<TextAsset>(name, ct: ct);
             if (handle?.Asset == null)
                 throw new Exception($"配置文件未找到: {name}");
             return (name, handle.Asset.text);
         }
 
-        public async UniTask OnGameLaunch()
+        public async UniTask OnGameLaunch(CancellationToken ct = default)
         {
             this.GetSystem<IUISystem>().SetMainProvider(new LubanUIWindowProvider());
-            await this.RunProcedure(new EnterMainGameProcedure());
+            await this.RunProcedure(new EnterMainGameProcedure(), ct);
 #if JULYGF_DEBUG
             this.GetSystem<IGMSystem>().Build(TMP_Settings.defaultFontAsset);
             GMPanelLayout.Configure();
