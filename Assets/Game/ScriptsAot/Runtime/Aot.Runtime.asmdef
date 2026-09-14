@@ -22,7 +22,8 @@
     "YooAsset",
     "July.Bootstrap",
     "July.Networking",
-    "July.Release.Runtime"
+    "July.Release.Runtime",
+    "DOTweenAot"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -1,4 +1,5 @@
 using System;
+using DG.Tweening;
 using July.Arch;
 using July.Bootstrap;
 using July.Launch;
@@ -30,6 +31,11 @@ namespace Game.Aot
         {
             base.OnShutdown();
             if (_presentation != null) Destroy(_presentation.gameObject);
+
+            // DOTween owns a DontDestroyOnLoad manager named "[DOTween]". UI controls
+            // kill their individual tweens while the architecture shuts down, then the
+            // global manager must be removed before Unity finishes closing the scene.
+            DOTween.Clear(destroy: true);
         }
     }
 }

@@ -1,0 +1,72 @@
+{
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "layers": [
+    {
+      "id": 1,
+      "name": "FireballSample/icon_fireballTier1",
+      "groupPath": "tier1",
+      "type": "image",
+      "x": 105,
+      "y": 382,
+      "width": 140,
+      "height": 140,
+      "visible": true,
+      "order": 100,
+      "opacity": 100,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotationZ": 0
+    },
+    {
+      "id": 2,
+      "name": "FireballSample/icon_fireballTier2",
+      "groupPath": "tier2",
+      "type": "image",
+      "x": 105,
+      "y": 852,
+      "width": 140,
+      "height": 140,
+      "visible": true,
+      "order": 101,
+      "opacity": 100,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotationZ": 0
+    },
+    {
+      "id": 3,
+      "name": "FireballSample/icon_fireballTier3",
+      "groupPath": "tier3",
+      "type": "image",
+      "x": 105,
+      "y": 1322,
+      "width": 140,
+      "height": 140,
+      "visible": true,
+      "order": 102,
+      "opacity": 100,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotationZ": 0
+    },
+    {
+      "id": 4,
+      "name": "FireballSample/img_fireballImpact",
+      "groupPath": "impactSample",
+      "type": "image",
+      "x": 755,
+      "y": 1310,
+      "width": 140,
+      "height": 140,
+      "visible": true,
+      "order": 110,
+      "opacity": 100,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotationZ": 0
+    }
+  ]
+}

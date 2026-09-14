@@ -45,7 +45,9 @@ namespace Game.Tests
                 {
                     var key = keys[i % 4];
                     card.Render(new SpellCardViewData {InstanceId=i+1, Tier=1+i%3, Level=1, IconResourceKey=key});
-                    Assert.That(card.DisplayedIcon.name, Is.EqualTo(key));
+                    var expectedPrefix = new[]{"icon_fireballTier", "icon_chainLightningTier", "icon_frostRingTier", "icon_runeShieldTier"}[i % 4];
+                    var expected = expectedPrefix + (1 + i % 3);
+                    Assert.That(card.DisplayedIcon.name, Is.EqualTo(expected));
                     shadow.RenderDragCopy(card);
                     Assert.That(shadow.DisplayedIcon, Is.SameAs(card.DisplayedIcon));
                     shadow.Render(null);
@@ -54,6 +56,29 @@ namespace Game.Tests
                 Assert.That(card.GetComponentsInChildren<Component>(true).Length, Is.EqualTo(count));
             }
             finally { Object.DestroyImmediate(shadow.gameObject); Object.DestroyImmediate(card.gameObject); }
+        }
+
+        [Test]
+        public void FireballPool_RecycleAndClearDoNotLeakBrushworkIntoOtherSpells()
+        {
+            var root = new GameObject("Effects", typeof(RectTransform));
+            try
+            {
+                var effects = new BattlePresentationEffects((RectTransform)root.transform);
+                for (var i = 0; i < 30; i++)
+                    effects.Play(cfg.SpellType.Fireball, null, Vector2.zero, Vector2.right * 300, i % 2 == 0, .2f, 1 + i % 3);
+                Assert.That(root.GetComponentsInChildren<FireballEffectGraphic>(true).Length, Is.EqualTo(24));
+                effects.Clear();
+                Assert.That(root.GetComponentsInChildren<FireballEffectGraphic>().Length, Is.Zero);
+                effects.Play(cfg.SpellType.ChainLightning, null, Vector2.zero, Vector2.one * 100, false, .2f);
+                Assert.That(root.GetComponentsInChildren<FireballEffectGraphic>().Length, Is.Zero);
+                effects.Tick(1);
+                effects.Play(cfg.SpellType.Fireball, null, Vector2.zero, Vector2.right * 300, true, 0, 3);
+                Assert.That(root.GetComponentsInChildren<FireballEffectGraphic>().Length, Is.EqualTo(1));
+                effects.Tick(1);
+                Assert.That(root.GetComponentsInChildren<FireballEffectGraphic>().Length, Is.Zero);
+            }
+            finally { Object.DestroyImmediate(root); }
         }
 
         [Test]
@@ -69,7 +94,7 @@ namespace Game.Tests
                 board.Render(new SpellBoardViewData {Slots=slots});
                 var view = (UISpellCardGameView)new SerializedObject(board).FindProperty("_slots").GetArrayElementAtIndex(0).objectReferenceValue;
                 Assert.That(view.Data.InstanceId,Is.EqualTo(99));
-                Assert.That(view.DisplayedIcon.name,Is.EqualTo("icon_spellIceRing"));
+                Assert.That(view.DisplayedIcon.name,Is.EqualTo("icon_frostRingTier3"));
             }
             finally {Object.DestroyImmediate(root);}
         }
@@ -101,14 +126,27 @@ namespace Game.Tests
             foreach (var card in root.GetComponentsInChildren<UISpellCardGameView>(true))
             {
                 var serialized = new SerializedObject(card);
-                foreach (var field in new[]{"_tierGraphic", "_presentationGroup", "_iconTransform"})
+                foreach (var field in new[]{"_presentationGroup", "_iconTransform"})
                     Assert.That(serialized.FindProperty(field).objectReferenceValue, Is.Not.Null, card.name + field);
+                var tierVisuals = serialized.FindProperty("_tierVisuals");
+                Assert.That(tierVisuals.arraySize, Is.EqualTo(4));
+                for (var i = 0; i < 4; i++)
+                {
+                    var visual = tierVisuals.GetArrayElementAtIndex(i);
+                    var sprites = new HashSet<Object>();
+                    foreach (var field in new[]{"Tier1", "Tier2", "Tier3"})
+                    {
+                        var sprite = visual.FindPropertyRelative(field).objectReferenceValue;
+                        Assert.That(sprite, Is.Not.Null);
+                        Assert.That(sprites.Add(sprite), Is.True, "Every tier needs a distinct silhouette.");
+                    }
+                }
             }
-            foreach (var graphic in root.GetComponentsInChildren<SpellTierGraphic>(true))
-                Assert.That(graphic.GetComponent<CanvasRenderer>(), Is.Not.Null);
             var board = new SerializedObject(root.GetComponentInChildren<UISpellBoardGameView>(true));
             Assert.That(board.FindProperty("_burst").objectReferenceValue, Is.Not.Null);
             var battle = new SerializedObject(root.GetComponentInChildren<UIBattlefieldGameView>(true));
+            Assert.That(battle.FindProperty("_fireballImpact").objectReferenceValue, Is.Not.Null);
+            Assert.That(battle.FindProperty("_tierVisuals").arraySize, Is.EqualTo(4));
             var covers = battle.FindProperty("_cooldownCovers");
             Assert.That(covers.arraySize, Is.EqualTo(4));
             for (var i = 0; i < covers.arraySize; i++)
@@ -121,6 +159,35 @@ namespace Game.Tests
                 Assert.That(image.rectTransform.anchorMax, Is.EqualTo(Vector2.one));
                 Assert.That(image.raycastTarget, Is.False);
             }
+        }
+
+        [TestCase(cfg.SpellType.ChainLightning)]
+        [TestCase(cfg.SpellType.FrostRing)]
+        [TestCase(cfg.SpellType.Shield)]
+        public void NonFireBattleEffects_ScaleTheirReadableShapeByTier(cfg.SpellType type)
+        {
+            float Capture(int tier, out int activeLightning)
+            {
+                var root = new GameObject("Effects", typeof(RectTransform));
+                try
+                {
+                    var effects = new BattlePresentationEffects((RectTransform)root.transform);
+                    effects.Play(type, null, Vector2.zero, Vector2.right * 300, false, .2f, tier);
+                    var motion = root.transform.Find("SpellMotion").GetComponent<Image>();
+                    activeLightning = 0;
+                    foreach (var image in motion.GetComponentsInChildren<Image>())
+                        if (image.name == "LightningSegment" && image.gameObject.activeSelf) activeLightning++;
+                    return motion.rectTransform.sizeDelta.x;
+                }
+                finally { Object.DestroyImmediate(root); }
+            }
+
+            var lowSize = Capture(1, out var lowBranches);
+            var highSize = Capture(3, out var highBranches);
+            if (type == cfg.SpellType.ChainLightning)
+                Assert.That(highBranches, Is.GreaterThan(lowBranches));
+            else
+                Assert.That(highSize, Is.GreaterThan(lowSize));
         }
     }
 }

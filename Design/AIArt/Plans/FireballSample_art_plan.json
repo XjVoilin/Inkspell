@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "screen": "FireballSample",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "requirements": [
+    "Design/Docs/火球三阶表现样板.md"
+  ],
+  "references": [
+    "Assets/Game/Arts/Textures/MainWindow/icon_spellFireball.png"
+  ],
+  "outputs": {
+    "directory": "Design/AIArt/ArtSource/FireballSample",
+    "authoringJson": "Design/AIArt/ArtSource/FireballSample/FireballSample_ui_data.json",
+    "preview": "Design/AIArt/ArtSource/FireballSample/FireballSample_preview.png"
+  },
+  "assets": [
+    {
+      "path": "FireballSample/icon_fireballTier1.png",
+      "role": "spellIcon",
+      "width": 512,
+      "height": 512,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Use case: stylized-concept. Asset type: transparent Unity 2D spell icon, square 512x512. Reference image is STYLE REFERENCE ONLY: preserve bold dark navy ink contours, crisp hand painted orange/red flame shapes and ivory hot highlights. Create ONE isolated fire spell symbol on genuinely transparent alpha background, no paper, no card, no frame, no text, no numbers, no shadows, no watermark, no soft bloom cloud. Center it with 10 percent empty padding. Strong readable silhouette at 96 pixels, flame points upward, graphic hand inked fantasy spellbook style. Tier ONE: one compact simple teardrop flame, small warm ivory core in the lower center, three upward orange-red flame tips, only two small detached sparks. No orbit, no rings, no crown. Clearly the simplest tier."
+    },
+    {
+      "path": "FireballSample/icon_fireballTier2.png",
+      "role": "spellIcon",
+      "width": 512,
+      "height": 512,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Use case: stylized-concept. Asset type: transparent Unity 2D spell icon, square 512x512. Reference image is STYLE REFERENCE ONLY: preserve bold dark navy ink contours, crisp hand painted orange/red flame shapes and ivory hot highlights. Create ONE isolated fire spell symbol on genuinely transparent alpha background, no paper, no card, no frame, no text, no numbers, no shadows, no watermark, no soft bloom cloud. Center it with 10 percent empty padding. Strong readable silhouette at 96 pixels, flame points upward, graphic hand inked fantasy spellbook style. Tier TWO: a substantial round orange fire core wrapped by one broad elliptical swirling red-orange flame ribbon with two pointed ends. Clearly visible open gaps between core and orbiting ribbon. A few sparks, ivory central core. The outer silhouette is wide and circular, clearly different from a simple teardrop. No crown."
+    },
+    {
+      "path": "FireballSample/icon_fireballTier3.png",
+      "role": "spellIcon",
+      "width": 512,
+      "height": 512,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Use case: stylized-concept. Asset type: transparent Unity 2D spell icon, square 512x512. Reference image is STYLE REFERENCE ONLY: preserve bold dark navy ink contours, crisp hand painted orange/red flame shapes and ivory hot highlights. Create ONE isolated fire spell symbol on genuinely transparent alpha background, no paper, no card, no frame, no text, no numbers, no shadows, no watermark, no soft bloom cloud. Center it with 10 percent empty padding. Strong readable silhouette at 96 pixels, flame points upward, graphic hand inked fantasy spellbook style. Tier THREE: commanding fire crown silhouette: a bright ivory-white central flame core, five large jagged red-orange flame prongs fanning outward like a crown, and two crescent flame arcs cupping the lower core. Bold symmetric overall silhouette with organic asymmetric flames, dark ink separations and a few sparks. Distinct broad spiky crown, visibly more elaborate than a round ring of flame. No actual metal crown or shield. CRITICAL output format: RGBA PNG with real alpha=0 outside the artwork, exactly like the supplied original reference. Do not draw a checkerboard. Do not flatten transparency. Transparent background is mandatory."
+    },
+    {
+      "path": "FireballSample/img_fireballImpact.png",
+      "role": "impactEffect",
+      "width": 512,
+      "height": 512,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Use case: stylized-concept. Production asset: ONE transparent 2D fireball impact sprite, centered square 512x512. Use the reference ONLY for hand painted texture, bold dark navy ink contours, hot ivory, yellow, orange and vermilion palette. Draw an explosive irregular round fire bloom: a small bright ivory core surrounded by about seven broad curling flame lobes bursting outward, ragged orange edges and a handful of detached embers. Shape must be organic with uneven flame petals, not a geometric star, compass, sun symbol, or perfect ring. Compact roughly circular silhouette, 12 percent empty margin. No card, no text, no ground, no shadow, no smoke cloud or soft bloom. Actual transparent RGBA PNG with alpha=0 outside the fire and in the gaps; absolutely do not render a checkerboard background."
+    }
+  ],
+  "localizationKeys": [
+    "SPELL_TIER_1_NAME",
+    "SPELL_TIER_2_NAME",
+    "SPELL_TIER_3_NAME"
+  ],
+  "componentRules": {
+    "forbidSlider": true,
+    "binding": "Serialize three tier sprites on spell cards and battlefield. Detail window is text-only. No asynchronous sprite lookup during rendering.",
+    "preview": "Three rows using runtime effects: one tier per row, local single-target impacts only."
+  }
+}

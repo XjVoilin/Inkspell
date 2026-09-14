@@ -65,7 +65,8 @@ namespace Game
             float shield,
             float effectRange,
             float effectDurationSeconds,
-            float slowMultiplier)
+            float slowMultiplier,
+            int spellTier = 1)
         {
             _attacks.Add(new BattleAttack(
                 _nextAttackId++,
@@ -77,7 +78,8 @@ namespace Game
                 shield,
                 effectRange,
                 effectDurationSeconds,
-                slowMultiplier));
+                slowMultiplier,
+                spellTier));
         }
 
         internal void RemoveAttackAt(int index)

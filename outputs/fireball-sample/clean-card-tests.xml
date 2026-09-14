@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="11" result="Passed" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.1871322">
+  <test-suite type="TestSuite" id="1000" name="GameBox" fullname="GameBox" runstate="Runnable" testcasecount="61" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.187132" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1078" name="Game.UI.Tests.dll" fullname="/private/tmp/inkspell-fireball-validation/Library/ScriptAssemblies/Game.UI.Tests.dll" runstate="Runnable" testcasecount="19" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.183054" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="18199" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestSuite" id="1079" name="Game" fullname="Game" runstate="Runnable" testcasecount="19" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.181235" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties>
+          <property name="platform" value="EditMode" />
+        </properties>
+        <test-suite type="TestSuite" id="1080" name="Tests" fullname="Game.Tests" runstate="Runnable" testcasecount="19" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.177362" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties>
+            <property name="platform" value="EditMode" />
+          </properties>
+          <test-suite type="TestFixture" id="1065" name="SpellPresentationTests" fullname="Game.Tests.SpellPresentationTests" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.173343" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="platform" value="EditMode" />
+            </properties>
+            <test-case id="1066" name="DragDimming_ReusesAuthoredGroupWithoutAddingComponents" fullname="Game.Tests.SpellPresentationTests.DragDimming_ReusesAuthoredGroupWithoutAddingComponents" methodname="DragDimming_ReusesAuthoredGroupWithoutAddingComponents" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="293274716" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.111791" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1076" name="DropWithoutPointerSource_IsIgnored" fullname="Game.Tests.SpellPresentationTests.DropWithoutPointerSource_IsIgnored" methodname="DropWithoutPointerSource_IsIgnored" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="1805638431" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.001443" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1068" name="FireballPool_RecycleAndClearDoNotLeakBrushworkIntoOtherSpells" fullname="Game.Tests.SpellPresentationTests.FireballPool_RecycleAndClearDoNotLeakBrushworkIntoOtherSpells" methodname="FireballPool_RecycleAndClearDoNotLeakBrushworkIntoOtherSpells" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="707795746" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.014552" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1075" name="MergeHover_RejectsIneligibleInputs" fullname="Game.Tests.SpellPresentationTests.MergeHover_RejectsIneligibleInputs" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.004607" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+              </properties>
+              <test-case id="1070" name="MergeHover_RejectsIneligibleInputs(1,1,False,1,True)" fullname="Game.Tests.SpellPresentationTests.MergeHover_RejectsIneligibleInputs(1,1,False,1,True)" methodname="MergeHover_RejectsIneligibleInputs" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="989609738" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.001282" asserts="0">
+                <properties>
+                  <property name="platform" value="EditMode" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1071" name="MergeHover_RejectsIneligibleInputs(1,2,False,1,False)" fullname="Game.Tests.SpellPresentationTests.MergeHover_RejectsIneligibleInputs(1,2,False,1,False)" methodname="MergeHover_RejectsIneligibleInputs" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="72896547" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.000064" asserts="0">
+                <properties>
+                  <property name="platform" value="EditMode" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1072" name="MergeHover_RejectsIneligibleInputs(3,3,False,1,False)" fullname="Game.Tests.SpellPresentationTests.MergeHover_RejectsIneligibleInputs(3,3,False,1,False)" methodname="MergeHover_RejectsIneligibleInputs" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="2140767687" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.000041" asserts="0">
+                <properties>
+                  <property name="platform" value="EditMode" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1073" name="MergeHover_RejectsIneligibleInputs(2,2,True,1,False)" fullname="Game.Tests.SpellPresentationTests.MergeHover_RejectsIneligibleInputs(2,2,True,1,False)" methodname="MergeHover_RejectsIneligibleInputs" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="1922464105" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.000083" asserts="0">
+                <properties>
+                  <property name="platform" value="EditMode" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1074" name="MergeHover_RejectsIneligibleInputs(2,2,False,2,False)" fullname="Game.Tests.SpellPresentationTests.MergeHover_RejectsIneligibleInputs(2,2,False,2,False)" methodname="MergeHover_RejectsIneligibleInputs" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="740458493" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.000049" asserts="0">
+                <properties>
+                  <property name="platform" value="EditMode" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1077" name="Prefab_ContainsBoundPresentationAndTileShapedCooldowns" fullname="Game.Tests.SpellPresentationTests.Prefab_ContainsBoundPresentationAndTileShapedCooldowns" methodname="Prefab_ContainsBoundPresentationAndTileShapedCooldowns" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="756438791" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.004956" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1069" name="SettlementRender_DoesNotWaitForMergeAnimation" fullname="Game.Tests.SpellPresentationTests.SettlementRender_DoesNotWaitForMergeAnimation" methodname="SettlementRender_DoesNotWaitForMergeAnimation" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="1836021236" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.018137" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1067" name="SwitchingSpellTypesAndTiers_ImmediatelyShowsMatchingAuthoredIcon" fullname="Game.Tests.SpellPresentationTests.SwitchingSpellTypesAndTiers_ImmediatelyShowsMatchingAuthoredIcon" methodname="SwitchingSpellTypesAndTiers_ImmediatelyShowsMatchingAuthoredIcon" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="876138010" result="Passed" start-time="2026-09-14 14:45:44Z" end-time="2026-09-14 14:45:44Z" duration="0.010528" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: /private/tmp/inkspell-clean-card-tests.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

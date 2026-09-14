@@ -154,7 +154,7 @@ namespace Game
                 }
 
                 run.RecordFact(new BattleFact(BattleFactKind.SpellImpact,
-                    attack.SpellType, attack.TargetPathPosition, attack.TargetEnemyIds.Count));
+                    attack.SpellType, attack.TargetPathPosition, attack.TargetEnemyIds.Count, spellTier: attack.SpellTier));
                 run.RemoveAttackAt(index);
             }
         }
@@ -275,10 +275,11 @@ namespace Game
                 shield: shield,
                 effectRange: combat.EffectRange,
                 effectDurationSeconds: combat.EffectDurationSeconds,
-                slowMultiplier: combat.SlowMultiplier);
+                slowMultiplier: combat.SlowMultiplier,
+                spellTier: spell.Tier);
             run.Cooldowns.Set(equipmentSlot, combat.CooldownSeconds);
             run.RecordFact(new BattleFact(BattleFactKind.SpellCast,
-                spell.Type, targetPosition, targetIds.Count, _battleRule.AttackTravelSeconds));
+                spell.Type, targetPosition, targetIds.Count, _battleRule.AttackTravelSeconds, spell.Tier));
         }
 
         private IReadOnlyList<long> SelectTargets(BattleRun run,

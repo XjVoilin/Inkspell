@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="35" result="Passed" total="35" passed="35" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:04Z" duration="0.4712077">
+  <test-suite type="TestSuite" id="1000" name="GameBox" fullname="GameBox" runstate="Runnable" testcasecount="61" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:04Z" duration="0.471208" total="35" passed="35" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1044" name="Game.Runtime.Tests.dll" fullname="/private/tmp/inkspell-fireball-validation/Library/ScriptAssemblies/Game.Runtime.Tests.dll" runstate="Runnable" testcasecount="39" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.306947" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="17499" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestSuite" id="1045" name="Game" fullname="Game" runstate="Runnable" testcasecount="39" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.301643" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties>
+          <property name="platform" value="EditMode" />
+        </properties>
+        <test-suite type="TestSuite" id="1046" name="Tests" fullname="Game.Tests" runstate="Runnable" testcasecount="39" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.298605" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties>
+            <property name="platform" value="EditMode" />
+          </properties>
+          <test-suite type="TestFixture" id="1008" name="AutoBattleFlowTests" fullname="Game.Tests.AutoBattleFlowTests" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.293301" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="platform" value="EditMode" />
+            </properties>
+            <test-case id="1025" name="CancelFromFactsListener_KeepsBatchAndReplacementIndependent" fullname="Game.Tests.AutoBattleFlowTests.CancelFromFactsListener_KeepsBatchAndReplacementIndependent" methodname="CancelFromFactsListener_KeepsBatchAndReplacementIndependent" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="1323334792" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.043404" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1017" name="CancelFromStateListener_CannotAdvanceReplacementRunInOldFrame" fullname="Game.Tests.AutoBattleFlowTests.CancelFromStateListener_CannotAdvanceReplacementRunInOldFrame" methodname="CancelFromStateListener_CannotAdvanceReplacementRunInOldFrame" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="139328892" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.003792" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1016" name="Cancellation_ClearsStateAndAllowsFreshChallenge" fullname="Game.Tests.AutoBattleFlowTests.Cancellation_ClearsStateAndAllowsFreshChallenge" methodname="Cancellation_ClearsStateAndAllowsFreshChallenge" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="2006967885" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.003953" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1015" name="ConcurrentRequest_IsRejectedWithoutReplacingCurrentRun" fullname="Game.Tests.AutoBattleFlowTests.ConcurrentRequest_IsRejectedWithoutReplacingCurrentRun" methodname="ConcurrentRequest_IsRejectedWithoutReplacingCurrentRun" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="978769756" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.003065" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1032" name="ContinuousChallenges_PauseOnBackgroundAndStopDuringFeedback" fullname="Game.Tests.AutoBattleFlowTests.ContinuousChallenges_PauseOnBackgroundAndStopDuringFeedback" methodname="ContinuousChallenges_PauseOnBackgroundAndStopDuringFeedback" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="1313837294" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.150128" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1010" name="CraftingSort_IsTierThenLevelDescending_AndSynthesisIdentifiesActualResult" fullname="Game.Tests.AutoBattleFlowTests.CraftingSort_IsTierThenLevelDescending_AndSynthesisIdentifiesActualResult" methodname="CraftingSort_IsTierThenLevelDescending_AndSynthesisIdentifiesActualResult" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="1774724324" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.008929" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1031" name="Defeat_DoesNotAdvanceAndNextAttemptRestoresBook" fullname="Game.Tests.AutoBattleFlowTests.Defeat_DoesNotAdvanceAndNextAttemptRestoresBook" methodname="Defeat_DoesNotAdvanceAndNextAttemptRestoresBook" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="871648460" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.004138" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1020" name="EmptyFieldWithFutureSpawn_DoesNotWinOrCastShield" fullname="Game.Tests.AutoBattleFlowTests.EmptyFieldWithFutureSpawn_DoesNotWinOrCastShield" methodname="EmptyFieldWithFutureSpawn_DoesNotWinOrCastShield" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="998580787" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.004041" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1019" name="FinalHit_WinsBeforeEnemyCanAttackBook" fullname="Game.Tests.AutoBattleFlowTests.FinalHit_WinsBeforeEnemyCanAttackBook" methodname="FinalHit_WinsBeforeEnemyCanAttackBook" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="1966520549" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.004880" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1021" name="FireballTier_IsFrozenFromCastThroughImpactAfterEquipmentChange" fullname="Game.Tests.AutoBattleFlowTests.FireballTier_IsFrozenFromCastThroughImpactAfterEquipmentChange" methodname="FireballTier_IsFrozenFromCastThroughImpactAfterEquipmentChange" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="1450782875" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.004096" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1018" name="FocusResume_KeepsSameRunAndDiscardsBackgroundDelta" fullname="Game.Tests.AutoBattleFlowTests.FocusResume_KeepsSameRunAndDiscardsBackgroundDelta" methodname="FocusResume_KeepsSameRunAndDiscardsBackgroundDelta" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="829277182" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.003727" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1012" name="GM_FourSpellLoadoutPreservesOriginalEquipment" fullname="Game.Tests.AutoBattleFlowTests.GM_FourSpellLoadoutPreservesOriginalEquipment" methodname="GM_FourSpellLoadoutPreservesOriginalEquipment" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="193518191" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.003102" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1013" name="GM_FourSpellLoadoutRejectsInsufficientSpaceBeforeAnyChange" fullname="Game.Tests.AutoBattleFlowTests.GM_FourSpellLoadoutRejectsInsufficientSpaceBeforeAnyChange" methodname="GM_FourSpellLoadoutRejectsInsufficientSpaceBeforeAnyChange" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="841954701" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.002982" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1009" name="GM_MaterialsAndInkRespectCapacityAndPublishChanges" fullname="Game.Tests.AutoBattleFlowTests.GM_MaterialsAndInkRespectCapacityAndPublishChanges" methodname="GM_MaterialsAndInkRespectCapacityAndPublishChanges" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="1619095081" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.003373" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1011" name="GM_OutcomeOverrideSurvivesRejectionAndIsConsumedOnce" fullname="Game.Tests.AutoBattleFlowTests.GM_OutcomeOverrideSurvivesRejectionAndIsConsumedOnce" methodname="GM_OutcomeOverrideSurvivesRejectionAndIsConsumedOnce" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="2049410174" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.004830" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[SpellSynthesisSystem] 合成请求被拒绝: firstSpellId=2, secondSpellId=2, reason=SameInstance
+]]></output>
+            </test-case>
+            <test-case id="1023" name="LongFrame_PublishesCastBeforeItsImpact" fullname="Game.Tests.AutoBattleFlowTests.LongFrame_PublishesCastBeforeItsImpact" methodname="LongFrame_PublishesCastBeforeItsImpact" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="554191389" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.003472" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1030" name="MaximumStage_VictoryDoesNotAdvanceOrNotifyProgress" fullname="Game.Tests.AutoBattleFlowTests.MaximumStage_VictoryDoesNotAdvanceOrNotifyProgress" methodname="MaximumStage_VictoryDoesNotAdvanceOrNotifyProgress" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="1422215474" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.003038" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1024" name="NoSimulationStep_DoesNotPublishStateOrFacts" fullname="Game.Tests.AutoBattleFlowTests.NoSimulationStep_DoesNotPublishStateOrFacts" methodname="NoSimulationStep_DoesNotPublishStateOrFacts" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="159630653" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.002641" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1014" name="PreCanceledRequest_DoesNotCreateOrPublishBattle" fullname="Game.Tests.AutoBattleFlowTests.PreCanceledRequest_DoesNotCreateOrPublishBattle" methodname="PreCanceledRequest_DoesNotCreateOrPublishBattle" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="21517385" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.002910" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1029" name="Progression_SubmitsVictoryOnceAndRejectsDuplicate" fullname="Game.Tests.AutoBattleFlowTests.Progression_SubmitsVictoryOnceAndRejectsDuplicate" methodname="Progression_SubmitsVictoryOnceAndRejectsDuplicate" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="1892970755" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.002667" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1026" name="ShieldAppliedAndBrokenInOneFrame_PreservesBothFacts" fullname="Game.Tests.AutoBattleFlowTests.ShieldAppliedAndBrokenInOneFrame_PreservesBothFacts" methodname="ShieldAppliedAndBrokenInOneFrame_PreservesBothFacts" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="1179590788" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.003313" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1027" name="SimulationFault_ReachesCallerAndReleasesRun" fullname="Game.Tests.AutoBattleFlowTests.SimulationFault_ReachesCallerAndReleasesRun" methodname="SimulationFault_ReachesCallerAndReleasesRun" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="880836418" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.003150" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1028" name="ThrowingEndListener_CannotLeaveCompletedBattleOccupied" fullname="Game.Tests.AutoBattleFlowTests.ThrowingEndListener_CannotLeaveCompletedBattleOccupied" methodname="ThrowingEndListener_CannotLeaveCompletedBattleOccupied" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="1286993954" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.002903" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1022" name="UpgradeAndReplacement_OnlyChangeNextCast" fullname="Game.Tests.AutoBattleFlowTests.UpgradeAndReplacement_OnlyChangeNextCast" methodname="UpgradeAndReplacement_OnlyChangeNextCast" classname="Game.Tests.AutoBattleFlowTests" runstate="Runnable" seed="1638474493" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.002803" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1078" name="Game.UI.Tests.dll" fullname="/private/tmp/inkspell-fireball-validation/Library/ScriptAssemblies/Game.UI.Tests.dll" runstate="Runnable" testcasecount="19" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:04Z" duration="0.156566" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="17499" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestSuite" id="1079" name="Game" fullname="Game" runstate="Runnable" testcasecount="19" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:04Z" duration="0.155529" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties>
+          <property name="platform" value="EditMode" />
+        </properties>
+        <test-suite type="TestSuite" id="1080" name="Tests" fullname="Game.Tests" runstate="Runnable" testcasecount="19" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:04Z" duration="0.152001" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties>
+            <property name="platform" value="EditMode" />
+          </properties>
+          <test-suite type="TestFixture" id="1065" name="SpellPresentationTests" fullname="Game.Tests.SpellPresentationTests" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:04Z" duration="0.148048" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties>
+              <property name="platform" value="EditMode" />
+            </properties>
+            <test-case id="1066" name="DragDimming_ReusesAuthoredGroupWithoutAddingComponents" fullname="Game.Tests.SpellPresentationTests.DragDimming_ReusesAuthoredGroupWithoutAddingComponents" methodname="DragDimming_ReusesAuthoredGroupWithoutAddingComponents" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="1455417635" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.090725" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1076" name="DropWithoutPointerSource_IsIgnored" fullname="Game.Tests.SpellPresentationTests.DropWithoutPointerSource_IsIgnored" methodname="DropWithoutPointerSource_IsIgnored" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="1226946951" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.001650" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1068" name="FireballPool_RecycleAndClearDoNotLeakBrushworkIntoOtherSpells" fullname="Game.Tests.SpellPresentationTests.FireballPool_RecycleAndClearDoNotLeakBrushworkIntoOtherSpells" methodname="FireballPool_RecycleAndClearDoNotLeakBrushworkIntoOtherSpells" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="830977806" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.014598" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1075" name="MergeHover_RejectsIneligibleInputs" fullname="Game.Tests.SpellPresentationTests.MergeHover_RejectsIneligibleInputs" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.003474" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+              </properties>
+              <test-case id="1070" name="MergeHover_RejectsIneligibleInputs(1,1,False,1,True)" fullname="Game.Tests.SpellPresentationTests.MergeHover_RejectsIneligibleInputs(1,1,False,1,True)" methodname="MergeHover_RejectsIneligibleInputs" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="263671031" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.000656" asserts="0">
+                <properties>
+                  <property name="platform" value="EditMode" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1071" name="MergeHover_RejectsIneligibleInputs(1,2,False,1,False)" fullname="Game.Tests.SpellPresentationTests.MergeHover_RejectsIneligibleInputs(1,2,False,1,False)" methodname="MergeHover_RejectsIneligibleInputs" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="569858227" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.000042" asserts="0">
+                <properties>
+                  <property name="platform" value="EditMode" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1072" name="MergeHover_RejectsIneligibleInputs(3,3,False,1,False)" fullname="Game.Tests.SpellPresentationTests.MergeHover_RejectsIneligibleInputs(3,3,False,1,False)" methodname="MergeHover_RejectsIneligibleInputs" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="1954024804" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.000031" asserts="0">
+                <properties>
+                  <property name="platform" value="EditMode" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1073" name="MergeHover_RejectsIneligibleInputs(2,2,True,1,False)" fullname="Game.Tests.SpellPresentationTests.MergeHover_RejectsIneligibleInputs(2,2,True,1,False)" methodname="MergeHover_RejectsIneligibleInputs" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="1733105225" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.000033" asserts="0">
+                <properties>
+                  <property name="platform" value="EditMode" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1074" name="MergeHover_RejectsIneligibleInputs(2,2,False,2,False)" fullname="Game.Tests.SpellPresentationTests.MergeHover_RejectsIneligibleInputs(2,2,False,2,False)" methodname="MergeHover_RejectsIneligibleInputs" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="616207700" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.000028" asserts="0">
+                <properties>
+                  <property name="platform" value="EditMode" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1077" name="Prefab_ContainsBoundPresentationAndTileShapedCooldowns" fullname="Game.Tests.SpellPresentationTests.Prefab_ContainsBoundPresentationAndTileShapedCooldowns" methodname="Prefab_ContainsBoundPresentationAndTileShapedCooldowns" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="1488665058" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.002852" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1069" name="SettlementRender_DoesNotWaitForMergeAnimation" fullname="Game.Tests.SpellPresentationTests.SettlementRender_DoesNotWaitForMergeAnimation" methodname="SettlementRender_DoesNotWaitForMergeAnimation" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="95631184" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:03Z" duration="0.017353" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1067" name="SwitchingSpellTypesAndTiers_ImmediatelyShowsMatchingAuthoredIcon" fullname="Game.Tests.SpellPresentationTests.SwitchingSpellTypesAndTiers_ImmediatelyShowsMatchingAuthoredIcon" methodname="SwitchingSpellTypesAndTiers_ImmediatelyShowsMatchingAuthoredIcon" classname="Game.Tests.SpellPresentationTests" runstate="Runnable" seed="1478643489" result="Passed" start-time="2026-09-14 14:38:03Z" end-time="2026-09-14 14:38:04Z" duration="0.012537" asserts="0">
+              <properties>
+                <property name="platform" value="EditMode" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: /private/tmp/inkspell-fireball-tests.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

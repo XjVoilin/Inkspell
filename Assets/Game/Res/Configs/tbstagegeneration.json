@@ -1,42 +1,42 @@
 [
   {
     "stageId": 1,
-    "intervalSeconds": 180
+    "intervalSeconds": 3
   },
   {
     "stageId": 2,
-    "intervalSeconds": 165
+    "intervalSeconds": 3
   },
   {
     "stageId": 3,
-    "intervalSeconds": 150
+    "intervalSeconds": 3
   },
   {
     "stageId": 4,
-    "intervalSeconds": 135
+    "intervalSeconds": 3
   },
   {
     "stageId": 5,
-    "intervalSeconds": 120
+    "intervalSeconds": 3
   },
   {
     "stageId": 6,
-    "intervalSeconds": 105
+    "intervalSeconds": 3
   },
   {
     "stageId": 7,
-    "intervalSeconds": 90
+    "intervalSeconds": 3
   },
   {
     "stageId": 8,
-    "intervalSeconds": 75
+    "intervalSeconds": 3
   },
   {
     "stageId": 9,
-    "intervalSeconds": 60
+    "intervalSeconds": 3
   },
   {
     "stageId": 10,
-    "intervalSeconds": 45
+    "intervalSeconds": 3
   }
 ]

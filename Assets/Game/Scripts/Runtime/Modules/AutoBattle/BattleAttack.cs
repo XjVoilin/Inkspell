@@ -16,10 +16,12 @@ namespace Game
             float shield,
             float effectRange,
             float effectDurationSeconds,
-            float slowMultiplier)
+            float slowMultiplier,
+            int spellTier = 1)
         {
             AttackId = attackId;
             SpellType = spellType;
+            SpellTier = spellTier;
             TargetEnemyIds = new List<long>(targetEnemyIds);
             TargetPathPosition = targetPathPosition;
             TotalTravelSeconds = travelSeconds;
@@ -33,6 +35,7 @@ namespace Game
 
         public long AttackId { get; }
         public SpellType SpellType { get; }
+        public int SpellTier { get; }
         public IReadOnlyList<long> TargetEnemyIds { get; }
         public float TargetPathPosition { get; }
         public float TotalTravelSeconds { get; }

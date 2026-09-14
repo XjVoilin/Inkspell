@@ -136,7 +136,7 @@ namespace Game
                     case BattleFactKind.SpellCast:
                     case BattleFactKind.SpellImpact:
                         _battlefield.PlaySpellFeedback(fact.Kind, fact.SpellType,
-                            _data.NormalizePath(fact.PathPosition), fact.TravelSeconds);
+                            _data.NormalizePath(fact.PathPosition), fact.TravelSeconds, fact.SpellTier);
                         break;
                     case BattleFactKind.EnemySpawned:
                     case BattleFactKind.EnemyDamaged:

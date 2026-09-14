@@ -1,6 +1,5 @@
 using System;
 using July.Arch;
-using July.Localization;
 using July.UI;
 using TMPro;
 using UnityEngine;
@@ -20,7 +19,6 @@ namespace Game
         IDropHandler
     {
         [SerializeField] private UIItemSlot _itemSlot;
-        [SerializeField] private UILocalizedText _tierText;
         [SerializeField] private TMP_Text _levelText;
         [SerializeField] private GameObject _lockedIndicator;
 
@@ -31,8 +29,8 @@ namespace Game
             public Sprite Sprite;
         }
         [SerializeField] private IconBinding[] _iconBindings;
+        [SerializeField] private SpellTierVisualSet[] _tierVisuals;
         private Sprite _displayedIcon;
-        [SerializeField] private SpellTierGraphic _tierGraphic;
         [SerializeField] private CanvasGroup _presentationGroup;
         private bool _dragged;
         [SerializeField] private Transform _iconTransform;
@@ -65,6 +63,13 @@ namespace Game
             _displayedIcon = null;
             foreach (var binding in _iconBindings)
                 if (binding.ResourceKey == data.IconResourceKey) { _displayedIcon = binding.Sprite; break; }
+            if (_tierVisuals != null)
+                foreach (var visual in _tierVisuals)
+                    if (visual.ResourceKey == data.IconResourceKey)
+                    {
+                        _displayedIcon = visual.Get(data.Tier);
+                        break;
+                    }
             if (_displayedIcon == null)
             {
                 _itemSlot.SetEmpty();
@@ -77,9 +82,7 @@ namespace Game
         private void ApplyLabels(SpellCardViewData data)
         {
             Data = data;
-            _tierGraphic.SetTier(data?.Tier ?? 0);
             if (_iconTransform != null) _iconTransform.localScale = Vector3.one * (data == null ? 1 : .80f + Mathf.Clamp(data.Tier, 1, 3) * .07f);
-            _tierText.gameObject.SetActive(data != null);
             _levelText.gameObject.SetActive(data != null);
             _lockedIndicator.SetActive(data != null && data.IsLocked);
             if (data == null)
@@ -88,7 +91,6 @@ namespace Game
                 _displayedIcon = null;
                 return;
             }
-            _tierText.SetKey(data.TierDisplayKey);
             _levelText.text = data.Level.ToString();
         }
 

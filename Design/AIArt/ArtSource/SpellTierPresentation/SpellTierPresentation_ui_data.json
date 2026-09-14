@@ -1,0 +1,17 @@
+{
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "layers": [
+    {"id": 1, "name": "SpellTierPresentation/icon_chainLightningTier1", "groupPath": "lightning/tier1", "type": "image", "x": 176, "y": 490, "width": 168, "height": 168, "visible": true, "order": 100, "opacity": 100, "scaleX": 1, "scaleY": 1, "rotationZ": 0},
+    {"id": 2, "name": "SpellTierPresentation/icon_chainLightningTier2", "groupPath": "lightning/tier2", "type": "image", "x": 456, "y": 490, "width": 168, "height": 168, "visible": true, "order": 101, "opacity": 100, "scaleX": 1, "scaleY": 1, "rotationZ": 0},
+    {"id": 3, "name": "SpellTierPresentation/icon_chainLightningTier3", "groupPath": "lightning/tier3", "type": "image", "x": 736, "y": 490, "width": 168, "height": 168, "visible": true, "order": 102, "opacity": 100, "scaleX": 1, "scaleY": 1, "rotationZ": 0},
+    {"id": 4, "name": "SpellTierPresentation/icon_frostRingTier1", "groupPath": "frost/tier1", "type": "image", "x": 176, "y": 850, "width": 168, "height": 168, "visible": true, "order": 110, "opacity": 100, "scaleX": 1, "scaleY": 1, "rotationZ": 0},
+    {"id": 5, "name": "SpellTierPresentation/icon_frostRingTier2", "groupPath": "frost/tier2", "type": "image", "x": 456, "y": 850, "width": 168, "height": 168, "visible": true, "order": 111, "opacity": 100, "scaleX": 1, "scaleY": 1, "rotationZ": 0},
+    {"id": 6, "name": "SpellTierPresentation/icon_frostRingTier3", "groupPath": "frost/tier3", "type": "image", "x": 736, "y": 850, "width": 168, "height": 168, "visible": true, "order": 112, "opacity": 100, "scaleX": 1, "scaleY": 1, "rotationZ": 0},
+    {"id": 7, "name": "SpellTierPresentation/icon_runeShieldTier1", "groupPath": "shield/tier1", "type": "image", "x": 176, "y": 1210, "width": 168, "height": 168, "visible": true, "order": 120, "opacity": 100, "scaleX": 1, "scaleY": 1, "rotationZ": 0},
+    {"id": 8, "name": "SpellTierPresentation/icon_runeShieldTier2", "groupPath": "shield/tier2", "type": "image", "x": 456, "y": 1210, "width": 168, "height": 168, "visible": true, "order": 121, "opacity": 100, "scaleX": 1, "scaleY": 1, "rotationZ": 0},
+    {"id": 9, "name": "SpellTierPresentation/icon_runeShieldTier3", "groupPath": "shield/tier3", "type": "image", "x": 736, "y": 1210, "width": 168, "height": 168, "visible": true, "order": 122, "opacity": 100, "scaleX": 1, "scaleY": 1, "rotationZ": 0}
+  ]
+}

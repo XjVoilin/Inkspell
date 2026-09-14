@@ -273,6 +273,29 @@ namespace Game.Tests
         }
 
         [Test]
+        public void FireballTier_IsFrozenFromCastThroughImpactAfterEquipmentChange()
+        {
+            _game = new BattleFixture();
+            _game.Assets.TryGetEquippedSpell(0, out var original);
+            original.Tier = 3;
+            var facts = new List<BattleFact>();
+            _game.Subscribe<BattleFactsEvent>(e => facts.AddRange(e.Facts));
+            var request = _game.Battle.RunChallengeAsync(1);
+            _game.Tick();
+            Assert.That(_game.Battle.CurrentRun.Attacks[0].SpellTier, Is.EqualTo(3));
+            Assert.That(facts.Find(f => f.Kind == BattleFactKind.SpellCast).SpellTier, Is.EqualTo(3));
+            Assert.That(_game.Assets.TryReceiveGeneratedSpell(SpellType.Fireball), Is.True);
+            var incoming = _game.Assets.GetCraftingAreaSpells()[0];
+            Assert.That(_game.Assets.TryEquip(incoming.InstanceId, 0), Is.True);
+            for (var i = 0; i < 8; i++) _game.Tick();
+            var impact = facts.Find(f => f.Kind == BattleFactKind.SpellImpact);
+            Assert.That(impact.Kind, Is.EqualTo(BattleFactKind.SpellImpact));
+            Assert.That(impact.SpellTier, Is.EqualTo(3));
+            _game.Context.Shutdown();
+            Assert.Throws<OperationCanceledException>(() => request.GetAwaiter().GetResult());
+        }
+
+        [Test]
         public void UpgradeAndReplacement_OnlyChangeNextCast()
         {
             _game = new BattleFixture();

@@ -156,14 +156,11 @@ namespace Game.Editor
                 20, TextAlignmentOptions.BottomRight, Ink);
             var selected = CreateIndicator("Selected", root, Color.white);
             selected.GetComponent<Image>().sprite = ArtSprite("img_spellSelectedOverlay");
-            var tier = CreateLocalizedText("Tier", root, new Vector2(.06f, .78f), new Vector2(.94f, .98f),
-                18, TextAlignmentOptions.Center, Ink);
             var level = CreateText("Level", root, new Vector2(.05f, .02f), new Vector2(.28f, .23f), 18, Ink);
             var locked = CreateRect("Locked", root, new Vector2(.73f, .02f), new Vector2(.98f, .35f));
             AddImage(locked.gameObject, Color.white, false).sprite = ArtSprite("icon_spellLocked");
             locked.gameObject.SetActive(false);
             filled.gameObject.SetActive(false);
-            tier.gameObject.SetActive(false);
             level.gameObject.SetActive(false);
             SetObject(item, "_icon", icon);
             SetObject(item, "_quantityText", quantity);
@@ -171,7 +168,6 @@ namespace Game.Editor
             SetObject(item, "_emptyRoot", empty.gameObject);
             SetObject(item, "_filledRoot", filled.gameObject);
             SetObject(card, "_itemSlot", item);
-            SetObject(card, "_tierText", tier);
             SetObject(card, "_levelText", level);
             SetObject(card, "_lockedIndicator", locked.gameObject);
             return card;

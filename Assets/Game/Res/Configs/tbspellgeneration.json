@@ -1,7 +1,7 @@
 [
   {
     "offlineLimitSeconds": 28800,
-    "minimumIntervalSeconds": 45,
+    "minimumIntervalSeconds": 5,
     "spellTypes": [
       1,
       2,

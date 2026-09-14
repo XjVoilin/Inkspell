@@ -36,6 +36,8 @@ namespace Game
 
         [Header("法术表现绑定入口")]
         [SerializeField] private RectTransform _fireballFeedback;
+        [SerializeField] private SpellTierVisualSet[] _tierVisuals;
+        [SerializeField] private Sprite _fireballImpact;
         [SerializeField] private RectTransform _chainLightningFeedback;
         [SerializeField] private RectTransform _frostRingFeedback;
         [SerializeField] private RectTransform _spellShieldFeedback;
@@ -213,7 +215,7 @@ namespace Game
             }
         }
 
-        internal void PlaySpellFeedback(BattleFactKind kind, SpellType spellType, float pathNormalized, float travelSeconds)
+        internal void PlaySpellFeedback(BattleFactKind kind, SpellType spellType, float pathNormalized, float travelSeconds, int spellTier = 1)
         {
             _effects ??= new BattlePresentationEffects(_enemyPathRoot);
             var book = (RectTransform)_bookHitFeedback.transform.parent;
@@ -230,7 +232,16 @@ namespace Game
             };
             var impact = kind == BattleFactKind.SpellImpact;
             if (!impact) _castKick = 1;
-            _effects.Play(spellType, template.GetComponent<Image>().sprite, origin, target, impact, travelSeconds);
+            var sprite = template.GetComponent<Image>().sprite;
+            if (_tierVisuals != null)
+                foreach (var visual in _tierVisuals)
+                    if (visual.SpellType == spellType)
+                    {
+                        sprite = visual.Get(spellTier);
+                        break;
+                    }
+            if (spellType == SpellType.Fireball && impact && _fireballImpact != null) sprite = _fireballImpact;
+            _effects.Play(spellType, sprite, origin, target, impact, travelSeconds, spellTier);
         }
 
         private void PlayRetryFeedback()

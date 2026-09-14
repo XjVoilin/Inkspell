@@ -82,6 +82,7 @@ namespace Game.Startup.Tests
                 status.GenerationProgressSeconds / status.GenerationIntervalSeconds)).Within(.0001f), "启用窗口后应恢复事件订阅。");
             yield return new ExitPlayMode();
             Assert.That(ArchContext.Current, Is.Null, "退出后应释放 Arch。");
+            Assert.That(GameObject.Find("[DOTween]"), Is.Null, "退出后应释放 DOTween 全局管理对象。");
         }
 
         [UnityTest]

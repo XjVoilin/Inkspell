@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "screen": "SpellTierPresentation",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "requirements": [
+    "Design/Docs/全法术三阶表现.md"
+  ],
+  "references": [
+    "Assets/Game/Arts/Textures/MainWindow/icon_spellChainLightning.png",
+    "Assets/Game/Arts/Textures/MainWindow/icon_spellIceRing.png",
+    "Assets/Game/Arts/Textures/MainWindow/icon_spellRuneShield.png"
+  ],
+  "outputs": {
+    "directory": "Design/AIArt/ArtSource/SpellTierPresentation",
+    "authoringJson": "Design/AIArt/ArtSource/SpellTierPresentation/SpellTierPresentation_ui_data.json",
+    "preview": "Design/AIArt/ArtSource/SpellTierPresentation/SpellTierPresentation_preview.png"
+  },
+  "assets": [
+    {
+      "path": "SpellTierPresentation/icon_chainLightningTier1.png",
+      "role": "spellIcon",
+      "width": 512,
+      "height": 512,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Use case: stylized-concept. Transparent Unity 2D spell icon, 512 square. Match the supplied lightning reference's hand-painted cobalt, violet-white energy, bold dark navy ink contour and crisp fantasy spellbook style. Tier ONE: ONE simple diagonal zigzag lightning bolt from lower-left to upper-right, compact narrow silhouette, only two tiny sparks. No fork, no central orb, no ring. Strong at 96 px. Actual transparent RGBA; no checkerboard, card, frame, text, shadow or watermark."
+    },
+    {
+      "path": "SpellTierPresentation/icon_chainLightningTier2.png",
+      "role": "spellIcon",
+      "width": 512,
+      "height": 512,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Use case: stylized-concept. Transparent Unity 2D spell icon, 512 square. Match the supplied lightning reference's hand-painted cobalt, violet-white energy, bold dark navy ink contour and crisp fantasy spellbook style. Tier TWO: a bright central lightning knot with THREE clearly separated jagged branches forming a Y-shaped wide silhouette, each branch ending in one sharp point; several blue sparks. No circle or crown. Strong at 96 px. Actual transparent RGBA; no checkerboard, card, frame, text, shadow or watermark."
+    },
+    {
+      "path": "SpellTierPresentation/icon_chainLightningTier3.png",
+      "role": "spellIcon",
+      "width": 512,
+      "height": 512,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Use case: stylized-concept. Transparent Unity 2D spell icon, 512 square. Match the supplied lightning reference's hand-painted cobalt, violet-white energy, bold dark navy ink contour and crisp fantasy spellbook style. Tier THREE: a large radiant white-violet thunder core with FIVE thick jagged lightning arms spreading in distinct directions, surrounded by a broken cobalt storm halo and many small electric shards. Broad starburst silhouette, substantially more elaborate than a three-prong fork. Actual transparent RGBA; no checkerboard, card, frame, text, shadow or watermark."
+    },
+    {
+      "path": "SpellTierPresentation/icon_frostRingTier1.png",
+      "role": "spellIcon",
+      "width": 512,
+      "height": 512,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Use case: stylized-concept. Transparent Unity 2D spell icon, 512 square. Match the supplied frost reference's hand-painted cyan, deep blue shadows, ivory highlights and bold dark navy ink contour. Tier ONE: a thin incomplete circular frost stroke with exactly SIX small widely-spaced ice crystals, generous open center and simple sparse silhouette. No second ring, no snowflake. Strong at 96 px. Actual transparent RGBA; no checkerboard, card, frame, text, shadow or watermark. CRITICAL: output must be RGBA with alpha=0 outside the ice artwork and in the open center. Never draw any checkerboard pattern."
+    },
+    {
+      "path": "SpellTierPresentation/icon_frostRingTier2.png",
+      "role": "spellIcon",
+      "width": 512,
+      "height": 512,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Use case: stylized-concept. Transparent Unity 2D spell icon, 512 square. Match the supplied frost reference's hand-painted cyan, deep blue shadows, ivory highlights and bold dark navy ink contour. Tier TWO: TWO clearly visible concentric swirling frost arcs, with EIGHT medium diamond ice crystals alternating around the outer ring; open circular center, wider silhouette than tier one. Actual transparent RGBA; no checkerboard, card, frame, text, shadow or watermark."
+    },
+    {
+      "path": "SpellTierPresentation/icon_frostRingTier3.png",
+      "role": "spellIcon",
+      "width": 512,
+      "height": 512,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Use case: stylized-concept. Transparent Unity 2D spell icon, 512 square. Match the supplied frost reference's hand-painted cyan, deep blue shadows, ivory highlights and bold dark navy ink contour. Tier THREE: a dense majestic ice crown ring with TWELVE long alternating crystal spikes, a second inner rune ring and six snowflake branches bridging inward while retaining a small open center. Thick radial crystalline silhouette, clearly more powerful than a double ring. Actual transparent RGBA; no checkerboard, card, frame, text, shadow or watermark."
+    },
+    {
+      "path": "SpellTierPresentation/icon_runeShieldTier1.png",
+      "role": "spellIcon",
+      "width": 512,
+      "height": 512,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Use case: stylized-concept. Transparent Unity 2D spell icon, 512 square. Match the supplied shield reference's hand-painted antique gold, ochre, parchment highlights and bold dark navy ink contour. Tier ONE: one compact plain kite shield with a single small circular sun rune in the center, narrow gold rim, clean simple silhouette. No wings, no outer plates, no floating pieces. Strong at 96 px. Actual transparent RGBA; no checkerboard, card, frame, text, shadow or watermark."
+    },
+    {
+      "path": "SpellTierPresentation/icon_runeShieldTier2.png",
+      "role": "spellIcon",
+      "width": 512,
+      "height": 512,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Use case: stylized-concept. Transparent Unity 2D spell icon, 512 square. Match the supplied shield reference's hand-painted antique gold, ochre, parchment highlights and bold dark navy ink contour. Tier TWO: one wider reinforced shield with obvious top corner guards, a thick double rim and four large directional rune arms around the central sun. Broad angular silhouette, no wings or detached pieces. Actual transparent RGBA; no checkerboard, card, frame, text, shadow or watermark."
+    },
+    {
+      "path": "SpellTierPresentation/icon_runeShieldTier3.png",
+      "role": "spellIcon",
+      "width": 512,
+      "height": 512,
+      "transparent": true,
+      "action": "generate",
+      "prompt": "Use case: stylized-concept. Transparent Unity 2D spell icon, 512 square. Match the supplied shield reference's hand-painted antique gold, ochre, ivory highlights and bold dark navy ink contour. Tier THREE: a massive central tower shield with a large radiant rune core, flanked by TWO unmistakable swept golden wing-guards and crowned by three tall crystal-like crest points. Wide heroic silhouette, much larger and more elaborate than a reinforced shield. Actual transparent RGBA; no checkerboard, card, frame, text, shadow or watermark."
+    }
+  ],
+  "localizationKeys": [
+    "SPELL_TIER_1_NAME",
+    "SPELL_TIER_2_NAME",
+    "SPELL_TIER_3_NAME"
+  ],
+  "componentRules": {
+    "forbidSlider": true,
+    "cardPresentation": "Use tier-specific icon silhouette without tier text, tier badge, or additional tier frame.",
+    "battlePresentation": "Freeze spell tier at cast; scale lightning branches, frost layers, and shield pulse by tier.",
+    "binding": "Serialize all tier sprites in one shared SpellTierVisualSet array on spell cards and battlefield."
+  }
+}

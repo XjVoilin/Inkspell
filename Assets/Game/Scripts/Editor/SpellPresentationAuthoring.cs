@@ -27,20 +27,20 @@ namespace Game.Editor
         public static void Configure(GameObject root)
         {
             var definitions = JsonUtility.FromJson<IconRows>("{\"rows\":" + File.ReadAllText("Assets/Game/Res/Configs/tbspelldefinition.json") + "}").rows;
+            var tierVisuals = LoadTierVisuals(definitions);
             foreach (var card in root.GetComponentsInChildren<UISpellCardGameView>(true))
             {
                 var group = card.GetComponent<CanvasGroup>();
                 if (group == null) group = card.gameObject.AddComponent<CanvasGroup>();
-                var legacyEmblem = card.transform.Find("TierEmblem");
-                if (legacyEmblem != null) legacyEmblem.name = "TierFrame";
-                var emblem = Child(card.transform, "TierFrame");
-                emblem.SetAsFirstSibling();
-                var graphic = Component<SpellTierGraphic>(emblem);
-                graphic.raycastTarget = false;
-                Bind(card, "_tierGraphic", graphic);
+                foreach (var name in new[] { "Tier", "TierFrame", "TierEmblem" })
+                {
+                    var legacy = card.transform.Find(name);
+                    if (legacy != null) UnityEngine.Object.DestroyImmediate(legacy.gameObject);
+                }
                 Bind(card, "_presentationGroup", group);
                 Bind(card, "_iconTransform", card.transform.Find("Filled/Icon"));
                 var cardObject = new SerializedObject(card);
+                BindTierVisuals(cardObject, tierVisuals);
                 var bindings = cardObject.FindProperty("_iconBindings");
                 bindings.arraySize = definitions.Length;
                 for (var i = 0; i < definitions.Length; i++)
@@ -67,6 +67,10 @@ namespace Game.Editor
 
             var battle = root.GetComponentInChildren<UIBattlefieldGameView>(true);
             var serialized = new SerializedObject(battle);
+            BindTierVisuals(serialized, tierVisuals);
+            var fireballImpact = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Game/Arts/Textures/FireballSample/img_fireballImpact.png");
+            if (fireballImpact == null) throw new InvalidOperationException("Missing fireball impact sprite.");
+            serialized.FindProperty("_fireballImpact").objectReferenceValue = fireballImpact;
             var texts = serialized.FindProperty("_cooldownTexts");
             var covers = serialized.FindProperty("_cooldownCovers");
             covers.arraySize = texts.arraySize;
@@ -98,6 +102,53 @@ namespace Game.Editor
                 text.alignment = TextAlignmentOptions.Center; text.raycastTarget = false;
             }
             serialized.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static SpellTierVisualSet[] LoadTierVisuals(IconRow[] definitions)
+        {
+            var visuals = new SpellTierVisualSet[definitions.Length];
+            for (var i = 0; i < definitions.Length; i++)
+            {
+                var key = definitions[i].iconResourceKey;
+                var (type, prefix) = key switch
+                {
+                    "icon_spellFireball" => (cfg.SpellType.Fireball, "FireballSample/icon_fireballTier"),
+                    "icon_spellChainLightning" => (cfg.SpellType.ChainLightning, "SpellTierPresentation/icon_chainLightningTier"),
+                    "icon_spellIceRing" => (cfg.SpellType.FrostRing, "SpellTierPresentation/icon_frostRingTier"),
+                    "icon_spellRuneShield" => (cfg.SpellType.Shield, "SpellTierPresentation/icon_runeShieldTier"),
+                    _ => throw new InvalidOperationException("No tier presentation configured for " + key),
+                };
+                Sprite Load(int tier)
+                {
+                    var sprite = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Game/Arts/Textures/{prefix}{tier}.png");
+                    if (sprite == null) throw new InvalidOperationException($"Missing {type} tier {tier} sprite.");
+                    return sprite;
+                }
+                visuals[i] = new SpellTierVisualSet
+                {
+                    SpellType = type,
+                    ResourceKey = key,
+                    Tier1 = Load(1),
+                    Tier2 = Load(2),
+                    Tier3 = Load(3),
+                };
+            }
+            return visuals;
+        }
+
+        private static void BindTierVisuals(SerializedObject target, SpellTierVisualSet[] visuals)
+        {
+            var property = target.FindProperty("_tierVisuals");
+            property.arraySize = visuals.Length;
+            for (var i = 0; i < visuals.Length; i++)
+            {
+                var entry = property.GetArrayElementAtIndex(i);
+                entry.FindPropertyRelative("SpellType").intValue = (int)visuals[i].SpellType;
+                entry.FindPropertyRelative("ResourceKey").stringValue = visuals[i].ResourceKey;
+                entry.FindPropertyRelative("Tier1").objectReferenceValue = visuals[i].Tier1;
+                entry.FindPropertyRelative("Tier2").objectReferenceValue = visuals[i].Tier2;
+                entry.FindPropertyRelative("Tier3").objectReferenceValue = visuals[i].Tier3;
+            }
         }
 
         private static RectTransform Child(Transform parent, string name)
